@@ -27,3 +27,27 @@
 .app-notice strong,.app-notice span{display:block}.app-notice span{font-size:13px;margin-top:3px}
 .local-mode-panel{border:1px solid #bbf7d0;background:linear-gradient(180deg,#f0fdf4,#ffffff)}
 .hidden{display:none!important}
+
+.person-fieldset{border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
+.person-fieldset legend{font-weight:800;padding:0 6px}
+.person-fieldset>small{display:block;color:var(--muted);margin-top:8px}
+.person-choice-grid{display:grid;gap:8px;margin-top:4px}
+.person-choice{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+.person-choice input{width:20px;height:20px;flex:0 0 auto}
+.person-choice span{display:flex;flex-direction:column;gap:2px}
+.person-choice small{color:var(--muted)}
+.choice-inactive{opacity:.5;background:#f8fafc}
+.person-id-badge,.person-number{display:inline-flex;align-items:center;justify-content:center;background:var(--brand);color:#fff;border-radius:999px;font-size:11px;font-weight:900;padding:4px 8px}
+.cost-person-breakdown{display:grid;gap:5px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px}
+.cost-person-breakdown span{font-size:12px}.cost-person-breakdown b{display:inline-flex;min-width:28px;color:var(--brand)}
+.warning-text{color:#b91c1c;font-size:12px;font-weight:700;margin-top:8px}
+
+.calendar-date-button{appearance:none;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.calendar-date-button:hover,.calendar-date-button:focus{border-color:var(--brand);outline:2px solid rgba(47,117,181,.22)}
+.waste-type-fieldset{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:9px}
+.waste-type-fieldset legend{font-weight:800;padding:0 6px}
+.waste-choice{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.waste-choice input{width:20px;height:20px}.waste-choice i{width:14px;height:14px;border-radius:50%;display:block}
+.cost-info-table{overflow-x:auto}.cost-info-head,.cost-info-row{display:grid;grid-template-columns:1.1fr 1.2fr 1fr 1.1fr 1fr;gap:10px;align-items:center;min-width:650px;padding:10px 12px}
+.cost-info-head{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line)}
+.cost-info-row{border-bottom:1px solid var(--line);font-size:13px}.cost-info-row:last-child{border-bottom:0}.cost-info-row strong{text-align:right}
