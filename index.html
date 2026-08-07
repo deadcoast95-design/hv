@@ -103,11 +103,42 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>25 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>26 Lokal</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
-<nav class="bottom-nav"><button class="active" data-target="dashboard"><span>⌂</span><span data-i18n="overview">Übersicht</span></button><button data-target="transactions"><span>€</span><span data-i18n="account">Konto</span></button><button data-target="properties"><span>▣</span><span data-i18n="objects">Objekte</span></button><button data-target="tasks"><span>✓</span><span data-i18n="planning">Planung</span></button><button data-target="vehicles"><span>🚗</span><span data-i18n="vehicles">Fahrzeuge</span></button><button data-target="settings"><span>⚙</span>Mehr</button></nav>
+<nav id="mainBottomNav" class="bottom-nav" aria-label="Hauptnavigation">
+  <button type="button" class="nav-item active" data-target="dashboard">
+    <span class="nav-icon" aria-hidden="true">⌂</span>
+    <span class="nav-label nav-label-full" data-i18n="overview">Übersicht</span>
+    <span class="nav-label nav-label-short">Übers.</span>
+  </button>
+  <button type="button" class="nav-item" data-target="transactions">
+    <span class="nav-icon" aria-hidden="true">€</span>
+    <span class="nav-label nav-label-full" data-i18n="account">Konto</span>
+    <span class="nav-label nav-label-short">Konto</span>
+  </button>
+  <button type="button" class="nav-item" data-target="properties">
+    <span class="nav-icon" aria-hidden="true">▣</span>
+    <span class="nav-label nav-label-full" data-i18n="objects">Objekte</span>
+    <span class="nav-label nav-label-short">Objekte</span>
+  </button>
+  <button type="button" class="nav-item" data-target="tasks">
+    <span class="nav-icon" aria-hidden="true">✓</span>
+    <span class="nav-label nav-label-full" data-i18n="planning">Planung</span>
+    <span class="nav-label nav-label-short">Planung</span>
+  </button>
+  <button type="button" class="nav-item" data-target="vehicles">
+    <span class="nav-icon" aria-hidden="true">🚗</span>
+    <span class="nav-label nav-label-full" data-i18n="vehicles">Fahrzeuge</span>
+    <span class="nav-label nav-label-short">Autos</span>
+  </button>
+  <button type="button" class="nav-item" data-target="settings">
+    <span class="nav-icon" aria-hidden="true">⚙</span>
+    <span class="nav-label nav-label-full" data-i18n="more">Mehr</span>
+    <span class="nav-label nav-label-short">Mehr</span>
+  </button>
+</nav>
 
 <dialog id="transactionModal"><form method="dialog" id="transactionForm"><h2>Neue Buchung</h2><label>Typ<select name="type"><option>Einnahme</option><option>Ausgabe</option></select></label><label>Kategorie<select name="category" id="transactionCategory"></select></label><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Beschreibung<input name="description" required /></label><label>Betrag<input name="amount" type="number" min="0" step="0.01" required /></label><label><span data-i18n="date">Datum</span><input name="date" type="date" required /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="costModal"><form method="dialog" id="costForm"><h2 id="costModalTitle">Kostenposition</h2><input name="id" type="hidden"/><label>Kategorie<input name="category" list="categoryList" required /></label><label>Bezeichnung<input name="name" required /></label><fieldset class="person-fieldset"><legend>Beteiligte Personen</legend><div id="costPersonChoices" class="person-choice-grid"></div><small>Nur ausgewählte Personen tragen diese Kostenposition. Der Betrag wird gleichmäßig verteilt.</small></fieldset><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Betrag je Zahlung<input name="amount" type="number" min="0" step="0.01" required /></label><label>Intervall<select name="interval"><option value="monthly">Monatlich</option><option value="fiveyearly">5× im Jahr</option><option value="quarterly">Vierteljährlich</option><option value="semiannual">Halbjährlich</option><option value="yearly">Jährlich</option></select></label><label>Fälligkeit / Hinweis<input name="note" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>

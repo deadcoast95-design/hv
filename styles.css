@@ -293,3 +293,167 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
     font-size:21px !important;
   }
 }
+
+/* =========================================================
+   V26 – KOMPLETT NEUE MOBILE NAVIGATION
+   ========================================================= */
+
+#mainBottomNav.bottom-nav{
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  z-index:2147483000 !important;
+
+  display:grid !important;
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  align-items:stretch !important;
+
+  width:100% !important;
+  height:calc(66px + env(safe-area-inset-bottom)) !important;
+  margin:0 !important;
+  padding:0 4px env(safe-area-inset-bottom) !important;
+  box-sizing:border-box !important;
+
+  background:rgba(255,255,255,.98) !important;
+  border-top:1px solid rgba(148,163,184,.28) !important;
+  box-shadow:0 -6px 20px rgba(15,23,42,.08) !important;
+  backdrop-filter:blur(16px) !important;
+  -webkit-backdrop-filter:blur(16px) !important;
+
+  overflow:hidden !important;
+}
+
+#mainBottomNav .nav-item{
+  appearance:none !important;
+  -webkit-appearance:none !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:3px !important;
+
+  min-width:0 !important;
+  width:100% !important;
+  height:66px !important;
+
+  margin:0 !important;
+  padding:4px 1px 3px !important;
+
+  border:0 !important;
+  border-radius:12px !important;
+  background:transparent !important;
+
+  color:#64748b !important;
+  text-align:center !important;
+  line-height:1 !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+  cursor:pointer !important;
+  touch-action:manipulation !important;
+}
+
+#mainBottomNav .nav-item.active{
+  color:#2563eb !important;
+  background:rgba(37,99,235,.08) !important;
+}
+
+#mainBottomNav .nav-icon{
+  display:block !important;
+  flex:0 0 auto !important;
+
+  font-size:19px !important;
+  line-height:20px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+  pointer-events:none !important;
+}
+
+#mainBottomNav .nav-label{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  font-weight:800 !important;
+  text-align:center !important;
+  line-height:1.05 !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:clip !important;
+  pointer-events:none !important;
+}
+
+#mainBottomNav .nav-label-full{
+  display:none !important;
+}
+
+#mainBottomNav .nav-label-short{
+  display:block !important;
+  font-size:9px !important;
+  letter-spacing:-0.02em !important;
+}
+
+/* normal phones */
+@media (min-width:391px) and (max-width:760px){
+  #mainBottomNav .nav-label-short{
+    font-size:9.5px !important;
+  }
+
+  #mainBottomNav .nav-icon{
+    font-size:20px !important;
+  }
+}
+
+/* very narrow phones */
+@media (max-width:390px){
+  #mainBottomNav{
+    padding-left:2px !important;
+    padding-right:2px !important;
+  }
+
+  #mainBottomNav .nav-item{
+    gap:2px !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+  }
+
+  #mainBottomNav .nav-label-short{
+    font-size:8.2px !important;
+  }
+
+  #mainBottomNav .nav-icon{
+    font-size:18px !important;
+  }
+}
+
+/* tablets / desktop can show full labels */
+@media (min-width:761px){
+  #mainBottomNav .nav-label-short{
+    display:none !important;
+  }
+
+  #mainBottomNav .nav-label-full{
+    display:block !important;
+    font-size:11px !important;
+  }
+
+  #mainBottomNav .nav-icon{
+    font-size:20px !important;
+  }
+}
+
+/* reserve exact space so content never sits behind navigation */
+body{
+  padding-bottom:calc(78px + env(safe-area-inset-bottom)) !important;
+}
+
+main,
+#app{
+  padding-bottom:calc(86px + env(safe-area-inset-bottom)) !important;
+}

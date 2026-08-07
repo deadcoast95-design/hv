@@ -1,17 +1,13 @@
-VERSION 25 – MOBILE NAVIGATION
+VERSION 26 – MOBILE NAVIGATION NEU AUFGEBAUT
 
-NEU:
-- Untere Navigation auf Smartphones komplett responsive.
-- Alle 6 Menüpunkte gleichmäßig und symmetrisch verteilt.
-- Kleine Schriftgrößen speziell für iPhone und schmale Android-Geräte.
-- Icons sauber zentriert.
-- Lange Beschriftungen können nicht mehr ineinander laufen.
-- iPhone Safe Area / Home-Indikator berücksichtigt.
-- Tablet- und Desktopdarstellung bleibt erhalten.
-
-UNVERÄNDERT:
-- IndexedDB-Speicherung
-- JSON Import / Export
-- Mehrsprachigkeit
-- Lokale Profile / Rechte
-- Fahrzeuge, Objekte, Konto, Planung und Übersicht
+- Navigation HTML komplett neu strukturiert.
+- Icon und Text sind getrennte Elemente.
+- Smartphones verwenden kurze Labels:
+  Übersicht -> Übers.
+  Fahrzeuge -> Autos
+- Alle sechs Bereiche sind exakt gleich breit.
+- Kleine Schrift speziell für Smartphones.
+- Icons kleiner und sauber zentriert.
+- iPhone Safe Area berücksichtigt.
+- Auf Tablet/Desktop erscheinen wieder die vollständigen Namen.
+- IndexedDB, JSON Import, Sprachen, Profile und alle App-Funktionen bleiben unverändert.
