@@ -22,12 +22,25 @@
 <div id="appNotice" class="app-notice hidden"></div>
 <main id="app">
   <section class="view active" data-view="dashboard">
-    <div class="hero-card hero-finance">
+    
+    <section class="panel" data-widget="important">
+      <div class="panel-head"><h2>⚠️ Demnächst wichtig</h2><span id="importantCountTag" class="tag">0 Hinweise</span></div>
+      <div id="importantItems" class="important-list"></div>
+    </section>
+    
+    <section class="panel" data-widget="consumption">
+      <div class="panel-head"><h2>📊 Verbrauchsanalyse</h2><span class="tag">Zählerhistorie</span></div>
+      <div id="dashboardConsumption" class="consumption-overview"></div>
+    </section>
+    
+    
+    
+    <div class="hero-card hero-finance" data-widget="finance">
       <div><span>Monatliche Ausgaben</span><strong id="monthlyNeed">0,00 €</strong></div>
       <div><span>Monatliche Einnahmen</span><strong id="monthlyIncome">0,00 €</strong></div>
       <div><span>Monatlicher Saldo</span><strong id="monthlyNet">0,00 €</strong></div>
     </div>
-<section class="panel">
+<section class="panel" data-widget="loan">
       <div class="panel-head"><h2 data-i18n="loan">Kreditübersicht</h2></div>
       <div class="loan-layout">
         <div class="donut" id="loanDonut"><div><strong id="loanPercent">0 %</strong><span>getilgt</span></div></div>
@@ -39,29 +52,29 @@
         </div>
       </div>
       <div id="loanDetails" class="detail-grid"></div>
-    </section><section class="panel"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel"><div class="panel-head"><h2 data-i18n="contributions">Monatliche Einzahlungen der Personen</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
+    </section><section class="panel" data-widget="objectcosts"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel" data-widget="contributions"><div class="panel-head"><h2 data-i18n="contributions">Monatliche Einzahlungen der Personen</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
     
 
-    <section class="panel waste-panel">
+    <section class="panel waste-panel" data-widget="waste">
       <div class="panel-head"><h2 data-i18n="waste">Müllabfuhr-Kalender</h2><span class="tag">Datum antippen</span></div>
       <div class="calendar-head"><button id="wastePrev" class="secondary tiny" type="button">‹</button><strong id="wasteMonthTitle"></strong><button id="wasteNext" class="secondary tiny" type="button">›</button></div>
       <div id="wasteCalendar" class="waste-calendar"></div>
       <div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div>
     </section>
-    <section class="panel"><div class="panel-head"><h2 data-i18n="costs">Kostenpositionen</h2><span class="tag">Nur Information</span></div><div class="cost-info-table"><div class="cost-info-head"><span data-i18n="category">Kategorie</span><span data-i18n="object">Objekt</span><span data-i18n="monthly">Monatlich</span><span data-i18n="interval">Intervall</span><span data-i18n="yearTotal">Jahr gesamt</span></div><div id="dashboardCostPositions"></div></div></section>
-    <section class="panel">
+    <section class="panel" data-widget="costpositions"><div class="panel-head"><h2 data-i18n="costs">Kostenpositionen</h2><span class="tag">Nur Information</span></div><div class="cost-info-table"><div class="cost-info-head"><span data-i18n="category">Kategorie</span><span data-i18n="object">Objekt</span><span data-i18n="monthly">Monatlich</span><span data-i18n="interval">Intervall</span><span data-i18n="yearTotal">Jahr gesamt</span></div><div id="dashboardCostPositions"></div></div></section>
+    <section class="panel" data-widget="objects">
   <div class="panel-head"><h2 data-i18n="objectOverview">Objektübersicht</h2><span class="tag">Nur Information</span></div>
   <div id="dashboardPropertyOverview" class="dashboard-property-grid"></div>
 </section>
 
-<section class="panel"><div class="panel-head"><h2>Sanierungsübersicht</h2><span class="tag">Nur Information</span></div><div id="dashboardRenovationOverview" class="dashboard-renovation-overview"></div></section>
+<section class="panel" data-widget="renovations"><div class="panel-head"><h2>Sanierungsübersicht</h2><span class="tag">Nur Information</span></div><div id="dashboardRenovationOverview" class="dashboard-renovation-overview"></div></section>
 
-<section class="panel">
+<section class="panel" data-widget="vehicles">
   <div class="panel-head"><h2 data-i18n="vehicleOverview">Fahrzeugübersicht</h2><span class="tag">Nur Information</span></div>
   <div id="dashboardVehicleOverview" class="dashboard-vehicle-grid"></div>
 </section>
 
-<section class="panel"><div class="panel-head"><h2 data-i18n="taskOverview">Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
+<section class="panel" data-widget="tasks"><div class="panel-head"><h2 data-i18n="taskOverview">Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
   </section>
 
   <section class="view" data-view="transactions">
@@ -74,11 +87,36 @@
   <section class="view" data-view="properties"><div class="toolbar"><button class="primary" data-modal="propertyModal"><span data-i18n="addObject">+ Objekt</span></button></div><div id="propertyList" class="card-grid"></div></section>
   <section class="view" data-view="owners"><div class="toolbar"><button class="primary" data-modal="ownerModal"><span data-i18n="addPerson">+ Person</span></button></div><section class="panel compact"><div class="panel-head"><h2>Anteile</h2><strong id="shareCheck">100 %</strong></div><p>Bis zu fünf Personen. Zahlanteile können unabhängig vom Grundbuchanteil eingestellt werden.</p></section><div id="ownerList" class="card-grid"></div></section>
 
-  <section class="view" data-view="tasks">
-    <div class="segmented"><button class="active" data-task-tab="tasks">Aufgaben</button><button data-task-tab="maintenance">Wartungen</button><button data-task-tab="reserves">Rücklagen</button></div>
-    <div class="toolbar"><button id="planningAddBtn" class="primary"><span data-i18n="addTask">+ Aufgabe</span></button></div>
-    <div id="taskList" class="list card-list"></div><div id="maintenanceList" class="list card-list hidden"></div><div id="reserveList" class="list card-list hidden"></div>
-  </section>
+  <section class="view planning-view-v40" data-view="tasks">
+  <div class="planning-hero-v40">
+    <div>
+      <span class="planning-kicker-v40">PLANUNG</span>
+      <h2>Aufgaben & Wartungen</h2>
+      <p>Behalte Arbeiten, Termine und regelmäßige Hauswartungen übersichtlich im Blick.</p>
+    </div>
+    <div class="planning-hero-counts-v40">
+      <div><strong id="planningTaskCount">0</strong><span>Aufgaben</span></div>
+      <div><strong id="planningMaintenanceCount">0</strong><span>Wartungen</span></div>
+    </div>
+  </div>
+
+  <div class="planning-tabs-v40">
+    <button class="active" data-task-tab="tasks"><span class="planning-tab-icon">☑</span><span>Aufgaben</span><small id="taskOpenTabCount">0 offen</small></button>
+    <button data-task-tab="maintenance"><span class="planning-tab-icon">🔧</span><span>Wartungen</span><small id="maintenanceTabCount">0 Einträge</small></button>
+  </div>
+
+  <div class="planning-toolbar-v40">
+    <div class="planning-filters-v40">
+      <button class="active" data-planning-filter="all">Alle</button>
+      <button data-planning-filter="open">Offen</button>
+      <button data-planning-filter="done">Erledigt</button>
+    </div>
+    <button id="planningAddBtn" class="primary planning-add-v40"><span>+ Aufgabe hinzufügen</span></button>
+  </div>
+
+  <div id="taskList" class="planning-list-v40"></div>
+  <div id="maintenanceList" class="planning-list-v40 hidden"></div>
+</section>
 
   <section class="view" data-view="vehicles"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button"><span data-i18n="addVehicle">+ Fahrzeug</span></button></div><section class="panel compact"><div class="panel-head"><h2 data-i18n="vehicleFile">Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p data-i18n="vehicleHint">Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
 <section class="view" data-view="settings">
@@ -95,11 +133,21 @@
     </select>
   </label>
 </section>
+<section class="panel">
+  <div class="panel-head"><h2>🧩 Dashboard anpassen</h2><span class="tag">Dieses Gerät</span></div>
+  <p>Wähle aus, welche Bereiche auf der Übersicht sichtbar sein sollen.</p>
+  <div id="dashboardWidgetChoices" class="dashboard-widget-choices"></div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>🌙 Darstellung</h2></div>
+  <label class="check-row"><input id="darkModeToggle" type="checkbox"> Dunkelmodus</label>
+</section>
+
 <section class="panel form-panel"><h2 data-i18n="basicSettings">Grundeinstellungen</h2><label><span data-i18n="name">Bezeichnung</span><input id="settingName" /></label><label><span data-i18n="startBalance">Startkontostand</span><input id="settingStartBalance" type="number" step="0.01" /></label><label><span data-i18n="minReserve">Mindestreserve</span><input id="settingMinimumReserve" type="number" step="0.01" /></label><label><span data-i18n="monthlyReserve">Monatliche Rücklage</span><input id="settingMonthlyReserve" type="number" step="0.01" /></label><button id="saveSettings" class="primary full"><span data-i18n="save">Speichern</span></button></section>
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>37 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.42l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -178,15 +226,18 @@
   </div>
 </div>
 <label><span data-i18n="notes">Notizen</span><textarea name="notes" rows="3"></textarea></label>
-</fieldset><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog><dialog id="vehicleServiceModal"><form method="dialog" id="vehicleServiceForm"><h2 id="vehicleServiceTitle" data-i18n="serviceAdd">Wartung eintragen</h2><input name="vehicleId" type="hidden"><label><span data-i18n="date">Datum</span><input name="date" type="date" required></label><label><span data-i18n="mileage">Kilometerstand</span><input name="km" type="number" min="0"></label><label><span data-i18n="work">Arbeit / Wartung</span><select name="type"><option>Ölwechsel</option><option>Inspektion</option><option>Bremsen</option><option>Reifenwechsel</option><option>Batterie</option><option>HU / TÜV</option><option>Klimaservice</option><option>Zündkerzen</option><option>Luftfilter</option><option>Innenraumfilter</option><option>Getriebeöl</option><option>Reparatur</option><option>Sonstiges</option></select></label><label><span data-i18n="cost">Kosten €</span><input name="cost" type="number" min="0" step="0.01"></label><label><span data-i18n="note">Notiz</span><textarea name="note" rows="3"></textarea></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog><dialog id="propertyModal"><form method="dialog" id="propertyForm">
+</fieldset><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog><dialog id="vehicleServiceModal"><form method="dialog" id="vehicleServiceForm"><h2 id="vehicleServiceTitle" data-i18n="serviceAdd">Wartung eintragen</h2><input name="vehicleId" type="hidden"><label><span data-i18n="date">Datum</span><input name="date" type="date" required></label><label><span data-i18n="mileage">Kilometerstand</span><input name="km" type="number" min="0"></label><label><span data-i18n="work">Arbeit / Wartung</span><select name="type"><option>Ölwechsel</option><option>Inspektion</option><option>Bremsen</option><option>Reifenwechsel</option><option>Batterie</option><option>HU / TÜV</option><option>Klimaservice</option><option>Zündkerzen</option><option>Luftfilter</option><option>Innenraumfilter</option><option>Getriebeöl</option><option>Reparatur</option><option>Sonstiges</option></select></label><label><span data-i18n="cost">Kosten €</span><input name="cost" type="number" min="0" step="0.01"></label><label>Werkstatt / Firma<input name="workshop" placeholder="z. B. Honda Autohaus"></label>
+<label>Rechnung / Foto<input name="attachment" type="file" accept="image/*,.pdf,application/pdf"></label>
+<label><span data-i18n="note">Notiz</span><textarea name="note" rows="3"></textarea></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog><dialog id="propertyModal"><form method="dialog" id="propertyForm">
 <h2 id="propertyModalTitle">Objekt hinzufügen</h2><input name="id" type="hidden"/>
 <label>Foto<input name="photo" type="file" accept="image/*" /></label><div id="propertyPhotoPreview" class="photo-preview hidden"></div>
 <fieldset class="dialog-section"><legend>Grunddaten</legend>
 <label>Bezeichnung<input name="name" required /></label>
 <label>Adresse<input name="address" /></label>
 <div class="form-two-columns"><label>Wohnfläche m²<input name="area" type="number" min="0" step="0.1" /></label><label>Grundstücksgröße m²<input name="plotArea" type="number" min="0" step="0.1" /></label></div>
-<div class="form-two-columns"><label><span data-i18n="year">Baujahr</span><input name="constructionYear" type="number" min="1000" max="2100" step="1" /></label><label>Zimmer<input name="rooms" type="number" min="0" step="0.5" /></label></div>
+<label>Geschätzter Fahrzeugwert €<input name="estimatedValue" type="number" min="0" step="100" /></label><div class="form-two-columns"><label><span data-i18n="year">Baujahr</span><input name="constructionYear" type="number" min="1000" max="2100" step="1" /></label><label>Zimmer<input name="rooms" type="number" min="0" step="0.5" /></label></div>
 <div class="form-two-columns"><label>Badezimmer<input name="bathrooms" type="number" min="0" step="1" /></label><label>WC<input name="toilets" type="number" min="0" step="1" /></label></div>
+<label>Geschätzter Immobilienwert €<input name="estimatedValue" type="number" min="0" step="1000" /></label>
 <label>Nutzung<select name="usage"><option>Eigennutzung</option><option>Mietfreie Überlassung</option><option>Vermietung</option><option>Leerstand</option></select></label>
 </fieldset>
 <fieldset class="dialog-section"><legend>Energie und Technik</legend>
@@ -209,19 +260,92 @@
 </select></label>
 <label>Status<select name="status" required><option value="paid">🟢 Bereits bezahlt</option><option value="open">🟠 Noch offen</option></select></label>
 </div>
-<div class="form-two-columns"><label>Betrag €<input name="amount" type="number" min="0" step="0.01" required /></label><label>Monat / Jahr<input name="month" type="month" /></label></div>
-<label>Firma / Ausführender Betrieb<input name="company" placeholder="z. B. Elektro Müller GmbH oder Eigenleistung" /></label>
+<div class="form-two-columns">
+<label>Geplante Kosten €<input name="plannedAmount" type="number" min="0" step="0.01" placeholder="z. B. 10000" /></label>
+<label>Tatsächlicher / aktueller Betrag €<input name="amount" type="number" min="0" step="0.01" required /></label>
+</div>
+<label>Monat / Jahr<input name="month" type="month" /></label>
+<div class="form-two-columns">
+<label>Ausführung<select name="workType"><option value="Fachfirma">Fachfirma</option><option value="Eigenleistung">Eigenleistung</option></select></label>
+<label>Bewertung Firma<select name="companyRating"><option value="">Keine Bewertung</option><option value="1">★</option><option value="2">★★</option><option value="3">★★★</option><option value="4">★★★★</option><option value="5">★★★★★</option></select></label>
+</div>
+<label>Firma / Ausführender Betrieb<input name="company" placeholder="z. B. Elektro Müller GmbH" /></label>
 <label>Notiz<textarea name="note" rows="3"></textarea></label>
 <label>Fotos / Dokumente<input name="attachments" type="file" accept="image/*,.pdf,application/pdf" multiple /></label>
 <div id="renovationAttachmentInfo" class="renovation-attachment-info">Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.</div>
+<div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
+</form></dialog>
+<dialog id="propertyDocumentModal"><form method="dialog" id="propertyDocumentForm">
+<h2>Dokument zur Hausakte hinzufügen</h2><input name="propertyId" type="hidden">
+<label>Bezeichnung<input name="title" required placeholder="z. B. Energieausweis"></label>
+<label>Kategorie<select name="category"><option>Rechnung</option><option>Versicherung</option><option>Energieausweis</option><option>Grundriss / Bauplan</option><option>Garantie</option><option>Vertrag</option><option>Bedienungsanleitung</option><option>Foto</option><option>Sonstiges</option></select></label>
+<label>Monat / Jahr<input name="month" type="month"></label>
+<label>Datei<input name="file" type="file" accept="image/*,.pdf,application/pdf" required></label>
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
 <dialog id="ownerModal"><form method="dialog" id="ownerForm"><h2 id="ownerModalTitle">Person hinzufügen</h2><input name="id" type="hidden" /><label>Name<input name="name" required /></label><label>Rolle<select name="personType"><option>Eigentümer</option><option>Bewohner</option><option>Verwalter</option><option>Sonstige Person</option></select></label><label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" required /></label><label>Zahlanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" required /></label><label>Aufgabe<input name="role" /></label><fieldset class="object-picker"><legend>Person gehört zu diesen Objekten</legend><div id="ownerPropertyChoices" class="check-grid"></div></fieldset><label class="check-row"><input name="active" type="checkbox" checked /> Person ist aktiv</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="taskModal"><form method="dialog" id="taskForm"><h2>Aufgabe hinzufügen</h2><label>Aufgabe<input name="title" required /></label>
 <label>Foto zur Aufgabe<input name="photoFile" type="file" accept="image/*" /></label>
 <div id="taskPhotoPreviewWrap" class="task-photo-preview-wrap hidden"><img id="taskPhotoPreview" alt="Aufgabenfoto Vorschau"><button id="removeTaskPhotoBtn" type="button" class="danger small">Foto entfernen</button></div><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Fällig (Monat / Jahr)<input name="due" type="month" /></label><label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
-<dialog id="maintenanceModal"><form method="dialog" id="maintenanceForm"><h2>Wartung hinzufügen</h2><label>Wartung<input name="title" required /></label><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Nächster Termin<input name="due" type="date" /></label><label>Intervall Monate<input name="intervalMonths" type="number" min="1" step="1" /></label><label>Verantwortlich<input name="owner" /></label><label>Geplante Kosten<input name="cost" type="number" min="0" step="0.01" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
-<dialog id="reserveModal"><form method="dialog" id="reserveForm"><h2>Rücklage hinzufügen</h2><label>Bezeichnung<input name="title" required /></label><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Zielbetrag<input name="target" type="number" min="0" step="0.01" required /></label><label>Bereits gespart<input name="saved" type="number" min="0" step="0.01" /></label><label>Zieljahr<input name="year" type="number" min="2024" max="2100" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
+<dialog id="maintenanceModal" class="planning-dialog-v40"><form method="dialog" id="maintenanceForm">
+<div class="dialog-title-row-v40"><div><span class="dialog-icon-v40">🔧</span><div><h2>Wartung hinzufügen</h2><p>Regelmäßige Wartung für ein Objekt anlegen.</p></div></div></div>
+
+<label>Objekt<select name="propertyId" class="property-select"></select></label>
+
+<label>Wartungsart
+<select name="maintenanceType" id="maintenanceTypeSelect" required>
+<option value="">Bitte wählen …</option>
+<optgroup label="Heizung & Wärme">
+<option>Heizungswartung</option><option>Wärmepumpe prüfen</option><option>Fußbodenheizung prüfen</option><option>Heizkörper entlüften</option><option>Heizungsdruck prüfen</option><option>Warmwasserspeicher warten</option><option>Schornstein / Abgasweg prüfen</option>
+</optgroup>
+<optgroup label="Sicherheit">
+<option>Rauchmelder prüfen</option><option>CO-Melder prüfen</option><option>Feuerlöscher prüfen</option><option>Elektroanlage prüfen</option><option>FI / RCD testen</option><option>Blitzschutz prüfen</option>
+</optgroup>
+<optgroup label="Dach & Fassade">
+<option>Dach prüfen</option><option>Dachrinnen reinigen</option><option>Fallrohre prüfen</option><option>Fassade prüfen</option><option>Fassadenfugen prüfen</option><option>Schornstein außen prüfen</option>
+</optgroup>
+<optgroup label="Fenster, Türen & Tore">
+<option>Fenster einstellen</option><option>Fensterdichtungen prüfen</option><option>Türen einstellen</option><option>Garagentor warten</option><option>Rollläden prüfen</option>
+</optgroup>
+<optgroup label="Wasser & Sanitär">
+<option>Wasserfilter wechseln</option><option>Wasserleitungen prüfen</option><option>Abflüsse prüfen</option><option>Hebeanlage warten</option><option>Rückstauklappe prüfen</option><option>Trinkwasseranlage prüfen</option>
+</optgroup>
+<optgroup label="Lüftung & Klima">
+<option>Lüftungsanlage warten</option><option>Lüftungsfilter wechseln</option><option>Klimaanlage warten</option><option>Abluftanlage prüfen</option>
+</optgroup>
+<optgroup label="Außenbereich">
+<option>Regenrinne / Entwässerung prüfen</option><option>Terrasse prüfen</option><option>Balkon prüfen</option><option>Geländer prüfen</option><option>Zaun prüfen</option><option>Bäume kontrollieren</option><option>Außenbeleuchtung prüfen</option>
+</optgroup>
+<optgroup label="Sonstiges"><option value="__custom__">✚ Eigene Wartung erstellen</option></optgroup>
+</select>
+</label>
+
+<label id="customMaintenanceWrap" class="hidden">Eigene Wartung<input name="customTitle" id="customMaintenanceTitle" placeholder="z. B. Naturstein-Sockel prüfen"></label>
+
+<div class="form-two-columns">
+<label>Nächster Termin (Monat / Jahr)<input name="due" type="month"></label>
+<label>Intervall<select name="intervalMonths">
+<option value="0">Einmalig</option>
+<option value="1">Monatlich</option>
+<option value="3">Alle 3 Monate</option>
+<option value="6">Halbjährlich</option>
+<option value="12" selected>Jährlich</option>
+<option value="24">Alle 2 Jahre</option>
+<option value="36">Alle 3 Jahre</option>
+<option value="60">Alle 5 Jahre</option>
+</select></label>
+</div>
+
+<div class="form-two-columns">
+<label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label>
+<label>Geplante Kosten €<input name="cost" type="number" min="0" step="0.01"></label>
+</div>
+
+<label>Notiz<textarea name="note" rows="3" placeholder="Optional: Was soll geprüft oder gemacht werden?"></textarea></label>
+
+<div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
+</form></dialog>
+
 
 <dialog id="wasteDateModal"><form method="dialog" id="wasteDateForm"><h2 id="wasteDateTitle">Müllabfuhr</h2><input name="date" type="hidden"><fieldset class="waste-type-fieldset"><legend>Welche Tonne wird abgeholt?</legend><label class="waste-choice"><input type="checkbox" name="types" value="Restmüll"><i style="background:#111111"></i><span>Restmüll</span></label><label class="waste-choice"><input type="checkbox" name="types" value="Biotonne"><i style="background:#8B5E3C"></i><span>Bio</span></label><label class="waste-choice"><input type="checkbox" name="types" value="Papiertonne"><i style="background:#2E8B57"></i><span>Papier</span></label><label class="waste-choice"><input type="checkbox" name="types" value="Plastik"><i style="background:#EAB308"></i><span>Plastik</span></label></fieldset><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button type="button" id="wasteDateSave" class="primary">Speichern</button></div></form></dialog>
 <script src="app.js"></script>

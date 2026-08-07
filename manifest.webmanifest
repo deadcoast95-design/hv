@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – V37 Sanierungsakte",
+  "name": "Private Immobilienverwaltung – 0.42l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Hausverwaltung mit Sanierungsstatus, Firmen, Gewerken und Dokumenten",
+  "description": "Lokale Hausverwaltung – 0.42l mit korrigierter Wartungsautomatik",
   "icons": [
     {
       "src": "icon.svg",

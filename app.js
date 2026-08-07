@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v37';
+const KEY='hausverwaltung_pwa_v042l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -13,7 +13,7 @@ const UI_TEXT={
   bookings:'Buchungen', costPlan:'Kostenplan', addBooking:'+ Buchung', addCost:'+ Kostenposition',
   monthlyPlan:'Monatlich geplant', yearlyPlan:'Jährlich geplant',
   addObject:'+ Objekt', addPerson:'+ Person', shares:'Anteile',
-  tasks:'Aufgaben', maintenance:'Wartungen', reserves:'Rücklagen', addTask:'+ Aufgabe',
+  tasks:'Aufgaben', maintenance:'Wartungen',  addTask:'+ Aufgabe',
   addVehicle:'+ Fahrzeug', vehicleFile:'Fahrzeugakte',
   loanManagement:'Kreditverwaltung', editLoan:'Kredit bearbeiten', management:'Verwaltung',
   language:'Sprache', basicSettings:'Grundeinstellungen', name:'Bezeichnung',
@@ -147,7 +147,9 @@ function populateLanguagesV24(){
 
 const categories=['Einzahlung Eigentümer','Kredit','Strom','Wasser','Internet','Versicherung','Grundsteuer','Müll','Wartung','Reparatur','Rücklage','Sanierung','Sonstiges'];
 const seed={
- settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600},
+ settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600,
+ darkMode:false,
+ dashboardWidgets:{important:true,consumption:true,finance:true,loan:true,objectcosts:true,contributions:true,waste:true,costpositions:true,objects:true,renovations:true,vehicles:true,tasks:true}},
  owners:[{id:1,name:'Dmitrij',ownershipShare:33.33,paymentShare:33.33,role:'Technik / Verwaltung',personType:'Eigentümer',active:true,propertyIds:[1,2]},{id:2,name:'Freundin',ownershipShare:33.33,paymentShare:33.33,role:'Finanzen / Verträge',personType:'Eigentümer',active:true,propertyIds:[1,2]},{id:3,name:'Schwager',ownershipShare:33.34,paymentShare:33.34,role:'Abstimmung / Grundstück',personType:'Eigentümer',active:true,propertyIds:[1,2]}],
  properties:[{id:1,name:'Haus 1',address:'',area:159,usage:'Eigennutzung',photo:''},{id:2,name:'Haus 2',address:'',area:152,usage:'Mietfreie Überlassung',photo:''}],
  loan:{bank:'',original:0,remaining:0,interest:0,monthlyPayment:0,startDate:'2024-01-01',fixedUntil:'2034-01-01',extraPayment:0,autoCalculate:true,balanceDate:''},
@@ -174,19 +176,22 @@ function migrate(data){
   meterHistory.push({id:Date.now()+Math.random(),date:x.meterReadingDate,electricity:x.electricityMeter??'',water:x.waterMeter??''});
  }
  return {...x,
-  photo:x.photo||'',constructionYear:x.constructionYear||'',plotArea:x.plotArea??'',
+  photo:x.photo||'',estimatedValue:Number(x.estimatedValue)||0,documents:Array.isArray(x.documents)?x.documents:[],constructionYear:x.constructionYear||'',plotArea:x.plotArea??'',
   rooms:x.rooms??'',bathrooms:x.bathrooms??'',toilets:x.toilets??'',
   electricityMeter:x.electricityMeter??'',waterMeter:x.waterMeter??'',meterReadingDate:x.meterReadingDate||'',
   meterHistory,renovationCosts:(Array.isArray(x.renovationCosts)?x.renovationCosts:[]).map(r=>({
  ...r,category:r.category||'Sonstiges',status:r.status||'paid',
  month:r.month||monthValueV37(r.date||''),company:r.company||'',
- attachments:Array.isArray(r.attachments)?r.attachments:[]
+ plannedAmount:Number(r.plannedAmount ?? r.amount ?? 0)||0,
+   workType:r.workType||'Fachfirma',
+   companyRating:r.companyRating||'',
+   attachments:Array.isArray(r.attachments)?r.attachments:[]
 })),
   energyClass:x.energyClass||'',heatingType:x.heatingType||'',notes:x.notes||''
  };
 });
- d.vehicles=Array.isArray(data.vehicles)?data.vehicles:[];
- d.vehicleServices=Array.isArray(data.vehicleServices)?data.vehicleServices:[];
+ d.vehicles=(Array.isArray(data.vehicles)?data.vehicles:[]).map(v=>({...v,estimatedValue:Number(v.estimatedValue)||0}));
+ d.vehicleServices=(Array.isArray(data.vehicleServices)?data.vehicleServices:[]).map(s=>({...s,workshop:s.workshop||'',attachment:s.attachment||null}));
  d.transactions=Array.isArray(data.transactions)?data.transactions:[];
  d.tasks=(data.tasks||[]).map(x=>({...x,propertyId:x.propertyId??'all'}));
  d.maintenance=(data.maintenance||[]).map(x=>({...x,propertyId:x.propertyId??'all',intervalMonths:x.intervalMonths||12,cost:Number(x.cost)||0}));
@@ -568,7 +573,68 @@ function runModule(name,fn){
   return false;
  }
 }
+
+function daysUntilV38(dateStr){
+ if(!dateStr)return null; const d=new Date(dateStr.length===7?dateStr+'-01T12:00:00':dateStr+'T12:00:00');
+ if(Number.isNaN(d.getTime()))return null; return Math.ceil((d-new Date())/86400000);
+}
+function monthEndDaysV38(month){
+ const m=String(month||'').match(/^(\d{4})-(\d{2})/);if(!m)return null;
+ const d=new Date(Number(m[1]),Number(m[2]),0,12);return Math.ceil((d-new Date())/86400000);
+}
+function renderImportantV38(){
+ const box=$('#importantItems');if(!box)return;const items=[];
+ (state.tasks||[]).filter(t=>t.status!=='Erledigt').forEach(t=>{const d=taskDueMonthDateV34(t.due);if(d){const n=Math.ceil((d-new Date())/86400000);if(n<=45)items.push({level:n<0?'red':'orange',title:t.title,text:`Aufgabe · ${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`})}});
+ (state.maintenance||[]).forEach(x=>{
+  if(x.status==='Erledigt'||!x.due)return;
+  const due=maintenanceMonthDueDateV040L(x.due);
+  if(!due)return;
+  const days=Math.ceil((due-new Date())/86400000);
+  if(days<=45){
+   const level=days<0?'red':days<=14?'red':'orange';
+   const when=days<0?'überfällig':days===0?'diesen Monat fällig':days<=31?'bald fällig':`fällig ${maintenanceMonthLabelV040L(x.due)}`;
+   items.push({level,title:`Wartung: ${x.title}`,text:`${when} · ${propertyName(x.propertyId)}`});
+  }
+ });
+ (state.vehicles||[]).forEach(v=>{
+  const tuv=monthEndDaysV38(v.tuvDate);if(tuv!==null&&tuv<=90)items.push({level:tuv<0?'red':'orange',title:`HU / TÜV ${vehicleName(v)}`,text:`fällig ${monthYearLabelV36(v.tuvDate)}`});
+  if(v.nextOilKm&&Number(v.currentKm)>=Number(v.nextOilKm)-1000)items.push({level:Number(v.currentKm)>=Number(v.nextOilKm)?'red':'orange',title:`Ölwechsel ${vehicleName(v)}`,text:`${km(v.currentKm)} / Ziel ${km(v.nextOilKm)}`});
+ });
+ (state.properties||[]).forEach(p=>(p.renovationCosts||[]).filter(r=>!renovationPaidV37(r)).forEach(r=>items.push({level:'orange',title:`Offene Sanierung: ${r.title}`,text:`${p.name} · ${eur(r.amount)}`})));
+ $('#importantCountTag').textContent=`${items.length} Hinweis${items.length===1?'':'e'}`;
+ box.innerHTML=items.length?items.slice(0,12).map(i=>`<div class="important-item ${i.level}"><i></i><div><strong>${esc(i.title)}</strong><span>${esc(i.text)}</span></div></div>`).join(''):'<div class="empty">Aktuell nichts Dringendes 🎉</div>';
+}
+function meterConsumptionsV38(p,key){
+ const rows=(p.meterHistory||[]).filter(r=>r[key]!==''&&r[key]!=null).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ const out=[];for(let i=1;i<rows.length;i++){const val=Number(rows[i][key])-Number(rows[i-1][key]);if(val>=0)out.push({from:rows[i-1].date,to:rows[i].date,value:val})}return out;
+}
+function renderConsumptionV38(){
+ const box=$('#dashboardConsumption');if(!box)return;
+ box.innerHTML=(state.properties||[]).map(p=>{
+  const e=meterConsumptionsV38(p,'electricity'),w=meterConsumptionsV38(p,'water'),le=e[e.length-1],lw=w[w.length-1];
+  const max=Math.max(1,...e.map(x=>x.value),...w.map(x=>x.value));
+  const bars=[...e.slice(-4).map(x=>({label:`⚡ ${x.to.slice(0,7)}`,v:x.value,unit:'kWh'})),...w.slice(-4).map(x=>({label:`💧 ${x.to.slice(0,7)}`,v:x.value,unit:'m³'}))];
+  return `<article class="consumption-card"><h3>${esc(p.name)}</h3><div class="consumption-kpis"><div><span>Letzter Stromverbrauch</span><strong>${le?le.value.toLocaleString('de-DE')+' kWh':'–'}</strong></div><div><span>Letzter Wasserverbrauch</span><strong>${lw?lw.value.toLocaleString('de-DE')+' m³':'–'}</strong></div></div>${bars.length?`<div class="mini-bars">${bars.map(b=>`<div><span>${esc(b.label)}</span><i><b style="width:${Math.max(4,b.v/max*100)}%"></b></i><strong>${b.v.toLocaleString('de-DE')} ${b.unit}</strong></div>`).join('')}</div>`:'<p class="helper-text">Mindestens zwei Zählerstände werden für eine Verbrauchsberechnung benötigt.</p>'}</article>`;
+ }).join('')||'<div class="empty">Noch keine Objekte</div>';
+}
+function totalVehicleServiceCostV38(v){return (state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).reduce((a,s)=>a+Number(s.cost||0),0)}
+function applyDashboardWidgetsV38(){
+ const cfg=state.settings.dashboardWidgets||{};document.querySelectorAll('[data-widget]').forEach(el=>{const k=el.dataset.widget;el.classList.toggle('widget-hidden',cfg[k]===false)});
+}
+function renderDashboardWidgetChoicesV38(){
+ const box=$('#dashboardWidgetChoices');if(!box)return;const names={important:'Demnächst wichtig',consumption:'Verbrauch',finance:'Finanzen',loan:'Kredit',objectcosts:'Kosten je Objekt',contributions:'Personen-Einzahlungen',waste:'Müllkalender',costpositions:'Kostenpositionen',objects:'Objekte',renovations:'Sanierungen',vehicles:'Fahrzeuge',tasks:'Aufgaben'};
+ const cfg=state.settings.dashboardWidgets||{};box.innerHTML=Object.entries(names).map(([k,n])=>`<label class="check-row"><input type="checkbox" data-widget-choice="${k}" ${cfg[k]!==false?'checked':''}> ${n}</label>`).join('');
+}
+function applyThemeV38(){document.body.classList.toggle('dark-mode',state.settings.darkMode===true);const t=$('#darkModeToggle');if(t)t.checked=state.settings.darkMode===true}
+
 function render(){
+ const removedOneTimeMaintenance=cleanupCompletedOneTimeMaintenanceV041L();
+ const activatedMaintenance=activateDueMaintenanceV042L();
+ if(removedOneTimeMaintenance||activatedMaintenance){
+  try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Wartungsstatus lokal speichern fehlgeschlagen',e)}
+  setTimeout(()=>{try{persistState(false)}catch(e){console.warn('Wartungsstatus speichern fehlgeschlagen',e)}},0);
+ }
+
  const notice=$('#appNotice');if(notice){notice.classList.add('hidden');notice.innerHTML=''}
  runModule('Auswahllisten',populateSelects);
  runModule('Übersicht',renderDashboard);
@@ -582,6 +648,9 @@ function render(){
  runModule('Planung',renderTasks);
  runModule('Einstellungen',renderSettings);
  runModule('Müllkalender',renderWasteCalendar);
+ runModule('Wichtig',renderImportantV38);
+ runModule('Verbrauch',renderConsumptionV38);
+ renderDashboardWidgetChoicesV38();applyDashboardWidgetsV38();applyThemeV38();
  updateLocalStatus(lastSaveTime?'Gespeichert':'Lokal gespeichert');
 }
 
@@ -693,6 +762,7 @@ function renderVehicles(){
     <div><span>Batterie nächster Wechsel</span><strong>${monthYearLabelV36(v.batteryNextDate)}</strong></div>
    </div>
    ${last?`<div class="last-service"><span>${uiText('lastWorkshop')}</span><strong>${dateDE(last.date)} · ${esc(serviceTypeLabel(last.type))}</strong><small>${last.km?km(last.km):''}${last.cost?` · ${eur(last.cost)}`:''}</small></div>`:''}
+   <details class="vehicle-history"><summary>Werkstatthistorie · Gesamt ${eur(totalVehicleServiceCostV38(v))}</summary>${services.length?services.map(s=>`<div class="service-history-row"><div><strong>${dateDE(s.date)} · ${esc(serviceTypeLabel(s.type))}</strong><span>${s.workshop?`🏢 ${esc(s.workshop)} · `:''}${s.km?km(s.km):''}${s.note?` · ${esc(s.note)}`:''}</span></div><strong>${eur(s.cost||0)}</strong>${s.attachment?.data?`<a class="secondary tiny" href="${s.attachment.data}" ${String(s.attachment.type||'').startsWith('image/')?'target="_blank"':`download="${esc(s.attachment.name||'Rechnung')}"`}>Datei</a>`:''}</div>`).join(''):'<div class="empty">Noch keine Werkstatteinträge</div>'}</details>
    <div class="card-actions"><button class="secondary small" onclick="editVehicle(${v.id})">${uiText('edit')}</button><button class="secondary small" onclick="openServiceModal(${v.id})">${uiText('addService')}</button><button class="danger small" onclick="deleteVehicle(${v.id})">${uiText('delete')}</button></div>
   </div></article>`;
  }).join(''):`<div class="empty">${uiText('noVehicles')}</div>`;
@@ -705,6 +775,7 @@ function openVehicleModal(v=null){
  f.dataset.removePhoto='0';
  $('#vehicleModalTitle').textContent=v?uiText('vehicleEditTitle'):uiText('vehicleAddTitle');
  f.elements.id.value=v?String(v.id):'';
+ if(f.elements.estimatedValue)f.elements.estimatedValue.value=v?.estimatedValue??'';
  ['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','oilSpec','tires','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});
  if(f.elements.tuvDate)f.elements.tuvDate.value=monthValueV36(v?.tuvDate);
  if(f.elements.brakesDate)f.elements.brakesDate.value=monthValueV36(v?.brakesDate);
@@ -982,21 +1053,61 @@ function renovationCategoryIconV37(c){return ({Elektrik:'⚡',Dach:'🏠',Fenste
 function renovationPaidV37(r){return String(r?.status||'paid')==='paid'}
 function renovationPaidTotalV37(x){return (x.renovationCosts||[]).filter(renovationPaidV37).reduce((s,r)=>s+Number(r.amount||0),0)}
 function renovationOpenTotalV37(x){return (x.renovationCosts||[]).filter(r=>!renovationPaidV37(r)).reduce((s,r)=>s+Number(r.amount||0),0)}
+function renovationPlannedTotalV39(x){return (x.renovationCosts||[]).reduce((s,r)=>s+Number(r.plannedAmount ?? r.amount ?? 0),0)}
 function renovationTotalV35(x){return (x.renovationCosts||[]).reduce((s,r)=>s+Number(r.amount||0),0)}
+function renovationProgressV39(x){const planned=renovationPlannedTotalV39(x),paid=renovationPaidTotalV37(x);return planned>0?Math.min(100,Math.max(0,(paid/planned)*100)):0}
 function renovationAttachmentHtmlV37(a){if(!a?.data)return '';const isImage=String(a.type||'').startsWith('image/');return isImage?`<a class="renovation-file renovation-file-image" href="${a.data}" target="_blank"><img src="${a.data}" alt="${esc(a.name||'Foto')}"><span>📷 ${esc(a.name||'Foto')}</span></a>`:`<a class="renovation-file" href="${a.data}" download="${esc(a.name||'Dokument.pdf')}">📄 ${esc(a.name||'Dokument')}</a>`}
 function propertyRenovationHtmlV35(x){
  const rows=(x.renovationCosts||[]).slice().sort((a,b)=>String(b.month||b.date||'').localeCompare(String(a.month||a.date||'')));
- const paid=renovationPaidTotalV37(x),open=renovationOpenTotalV37(x),total=renovationTotalV35(x);
- return `<div class="renovation-summary-grid"><div class="ren-sum ren-paid"><span>Bereits bezahlt</span><strong>${eur(paid)}</strong></div><div class="ren-sum ren-open"><span>Noch offen</span><strong>${eur(open)}</strong></div><div class="ren-sum ren-total"><span>Gesamt</span><strong>${eur(total)}</strong></div></div>
- <div class="renovation-list">${rows.length?rows.map(r=>`<article class="renovation-row-v37 ${renovationPaidV37(r)?'is-paid':'is-open'}"><div class="renovation-row-main"><div class="renovation-row-title"><span class="ren-category">${renovationCategoryIconV37(r.category)} ${esc(r.category||'Sonstiges')}</span><strong>${esc(r.title||'Sanierung')}</strong></div><div class="renovation-row-meta"><span>${renovationMonthLabelV37(r.month||r.date)}</span>${r.company?`<span>🏢 ${esc(r.company)}</span>`:''}${r.note?`<span>📝 ${esc(r.note)}</span>`:''}</div>${(r.attachments||[]).length?`<div class="renovation-files">${r.attachments.map(renovationAttachmentHtmlV37).join('')}</div>`:''}</div><div class="renovation-row-price"><strong>${eur(r.amount)}</strong><span class="ren-status ${renovationPaidV37(r)?'paid':'open'}">${renovationPaidV37(r)?'● Bezahlt':'● Offen'}</span></div><div class="renovation-row-actions"><button class="secondary tiny" onclick="editRenovationV37(${x.id},${r.id})">Bearbeiten</button><button class="${renovationPaidV37(r)?'secondary':'success'} tiny" onclick="toggleRenovationStatusV37(${x.id},${r.id})">${renovationPaidV37(r)?'Auf offen setzen':'Als bezahlt markieren'}</button><button class="danger tiny" onclick="deleteRenovationV35(${x.id},${r.id})">Löschen</button></div></article>`).join(''):'<div class="property-sub-empty">Noch keine Sanierungskosten eingetragen</div>'}</div>`;
+ const planned=renovationPlannedTotalV39(x),paid=renovationPaidTotalV37(x),open=renovationOpenTotalV37(x),progress=renovationProgressV39(x);
+ return `<div class="renovation-summary-grid renovation-summary-grid-v39">
+   <div class="ren-sum ren-planned"><span>Geplant</span><strong>${eur(planned)}</strong></div>
+   <div class="ren-sum ren-paid"><span>Bereits bezahlt</span><strong>${eur(paid)}</strong></div>
+   <div class="ren-sum ren-open"><span>Noch offen</span><strong>${eur(open)}</strong></div>
+  </div>
+  <div class="renovation-progress-v39"><div><span>Sanierungsfortschritt</span><strong>${progress.toFixed(1).replace('.',',')} %</strong></div><i><b style="width:${progress}%"></b></i><small>${eur(paid)} von ${eur(planned)} bezahlt</small></div>
+  <div class="renovation-list renovation-timeline-v39">${rows.length?rows.map(r=>`<article class="renovation-row-v37 ${renovationPaidV37(r)?'is-paid':'is-open'}">
+    <div class="renovation-timeline-dot"></div>
+    <div class="renovation-row-main">
+      <div class="renovation-row-title"><span class="ren-category">${renovationCategoryIconV37(r.category)} ${esc(r.category||'Sonstiges')}</span><strong>${esc(r.title||'Sanierung')}</strong></div>
+      <div class="renovation-row-meta"><span>📅 ${renovationMonthLabelV37(r.month||r.date)}</span><span>👷 ${esc(r.workType||'Fachfirma')}</span>${r.company?`<span>🏢 ${esc(r.company)}</span>`:''}${r.companyRating?`<span>⭐ ${'★'.repeat(Number(r.companyRating))}</span>`:''}${r.note?`<span>📝 ${esc(r.note)}</span>`:''}</div>
+      ${(r.attachments||[]).length?`<div class="renovation-files">${r.attachments.map(renovationAttachmentHtmlV37).join('')}</div>`:''}
+    </div>
+    <div class="renovation-row-price"><strong>${eur(r.amount)}</strong><small>geplant ${eur(r.plannedAmount ?? r.amount ?? 0)}</small><span class="ren-status ${renovationPaidV37(r)?'paid':'open'}">${renovationPaidV37(r)?'● Bezahlt':'● Offen'}</span></div>
+    <div class="renovation-row-actions"><button class="secondary tiny" onclick="editRenovationV37(${x.id},${r.id})">Bearbeiten</button><button class="${renovationPaidV37(r)?'secondary':'success'} tiny" onclick="toggleRenovationStatusV37(${x.id},${r.id})">${renovationPaidV37(r)?'Auf offen setzen':'Als bezahlt markieren'}</button><button class="danger tiny" onclick="deleteRenovationV35(${x.id},${r.id})">Löschen</button></div>
+  </article>`).join(''):'<div class="property-sub-empty">Noch keine Sanierungskosten eingetragen</div>'}</div>`;
 }
-function openRenovationModalV35(propertyId){const f=$('#renovationForm');f.reset();f.dataset.mode='new';f.elements.propertyId.value=propertyId;f.elements.id.value='';f.elements.status.value='paid';f.elements.category.value='Sonstiges';f.elements.month.value=new Date().toISOString().slice(0,7);$('#renovationModalTitle').textContent='Sanierungskosten hinzufügen';$('#renovationAttachmentInfo').textContent='Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.';$('#renovationModal').showModal()}
-function editRenovationV37(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;const f=$('#renovationForm');f.reset();f.dataset.mode='edit';f.elements.propertyId.value=propertyId;f.elements.id.value=id;f.elements.title.value=r.title||'';f.elements.category.value=r.category||'Sonstiges';f.elements.status.value=renovationPaidV37(r)?'paid':'open';f.elements.amount.value=Number(r.amount||0);f.elements.month.value=monthValueV37(r.month||r.date);f.elements.company.value=r.company||'';f.elements.note.value=r.note||'';$('#renovationModalTitle').textContent='Sanierungskosten bearbeiten';$('#renovationAttachmentInfo').textContent=(r.attachments||[]).length?`${r.attachments.length} Datei(en) vorhanden. Neue Dateien werden zusätzlich angehängt.`:'Noch keine Dateien vorhanden.';$('#renovationModal').showModal()}
+function openRenovationModalV35(propertyId){const f=$('#renovationForm');f.reset();f.dataset.mode='new';f.elements.propertyId.value=propertyId;f.elements.id.value='';f.elements.status.value='paid';f.elements.category.value='Sonstiges';if(f.elements.workType)f.elements.workType.value='Fachfirma';if(f.elements.companyRating)f.elements.companyRating.value='';f.elements.month.value=new Date().toISOString().slice(0,7);$('#renovationModalTitle').textContent='Sanierungskosten hinzufügen';$('#renovationAttachmentInfo').textContent='Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.';$('#renovationModal').showModal()}
+function editRenovationV37(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;const f=$('#renovationForm');f.reset();f.dataset.mode='edit';f.elements.propertyId.value=propertyId;f.elements.id.value=id;f.elements.title.value=r.title||'';f.elements.category.value=r.category||'Sonstiges';f.elements.status.value=renovationPaidV37(r)?'paid':'open';if(f.elements.plannedAmount)f.elements.plannedAmount.value=Number(r.plannedAmount ?? r.amount ?? 0);
+ f.elements.amount.value=Number(r.amount||0);
+ f.elements.month.value=monthValueV37(r.month||r.date);
+ if(f.elements.workType)f.elements.workType.value=r.workType||'Fachfirma';
+ if(f.elements.companyRating)f.elements.companyRating.value=r.companyRating||'';f.elements.company.value=r.company||'';f.elements.note.value=r.note||'';$('#renovationModalTitle').textContent='Sanierungskosten bearbeiten';$('#renovationAttachmentInfo').textContent=(r.attachments||[]).length?`${r.attachments.length} Datei(en) vorhanden. Neue Dateien werden zusätzlich angehängt.`:'Noch keine Dateien vorhanden.';$('#renovationModal').showModal()}
 function toggleRenovationStatusV37(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;r.status=renovationPaidV37(r)?'open':'paid';r.updatedAt=new Date().toISOString();save()}
 function deleteRenovationV35(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;if(!confirm('Diesen Sanierungskosten-Eintrag wirklich löschen?'))return;p.renovationCosts=(p.renovationCosts||[]).filter(r=>Number(r.id)!==Number(id));save()}
 async function fileToDataUrlV37(file){return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error||new Error('Datei konnte nicht gelesen werden'));reader.readAsDataURL(file)})}
 async function renovationFilesV37(fileList){const files=[...(fileList||[])].slice(0,5),result=[];for(const file of files){if(file.size>3000000)throw new Error(`${file.name} ist größer als 3 MB.`);const data=String(file.type||'').startsWith('image/')?await imageFileToDataUrlV31(file,1400,1000,.80):await fileToDataUrlV37(file);result.push({name:file.name,type:file.type||'application/octet-stream',data,size:file.size})}return result}
-function renderDashboardRenovationsV37(){const box=$('#dashboardRenovationOverview');if(!box)return;const all=(state.properties||[]).flatMap(p=>(p.renovationCosts||[]).map(r=>({...r,propertyName:p.name})));if(!all.length){box.innerHTML='<div class="empty">Noch keine Sanierungskosten eingetragen</div>';return}const paid=all.filter(renovationPaidV37).reduce((s,r)=>s+Number(r.amount||0),0),open=all.filter(r=>!renovationPaidV37(r)).reduce((s,r)=>s+Number(r.amount||0),0),total=paid+open,cats={};all.forEach(r=>{const c=r.category||'Sonstiges';cats[c]=(cats[c]||0)+Number(r.amount||0)});const catRows=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div class="dashboard-ren-category"><span>${renovationCategoryIconV37(c)} ${esc(c)}</span><strong>${eur(v)}</strong></div>`).join('');box.innerHTML=`<div class="dashboard-ren-totals"><div><span>Bereits bezahlt</span><strong>${eur(paid)}</strong></div><div><span>Noch offen</span><strong>${eur(open)}</strong></div><div><span>Gesamt</span><strong>${eur(total)}</strong></div></div><div class="dashboard-ren-categories">${catRows}</div>`}
+function renderDashboardRenovationsV37(){
+ const box=$('#dashboardRenovationOverview');if(!box)return;
+ const properties=state.properties||[];
+ const all=properties.flatMap(p=>(p.renovationCosts||[]).map(r=>({...r,propertyName:p.name})));
+ if(!all.length){box.innerHTML='<div class="empty">Noch keine Sanierungskosten eingetragen</div>';return}
+ const planned=all.reduce((s,r)=>s+Number(r.plannedAmount ?? r.amount ?? 0),0);
+ const paid=all.filter(renovationPaidV37).reduce((s,r)=>s+Number(r.amount||0),0);
+ const open=all.filter(r=>!renovationPaidV37(r)).reduce((s,r)=>s+Number(r.amount||0),0);
+ const progress=planned>0?Math.min(100,(paid/planned)*100):0;
+ const perObject=properties.map(p=>({name:p.name,planned:renovationPlannedTotalV39(p),paid:renovationPaidTotalV37(p),open:renovationOpenTotalV37(p),progress:renovationProgressV39(p)})).filter(x=>x.planned||x.paid||x.open);
+ box.innerHTML=`<div class="dashboard-ren-totals"><div><span>Geplant</span><strong>${eur(planned)}</strong></div><div><span>Bereits investiert</span><strong>${eur(paid)}</strong></div><div><span>Noch offen</span><strong>${eur(open)}</strong></div></div>
+ <div class="renovation-progress-v39 dashboard-ren-progress"><div><span>Gesamtfortschritt</span><strong>${progress.toFixed(1).replace('.',',')} %</strong></div><i><b style="width:${progress}%"></b></i></div>
+ <div class="dashboard-ren-objects">${perObject.map(o=>`<div class="dashboard-ren-object"><div><strong>${esc(o.name)}</strong><span>${eur(o.paid)} bezahlt · ${eur(o.open)} offen</span></div><div><strong>${o.progress.toFixed(0)} %</strong></div></div>`).join('')}</div>`;
+}
+function propertyDocumentsHtmlV38(p){
+ const docs=p.documents||[];if(!docs.length)return '<div class="property-sub-empty">Noch keine Dokumente hinterlegt</div>';
+ return `<div class="document-list">${docs.map(d=>`<div class="document-row"><div><strong>${esc(d.title)}</strong><span>${esc(d.category||'Dokument')} · ${d.month?renovationMonthLabelV37(d.month):'ohne Datum'}</span></div><a class="secondary tiny" href="${d.data}" ${String(d.type||'').startsWith('image/')?'target="_blank"':`download="${esc(d.name||'Dokument')}"`}>Öffnen</a><button class="danger tiny" onclick="deletePropertyDocumentV38(${p.id},${d.id})">×</button></div>`).join('')}</div>`;
+}
+function openPropertyDocumentV38(propertyId){const f=$('#propertyDocumentForm');f.reset();f.elements.propertyId.value=propertyId;f.elements.month.value=new Date().toISOString().slice(0,7);$('#propertyDocumentModal').showModal()}
+function deletePropertyDocumentV38(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;if(!confirm('Dokument löschen?'))return;p.documents=(p.documents||[]).filter(d=>Number(d.id)!==Number(id));save()}
+
 function renderProperties(){
  const addButton=document.querySelector('[data-view="properties"] [data-modal="propertyModal"]');
  if(addButton){addButton.disabled=(state.properties||[]).length>=5;addButton.textContent=(state.properties||[]).length>=5?'Max. 5 Objekte':'+ Objekt'}
@@ -1012,7 +1123,7 @@ function renderProperties(){
    <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
    <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
   </div>
-  <details class="property-detail-block"><summary>Zählerstände & Historie</summary>${propertyMeterHistoryHtmlV35(x)}</details>
+  <details class="property-detail-block"><summary>Zählerstände & Historie</summary>${propertyMeterHistoryHtmlV35(x)}</details><section class="property-detail-block"><div class="property-sub-head"><strong>Dokumentenakte</strong><button class="secondary small" onclick="openPropertyDocumentV38(${x.id})">+ Dokument</button></div>${propertyDocumentsHtmlV38(x)}</section>
   <section class="property-detail-block renovation-block">
    <div class="property-sub-head"><strong>Sanierungskosten</strong><button class="secondary small" onclick="openRenovationModalV35(${x.id})">+ Kosten</button></div>
    ${propertyRenovationHtmlV35(x)}
@@ -1022,26 +1133,171 @@ function renderProperties(){
  </article>`).join(''):'<div class="empty">Noch keine Objekte</div>'
 }
 function renderOwners(){const total=state.owners.filter(x=>x.active!==false).reduce((a,b)=>a+Number(b.ownershipShare),0);$('#shareCheck').textContent=total.toLocaleString('de-DE',{maximumFractionDigits:2})+' %';$('#shareCheck').classList.toggle('warning',Math.abs(total-100)>0.01);$('#ownerList').innerHTML=state.owners.length?state.owners.map(x=>`<article class="entity-card"><div class="card-top"><span class="tag">${x.active===false?'Inaktiv':'Aktiv'}</span><span class="tag subtle">${esc(x.personType||'Eigentümer')}</span></div><h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3><p>${esc(x.role||'Keine Aufgabe eingetragen')}</p><p class="owner-objects">Objekte: ${esc((x.propertyIds||[]).map(propertyName).join(', ')||'keine Zuordnung')}</p><div class="meta"><span>Eigentum: <strong>${Number(x.ownershipShare||0).toLocaleString('de-DE')}%</strong></span><span>Zahlung: <strong>${Number(x.paymentShare||0).toLocaleString('de-DE')}%</strong></span></div><div class="card-actions"><button class="secondary small" onclick="editOwner(${x.id})">Bearbeiten</button><button class="secondary small" onclick="toggleOwner(${x.id})">${x.active===false?'Aktivieren':'Deaktivieren'}</button><button class="danger small" onclick="deleteOwner(${x.id})">Entfernen</button></div></article>`).join(''):'<div class="empty">Noch keine Personen</div>'}
+
+let planningFilterV40='all';
+
+function planningPriorityClassV40(priority){
+ const p=String(priority||'Mittel').toLowerCase();
+ return p==='sofort'?'urgent':p==='hoch'?'high':p==='niedrig'?'low':'medium';
+}
+function planningPriorityIconV40(priority){
+ const p=String(priority||'Mittel');
+ return p==='Sofort'?'⚡':p==='Hoch'?'↑':p==='Niedrig'?'↓':'•';
+}
+function maintenanceIconV40(title){
+ const t=String(title||'').toLowerCase();
+ if(t.includes('heizung')||t.includes('wärmepumpe')||t.includes('warmwasser')||t.includes('heizkörper')||t.includes('fußbodenheizung'))return '♨️';
+ if(t.includes('rauch')||t.includes('co-melder')||t.includes('feuerlöscher'))return '🛡️';
+ if(t.includes('dachrinne')||t.includes('fallrohr')||t.includes('entwässer'))return '🌧️';
+ if(t.includes('dach'))return '🏠';
+ if(t.includes('fenster'))return '🪟';
+ if(t.includes('tür')||t.includes('tor'))return '🚪';
+ if(t.includes('lüft')||t.includes('klima')||t.includes('filter'))return '🌬️';
+ if(t.includes('wasser')||t.includes('abfluss')||t.includes('hebeanlage')||t.includes('rückstau'))return '💧';
+ if(t.includes('elektro')||t.includes('fi ')||t.includes('rcd')||t.includes('blitzschutz'))return '⚡';
+ if(t.includes('fassade'))return '🧱';
+ if(t.includes('baum')||t.includes('zaun')||t.includes('terrasse')||t.includes('balkon'))return '🌿';
+ return '🔧';
+}
+function maintenanceMonthLabelV040L(value){
+ const m=String(value||'').match(/^(\d{4})-(\d{2})/);
+ if(!m)return 'Kein Termin';
+ return `${m[2]}/${m[1]}`;
+}
+function maintenanceMonthDueDateV040L(value){
+ const m=String(value||'').match(/^(\d{4})-(\d{2})/);
+ if(!m)return null;
+ return new Date(Number(m[1]),Number(m[2]),0,23,59,59);
+}
+function planningDueInfoV40(x,isTask){
+ const label=isTask?taskMonthLabelV34(x.due):maintenanceMonthLabelV040L(x.due);
+ if(!x.due)return {label:'Kein Termin',hint:'Noch nicht terminiert',status:'ok'};
+ const due=isTask?taskDueMonthDateV34(x.due):maintenanceMonthDueDateV040L(x.due);
+ if(!due||Number.isNaN(due.getTime()))return {label,hint:'',status:'ok'};
+ const days=Math.ceil((due-new Date())/86400000);
+ if(days<0)return {label,hint:'Überfällig',status:'overdue'};
+ if(days<=30)return {label,hint:days===0?'Heute fällig':`Fällig in ${days} Tagen`,status:'soon'};
+ if(days<=90)return {label,hint:`Fällig in ca. ${Math.max(1,Math.round(days/30))} Monaten`,status:'soon'};
+ return {label,hint:'Geplant',status:'ok'};
+}
+
+function maintenanceIntervalLabelV041L(months){
+ const n=Number(months)||0;
+ if(n===0)return 'Einmalig';
+ if(n===1)return 'Monatlich';
+ if(n===3)return 'Alle 3 Monate';
+ if(n===6)return 'Halbjährlich';
+ if(n===12)return 'Jährlich';
+ if(n===24)return 'Alle 2 Jahre';
+ if(n===36)return 'Alle 3 Jahre';
+ if(n===60)return 'Alle 5 Jahre';
+ return `Alle ${n} Monate`;
+}
+function currentMonthValueV041L(){
+ const d=new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function addMonthsToMonthValueV041L(monthValue,months){
+ const m=String(monthValue||'').match(/^(\d{4})-(\d{2})/);
+ const base=m?new Date(Number(m[1]),Number(m[2])-1,1):new Date();
+ base.setDate(1);
+ base.setMonth(base.getMonth()+Number(months||0));
+ return `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}`;
+}
+function cleanupCompletedOneTimeMaintenanceV041L(){
+ const now=Date.now();
+ const sevenDays=7*24*60*60*1000;
+ const before=(state.maintenance||[]).length;
+ state.maintenance=(state.maintenance||[]).filter(x=>{
+  if(Number(x.intervalMonths)!==0 || x.status!=='Erledigt')return true;
+  const completed=Date.parse(x.completedAt||'');
+  if(!Number.isFinite(completed))return true;
+  return (now-completed)<sevenDays;
+ });
+ return before!==state.maintenance.length;
+}
+
+function maintenanceIsDueNowV042L(x){
+ if(!x?.due)return false;
+ const m=String(x.due).match(/^(\d{4})-(\d{2})/);
+ if(!m)return false;
+ const now=new Date();
+ const currentIndex=now.getFullYear()*12+now.getMonth();
+ const dueIndex=Number(m[1])*12+(Number(m[2])-1);
+ return currentIndex>=dueIndex;
+}
+function activateDueMaintenanceV042L(){
+ let changed=false;
+ (state.maintenance||[]).forEach(x=>{
+  if(Number(x.intervalMonths)>0 && x.status==='Geplant' && maintenanceIsDueNowV042L(x)){
+   x.status='Offen';
+   x.activatedAt=new Date().toISOString();
+   changed=true;
+  }
+ });
+ return changed;
+}
+function planningFilteredV40(items){
+ if(planningFilterV40==='done')return items.filter(x=>x.status==='Erledigt');
+ if(planningFilterV40==='open')return items.filter(x=>x.status==='Offen');
+ return items;
+}
+function updatePlanningHeaderV40(){
+ const tasks=state.tasks||[],maintenance=state.maintenance||[];
+ const openTasks=tasks.filter(x=>x.status!=='Erledigt').length;
+ const openMaint=maintenance.filter(x=>x.status==='Offen').length;
+ if($('#planningTaskCount'))$('#planningTaskCount').textContent=tasks.length;
+ if($('#planningMaintenanceCount'))$('#planningMaintenanceCount').textContent=maintenance.length;
+ if($('#taskOpenTabCount'))$('#taskOpenTabCount').textContent=`${openTasks} offen`;
+ if($('#maintenanceTabCount'))$('#maintenanceTabCount').textContent=`${openMaint} offen`;
+}
+
 function renderTasks(){
- $('#taskList').innerHTML=state.tasks.length?state.tasks.map(x=>planningCard(x,'task')).join(''):'<div class="empty">Keine Aufgaben</div>';
- $('#maintenanceList').innerHTML=state.maintenance.length?state.maintenance.map(x=>planningCard(x,'maintenance')).join(''):'<div class="empty">Keine Wartungen</div>';
- $('#reserveList').innerHTML=state.reserves.length?state.reserves.map(x=>`<article class="entity-card"><div class="card-top"><span class="tag">${esc(propertyName(x.propertyId))}</span><span class="tag subtle">Ziel ${x.year||'offen'}</span></div><h3>${esc(x.title)}</h3><div class="progress"><span style="width:${Math.min(100,Number(x.target)?Number(x.saved)/Number(x.target)*100:0)}%"></span></div><div class="meta"><span>${eur(x.saved)} gespart</span><strong>${eur(Math.max(0,Number(x.target)-Number(x.saved)))} offen</strong></div><div class="card-actions"><button class="secondary small" onclick="editReserve(${x.id})">Bearbeiten</button><button class="danger small" onclick="deletePlanning('reserve',${x.id})">Löschen</button></div></article>`).join(''):'<div class="empty">Keine Rücklagenziele</div>'
+ updatePlanningHeaderV40();
+ const tasks=planningFilteredV40(state.tasks||[]);
+ const maintenance=planningFilteredV40(state.maintenance||[]);
+ $('#taskList').innerHTML=tasks.length?tasks.map(x=>planningCard(x,'task')).join(''):'<div class="planning-empty-v40"><span>☑</span><strong>Keine Aufgaben in dieser Ansicht</strong><small>Neue Aufgaben kannst du oben hinzufügen.</small></div>';
+ $('#maintenanceList').innerHTML=maintenance.length?maintenance.map(x=>planningCard(x,'maintenance')).join(''):'<div class="planning-empty-v40"><span>🔧</span><strong>Keine Wartungen in dieser Ansicht</strong><small>Lege regelmäßige Wartungen für deine Häuser an.</small></div>';
 }
 function planningCard(x,type){
- const isTask=type==='task';
- const done=x.status==='Erledigt';
- const when=isTask?taskMonthLabelV34(x.due):dateDE(x.due);
- const details=isTask
-  ?`${when}`
-  :`${when} · ${esc(x.owner||'Gemeinsam')} · ${x.intervalMonths||0} Monate · ${eur(x.cost||0)}`;
- return `<article class="entity-card">
-  <div class="card-top"><span class="tag">${esc(x.priority||x.status||'Offen')}</span><span class="tag subtle">${esc(propertyName(x.propertyId))}</span></div>
-  <h3>${esc(x.title)}</h3>
-  <p>${details}${done&&x.completedByName?` · ✓ Erledigt von ${esc(x.completedByName)}`:''}</p>
-  <div class="card-actions">${!done?`<button class="primary small" onclick="completeItem('${type}',${x.id})">Erledigen</button>`:'<span class="tag">Erledigt</span>'}<button class="danger small" onclick="deletePlanning('${type}',${x.id})">Löschen</button></div>
+ const isTask=type==='task',done=x.status==='Erledigt',planned=!isTask&&x.status==='Geplant';
+ const due=planningDueInfoV40(x,isTask);
+ const priority=x.priority||'Mittel';
+ const visual=isTask&&x.photo
+  ?`<img class="planning-card-photo-v40" src="${x.photo}" alt="${esc(x.title)}">`
+  :`<div class="planning-card-icon-v40 ${isTask?'task':'maintenance'}">${isTask?'☑':maintenanceIconV40(x.title)}</div>`;
+ const note=!isTask&&x.note?`<span class="planning-note-v40">${esc(x.note)}</span>`:'';
+ return `<article class="planning-card-v40 ${done?'is-done':planned?'is-planned':''}">
+  <div class="planning-card-check-v40">${done?'✓':planned?'◷':'○'}</div>
+  ${visual}
+  <div class="planning-card-content-v40">
+   <div class="planning-card-main-v40">
+    <div class="planning-card-title-v40"><strong>${esc(x.title)}</strong>${note}</div>
+    <div class="planning-card-meta-v40">
+     <span class="planning-date-v40 ${due.status}">📅 <b>${esc(due.label)}</b><small>${esc(due.hint)}</small></span>
+     <span>🏠 <b>${esc(propertyName(x.propertyId))}</b></span>
+     ${!isTask?`<span>🔁 <b>${esc(maintenanceIntervalLabelV041L(x.intervalMonths))}</b></span>`:''}
+     ${!isTask&&x.lastCompletedMonth?`<span class="planning-completed-v40">✓ Zuletzt erledigt <b>${esc(maintenanceMonthLabelV040L(x.lastCompletedMonth))}</b></span>`:''}
+     ${!isTask&&done&&Number(x.intervalMonths)===0&&x.completedAt?`<span class="planning-delete-info-v041l">🗑 Wird 7 Tage nach Erledigung automatisch entfernt</span>`:''}
+     ${!isTask&&Number(x.cost)>0?`<span>💶 <b>${eur(x.cost)}</b></span>`:''}
+     ${done&&x.completedByName?`<span class="planning-completed-v40">✓ Erledigt von <b>${esc(x.completedByName)}</b></span>`:''}
+    </div>
+   </div>
+   <div class="planning-card-side-v40">
+    <span class="planning-priority-v40 ${planningPriorityClassV40(priority)}">${esc(priority)} ${planningPriorityIconV40(priority)}</span>
+    <div class="planning-card-actions-v40">
+     ${done
+ ?`<span class="planning-done-badge-v40">Erledigt</span>`
+ :planned
+  ?`<span class="planning-planned-badge-v042l">Geplant bis ${esc(maintenanceMonthLabelV040L(x.due))}</span>`
+  :`<button class="primary small" onclick="completeItem('${type}',${x.id})">Erledigen</button>`}
+     <button class="danger small" onclick="deletePlanning('${type}',${x.id})">Löschen</button>
+    </div>
+   </div>
+  </div>
  </article>`;
 }
-function renderSettings(){$('#settingName').value=state.settings.name;$('#settingStartBalance').value=state.settings.startBalance;$('#settingMinimumReserve').value=state.settings.minimumReserve;$('#settingMonthlyReserve').value=state.settings.monthlyReserve}
+function renderSettings(){$('#settingName').value=state.settings.name;$('#settingStartBalance').value=state.settings.startBalance;$('#settingMinimumReserve').value=state.settings.minimumReserve;$('#settingMonthlyReserve').value=state.settings.monthlyReserve;applyThemeV38()}
 function populateSelects(){
  const opts=`<option value="all">Alle Objekte / gemeinsam</option>`+
   state.properties.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -1065,7 +1321,7 @@ function renderOwnerPropertyChoices(selected=[]){
 }
 function openOwnerModal(owner=null){const f=$('#ownerForm');f.reset();$('#ownerModalTitle').textContent=owner?'Person bearbeiten':'Person hinzufügen';f.elements.id.value=owner?.id||'';f.elements.name.value=owner?.name||'';f.elements.personType.value=owner?.personType||'Eigentümer';f.elements.ownershipShare.value=owner?.ownershipShare??0;f.elements.paymentShare.value=owner?.paymentShare??0;f.elements.role.value=owner?.role||'';f.elements.active.checked=owner?.active!==false;renderOwnerPropertyChoices(owner?.propertyIds||[]);$('#ownerModal').showModal()}
 function editOwner(id){const x=state.owners.find(x=>x.id===id);if(x)openOwnerModal(x)} function toggleOwner(id){const x=state.owners.find(x=>x.id===id);if(x){x.active=x.active===false;save()}} function deleteOwner(id){const x=state.owners.find(x=>x.id===id);if(x&&confirm(`Person „${x.name}“ wirklich entfernen?`)){state.owners=state.owners.filter(y=>y.id!==id);save()}}
-function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
+function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';if(f.elements.estimatedValue)f.elements.estimatedValue.value=x?.estimatedValue??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
 function showPhotoPreview(){const p=$('#propertyPhotoPreview');p.classList.toggle('hidden',!propertyPhotoData);p.innerHTML=propertyPhotoData?`<img src="${propertyPhotoData}" alt="Vorschau">`:''}
 function editProperty(id){const x=state.properties.find(x=>x.id===id);if(x)openPropertyModal(x)}
 function deleteProperty(id){const x=state.properties.find(x=>x.id===id);if(!x||!confirm(`Objekt „${x.name}“ löschen? Zugeordnete Planungen bleiben erhalten und werden dann als unbekannt angezeigt.`))return;state.properties=state.properties.filter(y=>y.id!==id);save()}
@@ -1087,24 +1343,75 @@ function toggleCostPaid(id){
  save();
 }
 function deleteCost(id){if(confirm('Kostenposition wirklich löschen?')){state.costPlans=state.costPlans.filter(x=>x.id!==id);save()}}
-function editReserve(id){const x=state.reserves.find(x=>x.id===id);if(!x)return;const f=$('#reserveForm');f.reset();f.dataset.editId=id;f.elements.title.value=x.title;f.elements.propertyId.value=String(x.propertyId??'all');f.elements.target.value=x.target;f.elements.saved.value=x.saved;f.elements.year.value=x.year||'';$('#reserveModal').showModal()}
 function completeItem(type,id){
  const arr=type==='task'?state.tasks:state.maintenance;
- const x=arr.find(x=>x.id===id);
- if(!x)return;
- x.status='Erledigt';
- x.completedAt=new Date().toISOString();
+ const x=arr.find(v=>Number(v.id)===Number(id));if(!x)return;
+
  const user=typeof currentAuthUserV27==='function'?currentAuthUserV27():null;
+ const tenant=typeof currentTenantV27==='function'?currentTenantV27():null;
+ const completedBy=user?.displayName||user?.username||tenant?.adminName||'Lokaler Benutzer';
+ const nowIso=new Date().toISOString();
+
+ if(type==='maintenance'){
+  const interval=Number(x.intervalMonths)||0;
+
+  if(interval>0){
+   const completedMonth=currentMonthValueV041L();
+   x.lastCompletedAt=nowIso;
+   x.lastCompletedMonth=completedMonth;
+   x.completedByName=completedBy;
+   x.completedByUserId=user?.id||'';
+   x.completedByUsername=user?.username||'';
+   x.completedByAccountId=tenant?.id||'';
+
+   // Regelmäßige Wartung: Der Rhythmus wird vom bisherigen Solltermin
+   // aus fortgeschrieben. Falls keiner vorhanden ist, ab dem Erledigungsmonat.
+   const baseMonth=/^\d{4}-\d{2}/.test(String(x.due||''))?String(x.due).slice(0,7):completedMonth;
+   x.due=addMonthsToMonthValueV041L(baseMonth,interval);
+
+   // Bis zum neuen Fälligkeitsmonat liegt sie nur als geplant vor.
+   x.status='Geplant';
+   x.activatedAt='';
+   save();
+   return;
+  }
+
+  // Einmalige Wartung bleibt 7 Tage sichtbar und wird dann entfernt.
+  x.status='Erledigt';
+  x.completedAt=nowIso;
+  x.completedMonth=currentMonthValueV041L();
+  x.completedByName=completedBy;
+  x.completedByUserId=user?.id||'';
+  x.completedByUsername=user?.username||'';
+  x.completedByAccountId=tenant?.id||'';
+  save();
+  return;
+ }
+
+ x.status='Erledigt';
+ x.completedAt=nowIso;
+ x.completedByName=completedBy;
  x.completedByUserId=user?.id||'';
- x.completedByName=user?.displayName||user?.username||'Lokaler Benutzer';
+ x.completedByUsername=user?.username||'';
+ x.completedByAccountId=tenant?.id||'';
  save();
 }
 function deletePlanning(type,id){if(!confirm('Eintrag wirklich löschen?'))return;const key=type==='task'?'tasks':type==='maintenance'?'maintenance':'reserves';state[key]=state[key].filter(x=>x.id!==id);save()}
 function openLoan(){const f=$('#loanForm'),l=state.loan;Object.keys(l).forEach(k=>{if(!f.elements[k])return;if(f.elements[k].type==='checkbox')f.elements[k].checked=Boolean(l[k]);else f.elements[k].value=l[k]??''});$('#loanModal').showModal()}
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',owners:'Personen',tasks:'Planung',settings:'Einstellungen'};$('#pageTitle').textContent=titles[name]||'Hausverwaltung';window.scrollTo({top:0,behavior:'smooth'})}
 $$('.bottom-nav .nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.target)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.go)));$$('[data-modal]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.modal;if(m==='ownerModal')openOwnerModal();else if(m==='propertyModal'){if((state.properties||[]).length>=5){alert('Es können maximal 5 Objekte angelegt werden.');return}openPropertyModal();}else if(m==='costModal')openCostModal();else if(m==='loanModal')openLoan();else document.getElementById(m).showModal()}));
-$$('[data-task-tab]').forEach(b=>b.addEventListener('click',()=>{activePlanningTab=b.dataset.taskTab;$$('[data-task-tab]').forEach(x=>x.classList.toggle('active',x===b));$('#taskList').classList.toggle('hidden',activePlanningTab!=='tasks');$('#maintenanceList').classList.toggle('hidden',activePlanningTab!=='maintenance');$('#reserveList').classList.toggle('hidden',activePlanningTab!=='reserves');$('#planningAddBtn').textContent=activePlanningTab==='tasks'?'+ Aufgabe':activePlanningTab==='maintenance'?'+ Wartung':'+ Rücklage'}));
-$('#planningAddBtn').addEventListener('click',()=>document.getElementById(activePlanningTab==='tasks'?'taskModal':activePlanningTab==='maintenance'?'maintenanceModal':'reserveModal').showModal());
+$$('[data-task-tab]').forEach(b=>b.addEventListener('click',()=>{
+ activePlanningTab=b.dataset.taskTab;
+ $$('[data-task-tab]').forEach(x=>x.classList.toggle('active',x===b));
+ $('#taskList').classList.toggle('hidden',activePlanningTab!=='tasks');
+ $('#maintenanceList').classList.toggle('hidden',activePlanningTab!=='maintenance');
+ $('#planningAddBtn').innerHTML=activePlanningTab==='tasks'?'<span>+ Aufgabe hinzufügen</span>':'<span>+ Wartung hinzufügen</span>';
+ renderTasks();
+}));
+$('#planningAddBtn').addEventListener('click',()=>{
+ const modal=document.getElementById(activePlanningTab==='tasks'?'taskModal':'maintenanceModal');
+ if(modal)modal.showModal();
+});
 $('#wastePrev').addEventListener('click',()=>changeWasteMonth(-1));
 $('#wasteNext').addEventListener('click',()=>changeWasteMonth(1));
 $('#wasteDateSave').addEventListener('click',saveWasteDateSelections);
@@ -1139,7 +1446,7 @@ $('#vehicleForm').addEventListener('submit',async e=>{
   catch{alert('Das Fahrzeugfoto konnte nicht verarbeitet werden.');return}
  }
  const data={
-  make:String(f.get('make')||'').trim(),model:String(f.get('model')||'').trim(),
+  make:String(f.get('make')||'').trim(),model:String(f.get('model')||'').trim(),estimatedValue:Number(f.get('estimatedValue'))||0,
   plate:String(f.get('plate')||'').trim(),year:f.get('year'),fuel:f.get('fuel'),
   currentKm:Number(f.get('currentKm'))||0,lastOilDate:f.get('lastOilDate'),
   lastOilKm:Number(f.get('lastOilKm'))||0,nextOilDate:f.get('nextOilDate'),
@@ -1162,7 +1469,13 @@ $('#vehicleForm').addEventListener('submit',async e=>{
  form.elements.id.value=''; updateVehiclePhotoPreviewV31('');
  $('#vehicleModal').close(); save();
 });
-$('#vehicleServiceForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),vehicleId=Number(f.get('vehicleId'));const entry={id:Date.now(),vehicleId,date:f.get('date'),km:Number(f.get('km'))||0,type:f.get('type'),cost:Number(f.get('cost'))||0,note:f.get('note').trim()};state.vehicleServices.push(entry);const v=state.vehicles.find(x=>Number(x.id)===vehicleId);if(v){if(entry.km)v.currentKm=Math.max(Number(v.currentKm)||0,entry.km);if(entry.type==='Ölwechsel'){v.lastOilDate=entry.date;v.lastOilKm=entry.km;if(entry.km&&!v.nextOilKm)v.nextOilKm=entry.km+15000}}e.target.reset();$('#vehicleServiceModal').close();save()});
+$('#vehicleServiceForm').addEventListener('submit',async e=>{
+ e.preventDefault();const f=new FormData(e.target),vehicleId=Number(f.get('vehicleId'));let attachment=null;const file=f.get('attachment');
+ if(file&&file.size){if(file.size>3000000){alert('Datei ist größer als 3 MB.');return}try{attachment={name:file.name,type:file.type,data:String(file.type||'').startsWith('image/')?await imageFileToDataUrlV31(file,1400,1000,.8):await fileToDataUrlV37(file)}}catch{alert('Datei konnte nicht gespeichert werden.');return}}
+ const entry={id:Date.now(),vehicleId,date:f.get('date'),km:Number(f.get('km'))||0,type:f.get('type'),cost:Number(f.get('cost'))||0,workshop:String(f.get('workshop')||'').trim(),attachment,note:String(f.get('note')||'').trim()};
+ state.vehicleServices.push(entry);const v=state.vehicles.find(x=>Number(x.id)===vehicleId);if(v){if(entry.km)v.currentKm=Math.max(Number(v.currentKm)||0,entry.km);if(entry.type==='Ölwechsel'){v.lastOilDate=entry.date;v.lastOilKm=entry.km;if(entry.km&&!v.nextOilKm)v.nextOilKm=entry.km+15000}}
+ e.target.reset();$('#vehicleServiceModal').close();save();
+});
 
 window.editRenovationV37=editRenovationV37;
 window.toggleRenovationStatusV37=toggleRenovationStatusV37;
@@ -1174,7 +1487,20 @@ $('#renovationForm')?.addEventListener('submit',async e=>{
  const existing=id?p.renovationCosts.find(x=>Number(x.id)===id):null;
  let attachments=Array.isArray(existing?.attachments)?[...existing.attachments]:[];
  try{const added=await renovationFilesV37(f.getAll('attachments').filter(x=>x&&x.size));attachments=[...attachments,...added].slice(0,10)}catch(err){alert(err.message||'Eine Datei konnte nicht gespeichert werden.');return}
- const data={title:String(f.get('title')||'').trim(),category:String(f.get('category')||'Sonstiges'),amount:Number(f.get('amount'))||0,status:String(f.get('status')||'paid'),month:f.get('month')||'',company:String(f.get('company')||'').trim(),note:String(f.get('note')||'').trim(),attachments,updatedAt:new Date().toISOString()};
+ const data={
+ title:String(f.get('title')||'').trim(),
+ category:String(f.get('category')||'Sonstiges'),
+ plannedAmount:Number(f.get('plannedAmount'))||Number(f.get('amount'))||0,
+ amount:Number(f.get('amount'))||0,
+ status:String(f.get('status')||'paid'),
+ month:f.get('month')||'',
+ workType:String(f.get('workType')||'Fachfirma'),
+ company:String(f.get('company')||'').trim(),
+ companyRating:String(f.get('companyRating')||''),
+ note:String(f.get('note')||'').trim(),
+ attachments,
+ updatedAt:new Date().toISOString()
+};
  if(existing)Object.assign(existing,data);else p.renovationCosts.push({id:Date.now(),createdAt:new Date().toISOString(),...data});
  form.reset();$('#renovationModal').close();save();
 });
@@ -1184,7 +1510,7 @@ $('#propertyForm').addEventListener('submit',e=>{
  if(!id&&(state.properties||[]).length>=5){alert('Es können maximal 5 Objekte angelegt werden.');return}
  const existing=id?state.properties.find(x=>x.id===id):null;
  const data={
-  name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),
+  name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),estimatedValue:Number(f.get('estimatedValue'))||0,
   plotArea:f.get('plotArea')===''?'':Number(f.get('plotArea')),constructionYear:f.get('constructionYear'),
   rooms:f.get('rooms')===''?'':Number(f.get('rooms')),bathrooms:f.get('bathrooms')===''?'':Number(f.get('bathrooms')),
   toilets:f.get('toilets')===''?'':Number(f.get('toilets')),usage:f.get('usage'),
@@ -1228,8 +1554,34 @@ $('#taskForm').addEventListener('submit',async e=>{
  state.tasks.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),priority:f.get('priority'),status:'Offen',completedAt:'',completedByUserId:'',completedByName:'',photo});
  form.reset();updateTaskPhotoPreviewV35('');$('#taskModal').close();save();
 });
-$('#maintenanceForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.maintenance.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),intervalMonths:Number(f.get('intervalMonths')),owner:f.get('owner'),cost:Number(f.get('cost')),status:'Offen'});e.target.reset();$('#maintenanceModal').close();save()});
-$('#reserveForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(e.target.dataset.editId),data={title:f.get('title'),propertyId:f.get('propertyId'),target:Number(f.get('target')),saved:Number(f.get('saved')),year:Number(f.get('year'))||''};if(id){Object.assign(state.reserves.find(x=>x.id===id),data);delete e.target.dataset.editId}else state.reserves.push({id:Date.now(),...data});e.target.reset();$('#reserveModal').close();save()});
+$$('[data-planning-filter]').forEach(b=>b.addEventListener('click',()=>{
+ planningFilterV40=b.dataset.planningFilter;
+ $$('[data-planning-filter]').forEach(x=>x.classList.toggle('active',x===b));
+ renderTasks();
+}));
+$('#maintenanceTypeSelect')?.addEventListener('change',e=>{
+ const custom=e.target.value==='__custom__';
+ $('#customMaintenanceWrap')?.classList.toggle('hidden',!custom);
+ if(custom)setTimeout(()=>$('#customMaintenanceTitle')?.focus(),50);
+});
+$('#maintenanceForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const form=e.target,f=new FormData(form);
+ const type=String(f.get('maintenanceType')||'').trim();
+ const custom=String(f.get('customTitle')||'').trim();
+ const title=type==='__custom__'?custom:type;
+ if(!title){alert('Bitte eine Wartungsart auswählen oder eine eigene Wartung eingeben.');return}
+ state.maintenance.push({
+  id:Date.now(),title,maintenanceType:type,propertyId:f.get('propertyId'),
+  due:f.get('due'),intervalMonths:(f.get('intervalMonths')===''?12:Number(f.get('intervalMonths'))),
+  priority:f.get('priority')||'Mittel',cost:Number(f.get('cost'))||0,
+  note:String(f.get('note')||'').trim(),status:'Offen'
+ });
+ form.reset();
+ $('#customMaintenanceWrap')?.classList.add('hidden');
+ $('#maintenanceModal').close();
+ save();
+});
 $('#saveSettings').addEventListener('click',()=>{state.settings={name:$('#settingName').value,startBalance:Number($('#settingStartBalance').value),minimumReserve:Number($('#settingMinimumReserve').value),monthlyReserve:Number($('#settingMonthlyReserve').value)};save();alert('Gespeichert')});
 $('#exportBtn').addEventListener('click',()=>{
  const payload={...state,_backupInfo:{version:22,exportedAt:new Date().toISOString(),storage:'IndexedDB'}};
@@ -1290,4 +1642,14 @@ document.getElementById('setupTenantForm')?.addEventListener('submit',async e=>{
 document.getElementById('logoutBtn')?.addEventListener('click',logoutV27);
 document.getElementById('addTenantUserBtn')?.addEventListener('click',()=>openTenantUserModalV27());
 document.getElementById('tenantUserForm')?.addEventListener('submit',async e=>{e.preventDefault();try{await saveTenantUserV27(e.target);$('#tenantUserModal').close()}catch(x){alert(x.message)}});
+
+window.openPropertyDocumentV38=openPropertyDocumentV38;window.deletePropertyDocumentV38=deletePropertyDocumentV38;
+$('#propertyDocumentForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();const f=new FormData(e.target),p=state.properties.find(x=>Number(x.id)===Number(f.get('propertyId')));if(!p)return;const file=f.get('file');if(!file||!file.size)return;if(file.size>3000000){alert('Datei ist größer als 3 MB.');return}
+ let data;try{data=String(file.type||'').startsWith('image/')?await imageFileToDataUrlV31(file,1500,1100,.82):await fileToDataUrlV37(file)}catch{alert('Datei konnte nicht gespeichert werden.');return}
+ p.documents=Array.isArray(p.documents)?p.documents:[];p.documents.push({id:Date.now(),title:String(f.get('title')||'').trim(),category:f.get('category'),month:f.get('month'),name:file.name,type:file.type,data});e.target.reset();$('#propertyDocumentModal').close();save();
+});
+$('#dashboardWidgetChoices')?.addEventListener('change',e=>{const k=e.target?.dataset?.widgetChoice;if(!k)return;state.settings.dashboardWidgets={...(state.settings.dashboardWidgets||{}),[k]:e.target.checked};save()});
+$('#darkModeToggle')?.addEventListener('change',e=>{state.settings.darkMode=e.target.checked;save()});
+
 Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24,editTenantUserV27,deleteTenantUserV27,toggleCostPaid,openRenovationModalV35,deleteRenovationV35});render();applyUiLanguage();bootstrapAuthV27();
