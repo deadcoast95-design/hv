@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – Objektübersicht V13",
+  "name": "Private Immobilienverwaltung – Fahrzeugübersicht",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit robuster Objektübersicht auf dem Dashboard",
+  "description": "Lokale Immobilienverwaltung mit Fahrzeugübersicht und symmetrischer Navigation",
   "icons": [
     {
       "src": "icon.svg",

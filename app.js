@@ -1,5 +1,5 @@
-const KEY='hausverwaltung_pwa_v13';
-const OLD_KEYS=['hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
+const KEY='hausverwaltung_pwa_v15';
+const OLD_KEYS=['hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 const categories=['Einzahlung Eigentümer','Kredit','Strom','Wasser','Internet','Versicherung','Grundsteuer','Müll','Wartung','Reparatur','Rücklage','Sanierung','Sonstiges'];
 const seed={
  settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600},
@@ -7,7 +7,7 @@ const seed={
  properties:[{id:1,name:'Haus 1',address:'',area:159,usage:'Eigennutzung',photo:''},{id:2,name:'Haus 2',address:'',area:152,usage:'Mietfreie Überlassung',photo:''}],
  loan:{bank:'',original:0,remaining:0,interest:0,monthlyPayment:0,startDate:'2024-01-01',fixedUntil:'2034-01-01',extraPayment:0,autoCalculate:true,balanceDate:''},
  costPlans:[{id:1,category:'Kredit',name:'Kreditrate',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3},{id:2,category:'Versicherung',name:'Gebäudeversicherung',propertyId:'all',amount:0,interval:'yearly',note:'',splitCount:3},{id:3,category:'Grundsteuer',name:'Grundsteuer',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:4,category:'Strom',name:'Strom Haus 1',propertyId:1,amount:0,interval:'monthly',note:'',splitCount:3},{id:5,category:'Strom',name:'Strom Haus 2',propertyId:2,amount:0,interval:'monthly',note:'',splitCount:3},{id:6,category:'Wasser',name:'Wasser / Abwasser',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:7,category:'Internet',name:'Internet',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3}],
- transactions:[],wasteDates:[],tasks:[],maintenance:[{id:1,title:'Wärmepumpe warten',propertyId:1,due:'',intervalMonths:12,owner:'Gemeinsam',cost:0,status:'Offen'}],reserves:[{id:1,title:'Dach',propertyId:'all',target:30000,saved:0,year:2035},{id:2,title:'Fassade',propertyId:'all',target:20000,saved:0,year:2027},{id:3,title:'Keller / Sockel',propertyId:'all',target:10000,saved:0,year:2027}]
+ transactions:[],wasteDates:[],vehicles:[],vehicleServices:[],tasks:[],maintenance:[{id:1,title:'Wärmepumpe warten',propertyId:1,due:'',intervalMonths:12,owner:'Gemeinsam',cost:0,status:'Offen'}],reserves:[{id:1,title:'Dach',propertyId:'all',target:30000,saved:0,year:2035},{id:2,title:'Fassade',propertyId:'all',target:20000,saved:0,year:2027},{id:3,title:'Keller / Sockel',propertyId:'all',target:10000,saved:0,year:2027}]
 };
 let state=load();
 let deferredPrompt=null;
@@ -38,6 +38,8 @@ function migrate(data){
  heatingType:x.heatingType||'',
  notes:x.notes||''
 }));
+ d.vehicles=Array.isArray(data.vehicles)?data.vehicles:[];
+ d.vehicleServices=Array.isArray(data.vehicleServices)?data.vehicleServices:[];
  d.transactions=Array.isArray(data.transactions)?data.transactions:[];
  d.tasks=(data.tasks||[]).map(x=>({...x,propertyId:x.propertyId??'all'}));
  d.maintenance=(data.maintenance||[]).map(x=>({...x,propertyId:x.propertyId??'all',intervalMonths:x.intervalMonths||12,cost:Number(x.cost)||0}));
@@ -138,6 +140,8 @@ function render(){
  runModule('Auswahllisten',populateSelects);
  runModule('Übersicht',renderDashboard);
  runModule('Objektübersicht',renderDashboardProperties);
+ runModule('Fahrzeuge',renderVehicles);
+ runModule('Fahrzeugübersicht',renderDashboardVehicles);
  runModule('Buchungen',renderTransactions);
  runModule('Kostenplan',renderCosts);
  runModule('Objekte',renderProperties);
@@ -178,6 +182,82 @@ function renderDashboardProperties(){
   </div>
  </article>`).join('');
 }
+
+function vehicleName(v){return [v.make,v.model].filter(Boolean).join(' ')||'Fahrzeug'}
+function km(v){return Number(v||0).toLocaleString('de-DE')+' km'}
+function serviceDueStatus(v){
+ const current=Number(v.currentKm)||0,next=Number(v.nextOilKm)||0;
+ if(!next)return {text:'Kein Intervall',cls:'service-neutral'};
+ if(current>=next)return {text:'Ölwechsel fällig',cls:'service-due'};
+ if(next-current<=1000)return {text:'Bald fällig',cls:'service-soon'};
+ return {text:'In Ordnung',cls:'service-ok'};
+}
+function renderVehicles(){
+ const list=$('#vehicleList');if(!list)return;
+ list.innerHTML=(state.vehicles||[]).length?state.vehicles.map(v=>{
+  const status=serviceDueStatus(v);
+  const services=(state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const last=services[0];
+  return `<article class="vehicle-card"><div class="vehicle-placeholder">🚗</div><div class="vehicle-body">
+   <div class="card-top"><span class="tag">${esc(v.plate||'Kein Kennzeichen')}</span><span class="vehicle-status ${status.cls}">${status.text}</span></div>
+   <h3>${esc(vehicleName(v))}</h3><p>${esc(v.year||'Baujahr unbekannt')} · ${esc(v.fuel||'Antrieb unbekannt')}</p>
+   <div class="vehicle-kpis"><div><span>Kilometerstand</span><strong>${km(v.currentKm)}</strong></div><div><span>Letzter Ölwechsel</span><strong>${v.lastOilDate?dateDE(v.lastOilDate):'–'}</strong><small>${v.lastOilKm?km(v.lastOilKm):''}</small></div><div><span>Nächster Ölwechsel</span><strong>${v.nextOilKm?km(v.nextOilKm):'–'}</strong><small>${v.nextOilDate?dateDE(v.nextOilDate):''}</small></div><div><span>HU / TÜV bis</span><strong>${v.tuvDate?dateDE(v.tuvDate):'–'}</strong></div></div>
+   <div class="vehicle-info-grid"><div><span>Motoröl</span><strong>${esc(v.oilSpec||'–')}</strong></div><div><span>Reifen</span><strong>${esc(v.tires||'–')}</strong></div><div><span>Bremsen zuletzt</span><strong>${v.brakesDate?dateDE(v.brakesDate):'–'}</strong></div><div><span>Batterie zuletzt</span><strong>${v.batteryDate?dateDE(v.batteryDate):'–'}</strong></div></div>
+   ${last?`<div class="last-service"><span>Letzter Werkstatteintrag</span><strong>${dateDE(last.date)} · ${esc(last.type)}</strong><small>${last.km?km(last.km):''}${last.cost?` · ${eur(last.cost)}`:''}</small></div>`:''}
+   <div class="card-actions"><button class="secondary small" onclick="editVehicle(${v.id})">Bearbeiten</button><button class="secondary small" onclick="openServiceModal(${v.id})">+ Wartung</button><button class="danger small" onclick="deleteVehicle(${v.id})">Löschen</button></div>
+  </div></article>`;
+ }).join(''):'<div class="empty">Noch keine Fahrzeuge angelegt</div>';
+}
+function openVehicleModal(v=null){const f=$('#vehicleForm');f.reset();$('#vehicleModalTitle').textContent=v?'Fahrzeug bearbeiten':'Fahrzeug hinzufügen';f.elements.id.value=v?.id||'';['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','tuvDate','oilSpec','tires','brakesDate','batteryDate','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});$('#vehicleModal').showModal()}
+function editVehicle(id){const v=state.vehicles.find(x=>Number(x.id)===Number(id));if(v)openVehicleModal(v)}
+function deleteVehicle(id){const v=state.vehicles.find(x=>Number(x.id)===Number(id));if(v&&confirm(`Fahrzeug „${vehicleName(v)}“ wirklich löschen?`)){state.vehicles=state.vehicles.filter(x=>Number(x.id)!==Number(id));state.vehicleServices=(state.vehicleServices||[]).filter(x=>Number(x.vehicleId)!==Number(id));save()}}
+function openServiceModal(vehicleId){const v=state.vehicles.find(x=>Number(x.id)===Number(vehicleId));if(!v)return;const f=$('#vehicleServiceForm');f.reset();f.elements.vehicleId.value=vehicleId;$('#vehicleServiceTitle').textContent='Wartung – '+vehicleName(v);$('#vehicleServiceModal').showModal()}
+
+
+function nextVehicleServiceInfo(v){
+ const services=(state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const current=Number(v.currentKm)||0;
+ const nextOilKm=Number(v.nextOilKm)||0;
+ const kmRemaining=nextOilKm?Math.max(0,nextOilKm-current):null;
+ const nextItems=[];
+ if(v.nextOilDate||nextOilKm){
+  nextItems.push({
+   type:'Ölwechsel',
+   text:[v.nextOilDate?dateDE(v.nextOilDate):'',nextOilKm?km(nextOilKm):''].filter(Boolean).join(' · '),
+   detail:kmRemaining!==null?`${kmRemaining.toLocaleString('de-DE')} km verbleibend`:''
+  });
+ }
+ if(v.tuvDate)nextItems.push({type:'HU / TÜV',text:dateDE(v.tuvDate),detail:''});
+ if(v.brakesDate)nextItems.push({type:'Bremsen zuletzt',text:dateDE(v.brakesDate),detail:'Kontrolle nach Bedarf'});
+ if(v.batteryDate)nextItems.push({type:'Batterie zuletzt',text:dateDE(v.batteryDate),detail:'Kontrolle nach Bedarf'});
+ const recentOther=services.filter(s=>s.type!=='Ölwechsel').slice(0,3).map(s=>({type:s.type,text:dateDE(s.date),detail:s.note||''}));
+ return [...nextItems,...recentOther].slice(0,5);
+}
+function renderDashboardVehicles(){
+ const box=$('#dashboardVehicleOverview');if(!box)return;
+ const vehicles=Array.isArray(state.vehicles)?state.vehicles:[];
+ if(!vehicles.length){box.innerHTML='<div class="empty">Noch keine Fahrzeuge angelegt</div>';return}
+ box.innerHTML=vehicles.map(v=>{
+  const items=nextVehicleServiceInfo(v);
+  return `<article class="dashboard-vehicle-card">
+   <div class="dashboard-vehicle-head">
+    <div class="vehicle-icon">🚗</div>
+    <div><h3>${esc(vehicleName(v))}</h3><p>${esc(v.plate||'Kein Kennzeichen')}</p></div>
+   </div>
+   <div class="dashboard-vehicle-details">
+    <div><span>Marke / Modell</span><strong>${esc(vehicleName(v))}</strong></div>
+    <div><span>Kennzeichen</span><strong>${esc(v.plate||'–')}</strong></div>
+    <div><span>Kilometerstand</span><strong>${km(v.currentKm)}</strong></div>
+    <div><span>Nächster Ölwechsel</span><strong>${v.nextOilDate?dateDE(v.nextOilDate):(v.nextOilKm?km(v.nextOilKm):'–')}</strong><small>${v.nextOilKm?km(v.nextOilKm):''}</small></div>
+   </div>
+   <div class="next-maintenance-list">
+    <strong>Nächste Wartungen / Informationen</strong>
+    ${items.length?items.map(item=>`<div class="maintenance-info-row"><span>${esc(item.type)}</span><strong>${esc(item.text||'–')}</strong>${item.detail?`<small>${esc(item.detail)}</small>`:''}</div>`).join(''):'<div class="empty small-empty">Keine weiteren Wartungsinformationen</div>'}
+   </div>
+  </article>`;
+ }).join('');
+}
+
 function renderDashboard(){
  const monthlyCosts=plannedMonthly(),monthlyIncome=plannedMonthlyIncome(),monthNet=projectedMonthlyBalance();
  $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
@@ -189,6 +269,8 @@ function renderDashboard(){
 
 
  renderDashboardProperties();
+
+ renderDashboardVehicles();
 });
 const combined=plannedCostMonthly();
 $('#dashboardObjectCosts').innerHTML=[
@@ -327,6 +409,10 @@ $('#wasteDateSave').addEventListener('click',saveWasteDateSelections);
 $('#transactionForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.transactions.push({id:Date.now(),type:f.get('type'),category:f.get('category'),propertyId:f.get('propertyId'),description:f.get('description'),amount:Number(f.get('amount')),date:f.get('date')});e.target.reset();$('#transactionModal').close();save()});
 $('#costForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),personIds=f.getAll('personIds').map(Number);if(!personIds.length){alert('Bitte mindestens eine aktive Person auswählen.');return}const data={category:f.get('category'),name:f.get('name'),personIds,splitCount:personIds.length,propertyId:f.get('propertyId'),amount:Number(f.get('amount')),interval:f.get('interval'),note:f.get('note')};if(id)Object.assign(state.costPlans.find(x=>x.id===id),data);else state.costPlans.push({id:Date.now(),...data});e.target.reset();$('#costModal').close();save()});
 $('#loanForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.loan={bank:f.get('bank'),original:Number(f.get('original')),remaining:Number(f.get('remaining')),balanceDate:f.get('balanceDate'),interest:Number(f.get('interest')),monthlyPayment:Number(f.get('monthlyPayment')),startDate:f.get('startDate'),fixedUntil:f.get('fixedUntil'),extraPayment:Number(f.get('extraPayment')),autoCalculate:f.get('autoCalculate')==='on'};$('#loanModal').close();save()});
+
+$('#vehicleForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id'));const data={make:f.get('make').trim(),model:f.get('model').trim(),plate:f.get('plate').trim(),year:f.get('year'),fuel:f.get('fuel'),currentKm:Number(f.get('currentKm'))||0,lastOilDate:f.get('lastOilDate'),lastOilKm:Number(f.get('lastOilKm'))||0,nextOilDate:f.get('nextOilDate'),nextOilKm:Number(f.get('nextOilKm'))||0,tuvDate:f.get('tuvDate'),oilSpec:f.get('oilSpec').trim(),tires:f.get('tires').trim(),brakesDate:f.get('brakesDate'),batteryDate:f.get('batteryDate'),notes:f.get('notes').trim()};if(id)Object.assign(state.vehicles.find(x=>Number(x.id)===id),data);else state.vehicles.push({id:Date.now(),...data});e.target.reset();$('#vehicleModal').close();save()});
+$('#vehicleServiceForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),vehicleId=Number(f.get('vehicleId'));const entry={id:Date.now(),vehicleId,date:f.get('date'),km:Number(f.get('km'))||0,type:f.get('type'),cost:Number(f.get('cost'))||0,note:f.get('note').trim()};state.vehicleServices.push(entry);const v=state.vehicles.find(x=>Number(x.id)===vehicleId);if(v){if(entry.km)v.currentKm=Math.max(Number(v.currentKm)||0,entry.km);if(entry.type==='Ölwechsel'){v.lastOilDate=entry.date;v.lastOilKm=entry.km;if(entry.km&&!v.nextOilKm)v.nextOilKm=entry.km+15000}}e.target.reset();$('#vehicleServiceModal').close();save()});
+
 $('#propertyForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),data={name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),plotArea:f.get('plotArea')===''?'':Number(f.get('plotArea')),constructionYear:f.get('constructionYear'),rooms:f.get('rooms')===''?'':Number(f.get('rooms')),bathrooms:f.get('bathrooms')===''?'':Number(f.get('bathrooms')),toilets:f.get('toilets')===''?'':Number(f.get('toilets')),usage:f.get('usage'),energyClass:f.get('energyClass'),heatingType:f.get('heatingType'),electricityMeter:f.get('electricityMeter')===''?'':Number(f.get('electricityMeter')),waterMeter:f.get('waterMeter')===''?'':Number(f.get('waterMeter')),meterReadingDate:f.get('meterReadingDate'),notes:f.get('notes'),photo:propertyPhotoData};if(id)Object.assign(state.properties.find(x=>x.id===id),data);else state.properties.push({id:Date.now(),...data});e.target.reset();propertyPhotoData='';$('#propertyModal').close();save()});
 $('#propertyForm').elements.photo.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>2_500_000){alert('Das Foto ist zu groß. Bitte ein Foto unter etwa 2,5 MB verwenden.');e.target.value='';return}const r=new FileReader();r.onload=()=>{propertyPhotoData=r.result;showPhotoPreview()};r.readAsDataURL(file)});
 $('#ownerForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id'));if(!id&&state.owners.length>=5){alert('Maximal fünf Personen.');return}const data={name:f.get('name').trim(),personType:f.get('personType'),ownershipShare:Number(f.get('ownershipShare')),paymentShare:Number(f.get('paymentShare')),role:f.get('role').trim(),propertyIds:f.getAll('propertyIds').map(String),active:f.get('active')==='on'};if(id)Object.assign(state.owners.find(x=>x.id===id),data);else state.owners.push({id:Date.now(),...data});state.owners=state.owners.slice(0,5).map((owner,index)=>({...owner,personNumber:index+1}));e.target.reset();$('#ownerModal').close();save()});
@@ -340,4 +426,4 @@ $('#resetBtn').addEventListener('click',()=>{if(confirm('Wirklich alle lokalen D
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').classList.remove('hidden')});$('#installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').classList.add('hidden')});
 $$('button[value="cancel"]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();b.closest('dialog').close()}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
-Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste});render();
+Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal});render();

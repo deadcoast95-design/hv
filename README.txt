@@ -1,8 +1,8 @@
-VERSION 13 LOKAL
+VERSION 15 LOKAL
 
-FEHLERBEHEBUNG:
-- Objektübersicht auf der Startseite rendert jetzt über ein eigenes, unabhängiges Modul.
-- Dadurch blockiert ein Fehler in einem anderen Bereich die Objektkarten nicht mehr.
-- Foto und alle Objektinformationen werden angezeigt.
-- Auf der Startseite bleiben die Objektkarten reine Information ohne Bearbeiten/Löschen.
-- Bestehende Daten aus Version 12 werden übernommen.
+NEU:
+- Fahrzeugübersicht auf der Startseite.
+- Marke/Modell, Kennzeichen, Kilometerstand, nächster Ölwechsel.
+- Nächste Wartungen und wichtige Fahrzeuginformationen.
+- Untere Navigation gleichmäßig und symmetrisch verteilt.
+- Alle bisherigen Daten werden übernommen.
