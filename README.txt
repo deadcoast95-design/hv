@@ -1,18 +1,21 @@
-VERSION 35.1 – AUSWAHLLISTEN FIX
+VERSION 36 – FAHRZEUGWARTUNG
 
-Behoben:
-- In V35 wurde „Buchungen“ komplett entfernt.
-- Die Auswahllisten-Funktion griff trotzdem noch auf das entfernte Feld „transactionCategory“ zu.
-- Dadurch erschien die Warnung „Auswahllisten konnte nicht vollständig geladen werden.“
+Weitere Wartung bei Fahrzeug hinzufügen/bearbeiten:
 
-V35.1:
-- Das entfernte Buchungsfeld wird nur noch angesprochen, wenn es wirklich existiert.
-- Das alte Buchungs-Render-Modul wird nicht mehr geladen.
-- Objekt-, Aufgaben-, Wartungs- und Kostenplan-Auswahllisten bleiben funktionsfähig.
+HU / TÜV:
+- nur Monat + Jahr
 
-Alle V35-Funktionen bleiben bestehen:
-- Aufgabenfoto
-- Konto nur als Kostenplan
-- max. 5 Objekte
-- Zählerhistorie
-- Sanierungskosten pro Objekt
+Reifen:
+- Auswahl: Neu / Mäßig / Müssen ersetzt werden
+
+Bremsen:
+- zuletzt gewechselt: Monat + Jahr
+- nächster Wechsel: Monat + Jahr
+
+Batterie:
+- zuletzt gewechselt: Monat + Jahr
+- nächster Wechsel: Monat + Jahr
+
+Die Fahrzeugkarte zeigt sowohl die letzten als auch die nächsten Wechseltermine.
+Auf der Startseite erscheinen die nächsten Wartungen ebenfalls.
+Alte Tagesdaten werden beim Bearbeiten automatisch auf Monat/Jahr reduziert.

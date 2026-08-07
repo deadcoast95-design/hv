@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – V35.1 Fix",
+  "name": "Private Immobilienverwaltung – V36 Fahrzeugwartung",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "V35.1 mit reparierten Auswahllisten",
+  "description": "Hausverwaltung mit erweiterten Fahrzeug-Wartungsdaten",
   "icons": [
     {
       "src": "icon.svg",

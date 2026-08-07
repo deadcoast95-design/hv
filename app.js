@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v351';
+const KEY='hausverwaltung_pwa_v36';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -643,6 +643,19 @@ function updateVehiclePhotoPreviewV31(photo){
 
 function vehicleName(v){return [v.make,v.model].filter(Boolean).join(' ')||'Fahrzeug'}
 function km(v){return Number(v||0).toLocaleString('de-DE')+' km'}
+
+function monthValueV36(value){
+ const raw=String(value||'');
+ const m=raw.match(/^(\d{4})-(\d{2})/);
+ return m?`${m[1]}-${m[2]}`:'';
+}
+function monthYearLabelV36(value){
+ const raw=monthValueV36(value);
+ if(!raw)return '–';
+ const [year,month]=raw.split('-');
+ return `${month}/${year}`;
+}
+
 function serviceDueStatus(v){
  const current=Number(v.currentKm)||0,next=Number(v.nextOilKm)||0;
  if(!next)return {text:uiText('noInterval'),cls:'service-neutral'};
@@ -660,8 +673,20 @@ function renderVehicles(){
   return `<article class="vehicle-card">${v.photo?`<img class="vehicle-photo" src="${v.photo}" alt="${esc(vehicleName(v))}">`:`<div class="vehicle-placeholder">🚗</div>`}<div class="vehicle-body">
    <div class="card-top"><span class="tag">${esc(v.plate||uiText('noPlate'))}</span><span class="vehicle-status ${status.cls}">${status.text}</span></div>
    <h3>${esc(vehicleName(v))}</h3><p>${esc(v.year||uiText('unknownYear'))} · ${esc(v.fuel?fuelLabel(v.fuel):uiText('unknownFuel'))}</p>
-   <div class="vehicle-kpis"><div><span>${uiText('mileage')}</span><strong>${km(v.currentKm)}</strong></div><div><span>${uiText('lastOil')}</span><strong>${v.lastOilDate?dateDE(v.lastOilDate):'–'}</strong><small>${v.lastOilKm?km(v.lastOilKm):''}</small></div><div><span>${uiText('nextOil')}</span><strong>${v.nextOilKm?km(v.nextOilKm):'–'}</strong><small>${v.nextOilDate?dateDE(v.nextOilDate):''}</small></div><div><span>${uiText('tuvDue')}</span><strong>${v.tuvDate?dateDE(v.tuvDate):'–'}</strong></div></div>
-   <div class="vehicle-info-grid"><div><span>${uiText('motorOil')}</span><strong>${esc(v.oilSpec||'–')}</strong></div><div><span>${uiText('tires')}</span><strong>${esc(v.tires||'–')}</strong></div><div><span>${uiText('brakesLast')}</span><strong>${v.brakesDate?dateDE(v.brakesDate):'–'}</strong></div><div><span>${uiText('batteryLast')}</span><strong>${v.batteryDate?dateDE(v.batteryDate):'–'}</strong></div></div>
+   <div class="vehicle-kpis">
+    <div><span>${uiText('mileage')}</span><strong>${km(v.currentKm)}</strong></div>
+    <div><span>${uiText('lastOil')}</span><strong>${v.lastOilDate?dateDE(v.lastOilDate):'–'}</strong><small>${v.lastOilKm?km(v.lastOilKm):''}</small></div>
+    <div><span>${uiText('nextOil')}</span><strong>${v.nextOilKm?km(v.nextOilKm):'–'}</strong><small>${v.nextOilDate?dateDE(v.nextOilDate):''}</small></div>
+    <div><span>HU / TÜV bis</span><strong>${monthYearLabelV36(v.tuvDate)}</strong></div>
+   </div>
+   <div class="vehicle-info-grid vehicle-maintenance-grid">
+    <div><span>Motoröl</span><strong>${esc(v.oilSpec||'–')}</strong></div>
+    <div><span>Reifen Zustand</span><strong>${esc(v.tires||'–')}</strong></div>
+    <div><span>Bremsen zuletzt</span><strong>${monthYearLabelV36(v.brakesDate)}</strong></div>
+    <div><span>Bremsen nächster Wechsel</span><strong>${monthYearLabelV36(v.brakesNextDate)}</strong></div>
+    <div><span>Batterie zuletzt</span><strong>${monthYearLabelV36(v.batteryDate)}</strong></div>
+    <div><span>Batterie nächster Wechsel</span><strong>${monthYearLabelV36(v.batteryNextDate)}</strong></div>
+   </div>
    ${last?`<div class="last-service"><span>${uiText('lastWorkshop')}</span><strong>${dateDE(last.date)} · ${esc(serviceTypeLabel(last.type))}</strong><small>${last.km?km(last.km):''}${last.cost?` · ${eur(last.cost)}`:''}</small></div>`:''}
    <div class="card-actions"><button class="secondary small" onclick="editVehicle(${v.id})">${uiText('edit')}</button><button class="secondary small" onclick="openServiceModal(${v.id})">${uiText('addService')}</button><button class="danger small" onclick="deleteVehicle(${v.id})">${uiText('delete')}</button></div>
   </div></article>`;
@@ -675,7 +700,12 @@ function openVehicleModal(v=null){
  f.dataset.removePhoto='0';
  $('#vehicleModalTitle').textContent=v?uiText('vehicleEditTitle'):uiText('vehicleAddTitle');
  f.elements.id.value=v?String(v.id):'';
- ['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','tuvDate','oilSpec','tires','brakesDate','batteryDate','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});
+ ['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','oilSpec','tires','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});
+ if(f.elements.tuvDate)f.elements.tuvDate.value=monthValueV36(v?.tuvDate);
+ if(f.elements.brakesDate)f.elements.brakesDate.value=monthValueV36(v?.brakesDate);
+ if(f.elements.brakesNextDate)f.elements.brakesNextDate.value=monthValueV36(v?.brakesNextDate);
+ if(f.elements.batteryDate)f.elements.batteryDate.value=monthValueV36(v?.batteryDate);
+ if(f.elements.batteryNextDate)f.elements.batteryNextDate.value=monthValueV36(v?.batteryNextDate);
  updateVehiclePhotoPreviewV31(v?.photo||'');
  $('#vehicleModal').showModal();
 }
@@ -693,11 +723,14 @@ function nextVehicleServiceInfo(v){
  if(v.nextOilDate||nextOilKm){
   nextItems.push({type:uiText('serviceOil'),text:[v.nextOilDate?dateDE(v.nextOilDate):'',nextOilKm?km(nextOilKm):''].filter(Boolean).join(' · '),detail:kmRemaining!==null?`${kmRemaining.toLocaleString('de-DE')} ${uiText('remaining')}`:''});
  }
- if(v.tuvDate)nextItems.push({type:uiText('tuvDue'),text:dateDE(v.tuvDate),detail:''});
- if(v.brakesDate)nextItems.push({type:uiText('brakesLast'),text:dateDE(v.brakesDate),detail:uiText('checkAsNeeded')});
- if(v.batteryDate)nextItems.push({type:uiText('batteryLast'),text:dateDE(v.batteryDate),detail:uiText('checkAsNeeded')});
- const recentOther=services.filter(s=>s.type!=='Ölwechsel').slice(0,3).map(s=>({type:serviceTypeLabel(s.type),text:dateDE(s.date),detail:s.note||''}));
- return [...nextItems,...recentOther].slice(0,5);
+ if(v.tuvDate)nextItems.push({type:'HU / TÜV',text:monthYearLabelV36(v.tuvDate),detail:'nächster Termin'});
+ if(v.brakesNextDate)nextItems.push({type:'Bremsen',text:monthYearLabelV36(v.brakesNextDate),detail:v.brakesDate?`zuletzt ${monthYearLabelV36(v.brakesDate)}`:'nächster Wechsel'});
+ else if(v.brakesDate)nextItems.push({type:'Bremsen',text:monthYearLabelV36(v.brakesDate),detail:'zuletzt gewechselt'});
+ if(v.batteryNextDate)nextItems.push({type:'Batterie',text:monthYearLabelV36(v.batteryNextDate),detail:v.batteryDate?`zuletzt ${monthYearLabelV36(v.batteryDate)}`:'nächster Wechsel'});
+ else if(v.batteryDate)nextItems.push({type:'Batterie',text:monthYearLabelV36(v.batteryDate),detail:'zuletzt gewechselt'});
+ if(v.tires)nextItems.push({type:'Reifen',text:v.tires,detail:''});
+ const recentOther=services.filter(s=>s.type!=='Ölwechsel').slice(0,2).map(s=>({type:serviceTypeLabel(s.type),text:dateDE(s.date),detail:s.note||''}));
+ return [...nextItems,...recentOther].slice(0,6);
 }
 function renderDashboardVehicles(){
  const box=$('#dashboardVehicleOverview');if(!box)return;
@@ -1105,7 +1138,8 @@ $('#vehicleForm').addEventListener('submit',async e=>{
   lastOilKm:Number(f.get('lastOilKm'))||0,nextOilDate:f.get('nextOilDate'),
   nextOilKm:Number(f.get('nextOilKm'))||0,tuvDate:f.get('tuvDate'),
   oilSpec:String(f.get('oilSpec')||'').trim(),tires:String(f.get('tires')||'').trim(),
-  brakesDate:f.get('brakesDate'),batteryDate:f.get('batteryDate'),
+  brakesDate:f.get('brakesDate'),brakesNextDate:f.get('brakesNextDate'),
+  batteryDate:f.get('batteryDate'),batteryNextDate:f.get('batteryNextDate'),
   notes:String(f.get('notes')||'').trim(),photo
  };
  if(mode==='edit'&&id){
