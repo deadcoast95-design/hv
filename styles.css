@@ -1484,3 +1484,123 @@ button.tiny{padding:4px 6px!important;min-height:0!important}
 .view.dashboard-only-v071l.active{
  display:grid!important;
 }
+
+/* =========================================================
+   0.73l – Fahrzeugübersicht NUR auf Dashboard kompakter
+   ========================================================= */
+.dashboard-only-v071l #dashVehiclesV071L{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:10px;
+ align-items:stretch;
+}
+.dashboard-only-v071l .dash-vehicle-card-v073l{
+ min-width:0;
+ overflow:hidden;
+ border:1px solid #e2e8f0;
+ border-radius:14px;
+ background:#fff;
+ box-shadow:0 5px 16px rgba(15,23,42,.035);
+ display:flex;
+ flex-direction:column;
+}
+.dashboard-only-v071l .dash-vehicle-media-v073l{
+ position:relative;
+ height:145px;
+ overflow:hidden;
+ background:#f1f5f9;
+}
+.dashboard-only-v071l .dash-vehicle-media-v073l img{
+ width:100%;
+ height:100%;
+ display:block;
+ object-fit:cover;
+}
+.dashboard-only-v071l .dash-vehicle-placeholder-v073l{
+ width:100%;
+ height:100%;
+ display:grid;
+ place-items:center;
+ font-size:34px;
+ background:linear-gradient(135deg,#eff6ff,#f8fafc);
+}
+.dashboard-only-v071l .dash-vehicle-plate-v073l,
+.dashboard-only-v071l .dash-vehicle-year-v073l{
+ position:absolute;
+ top:9px;
+ padding:4px 7px;
+ border-radius:999px;
+ font-size:7px;
+ font-weight:900;
+ backdrop-filter:blur(8px);
+ background:rgba(255,255,255,.88);
+ color:#0f172a;
+ box-shadow:0 2px 8px rgba(15,23,42,.08);
+}
+.dashboard-only-v071l .dash-vehicle-plate-v073l{left:9px;color:#1d4ed8}
+.dashboard-only-v071l .dash-vehicle-year-v073l{right:9px}
+.dashboard-only-v071l .dash-vehicle-body-v073l{
+ padding:10px;
+ display:flex;
+ flex-direction:column;
+ gap:9px;
+ flex:1;
+}
+.dashboard-only-v071l .dash-vehicle-title-v073l>div{
+ display:flex;
+ flex-direction:column;
+ gap:2px;
+}
+.dashboard-only-v071l .dash-vehicle-title-v073l strong{
+ font-size:10px;
+ line-height:1.15;
+}
+.dashboard-only-v071l .dash-vehicle-title-v073l small{
+ font-size:7px;
+ color:#64748b;
+}
+.dashboard-only-v071l .dash-vehicle-facts-v073l{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:6px;
+ margin-top:auto;
+}
+.dashboard-only-v071l .dash-vehicle-facts-v073l>div{
+ padding:7px 8px;
+ border-radius:9px;
+ background:#f8fafc;
+ display:flex;
+ flex-direction:column;
+ min-width:0;
+}
+.dashboard-only-v071l .dash-vehicle-facts-v073l span{
+ font-size:6px;
+ color:#64748b;
+}
+.dashboard-only-v071l .dash-vehicle-facts-v073l strong{
+ margin-top:1px;
+ font-size:8px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.dark-mode .dashboard-only-v071l .dash-vehicle-card-v073l{
+ background:#111827!important;
+ border-color:#334155!important;
+}
+.dark-mode .dashboard-only-v071l .dash-vehicle-facts-v073l>div{
+ background:#1e293b!important;
+}
+@media(max-width:950px){
+ .dashboard-only-v071l #dashVehiclesV071L{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:600px){
+ .dashboard-only-v071l #dashVehiclesV071L{
+  grid-template-columns:1fr;
+ }
+ .dashboard-only-v071l .dash-vehicle-media-v073l{
+  height:170px;
+ }
+}

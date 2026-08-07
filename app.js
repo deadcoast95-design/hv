@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v072l';
+const KEY='hausverwaltung_pwa_v073l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -1502,15 +1502,31 @@ function renderDashboardOnlyV071L(){
    </div>
   </article>`).join(''):'<div class="empty">Noch keine Objekte angelegt</div>';
 
- // Fahrzeuge – own dashboard-only cards, original vehicle page untouched
- $('#dashVehiclesV071L').innerHTML=cars.length?cars.map(v=>`<article class="dashboard-vehicle-card">
-   ${v.photo?`<img class="dashboard-vehicle-image" src="${v.photo}" alt="${esc(vehicleName(v))}">`:`<div class="dashboard-vehicle-placeholder">🚗</div>`}
-   <div class="dashboard-vehicle-body">
-    <div class="card-top"><span class="tag">${esc(v.plate||'Fahrzeug')}</span><span>${esc(v.year||'')}</span></div>
-    <h3>${esc(vehicleName(v))}</h3>
-    <div class="dashboard-vehicle-facts"><span>KM <b>${km(v.currentKm)}</b></span><span>HU/TÜV <b>${monthYearLabelV36(v.tuvDate)||'–'}</b></span><span>Öl <b>${v.nextOilKm?km(v.nextOilKm):'–'}</b></span></div>
-   </div>
-  </article>`).join(''):'<div class="empty">Noch keine Fahrzeuge angelegt</div>';
+ // Fahrzeuge – kompakte Dashboard-Karten; Fahrzeug-Seite bleibt unberührt
+ $('#dashVehiclesV071L').innerHTML=cars.length?cars.map(v=>{
+  const tuv=monthYearLabelV36(v.tuvDate)||'–';
+  const oil=v.nextOilKm?km(v.nextOilKm):'–';
+  const current=km(v.currentKm);
+  const tire=String(v.tires||v.tireCondition||'').trim()||'–';
+  return `<article class="dash-vehicle-card-v073l">
+    <div class="dash-vehicle-media-v073l">
+      ${v.photo?`<img src="${v.photo}" alt="${esc(vehicleName(v))}">`:`<div class="dash-vehicle-placeholder-v073l">🚗</div>`}
+      <span class="dash-vehicle-plate-v073l">${esc(v.plate||'Kein Kennzeichen')}</span>
+      <span class="dash-vehicle-year-v073l">${esc(v.year||'–')}</span>
+    </div>
+    <div class="dash-vehicle-body-v073l">
+      <div class="dash-vehicle-title-v073l">
+        <div><strong>${esc(vehicleName(v))}</strong><small>${esc(v.drive||v.fuelType||'Fahrzeug')}</small></div>
+      </div>
+      <div class="dash-vehicle-facts-v073l">
+        <div><span>KM</span><strong>${current}</strong></div>
+        <div><span>HU / TÜV</span><strong>${tuv}</strong></div>
+        <div><span>Nächstes Öl</span><strong>${oil}</strong></div>
+        <div><span>Reifen</span><strong>${esc(tire)}</strong></div>
+      </div>
+    </div>
+  </article>`;
+ }).join(''):'<div class="empty">Noch keine Fahrzeuge angelegt</div>';
 }
 
 function renderDashboard(){

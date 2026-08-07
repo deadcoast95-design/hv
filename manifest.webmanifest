@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – 0.72l",
+  "name": "Private Immobilienverwaltung – 0.73l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Dashboard-Seitenumschaltung repariert; andere Seiten bleiben getrennt",
+  "description": "Dashboard-Fahrzeugübersicht kompakt und symmetrisch gestaltet",
   "icons": [
     {
       "src": "icon.svg",
