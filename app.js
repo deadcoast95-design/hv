@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v060l';
+const KEY='hausverwaltung_pwa_v070l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -151,7 +151,7 @@ const seed={
  dashboardWidgets:{important:true,consumption:true,finance:true,loan:true,objectcosts:true,contributions:true,waste:true,costpositions:true,objects:true,renovations:true,vehicles:true,tasks:true}},
  owners:[],
  properties:[{id:1,name:'Haus 1',address:'',area:159,usage:'Eigennutzung',photo:''},{id:2,name:'Haus 2',address:'',area:152,usage:'Mietfreie Überlassung',photo:''}],
- loan:{bank:'',original:0,remaining:0,interest:0,monthlyPayment:0,startDate:'2024-01-01',fixedUntil:'2034-01-01',extraPayment:0,autoCalculate:true,balanceDate:''},
+ loan:{bank:'',original:0,remaining:0,interest:0,monthlyPayment:0,startDate:'2024-01-01',fixedUntil:'2034-01-01',extraPayment:0,autoCalculate:true,balanceDate:''},loans:[],
  costPlans:[{id:1,category:'Kredit',name:'Kreditrate',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3},{id:2,category:'Versicherung',name:'Gebäudeversicherung',propertyId:'all',amount:0,interval:'yearly',note:'',splitCount:3},{id:3,category:'Grundsteuer',name:'Grundsteuer',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:4,category:'Strom',name:'Strom Haus 1',propertyId:1,amount:0,interval:'monthly',note:'',splitCount:3},{id:5,category:'Strom',name:'Strom Haus 2',propertyId:2,amount:0,interval:'monthly',note:'',splitCount:3},{id:6,category:'Wasser',name:'Wasser / Abwasser',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:7,category:'Internet',name:'Internet',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3}],
  transactions:[],wasteDates:[],vehicles:[],vehicleServices:[],tasks:[],maintenance:[{id:1,title:'Wärmepumpe warten',propertyId:1,due:'',intervalMonths:12,owner:'Gemeinsam',cost:0,status:'Offen'}],reserves:[{id:1,title:'Dach',propertyId:'all',target:30000,saved:0,year:2035},{id:2,title:'Fassade',propertyId:'all',target:20000,saved:0,year:2027},{id:3,title:'Keller / Sockel',propertyId:'all',target:10000,saved:0,year:2027}]
 };
@@ -168,6 +168,23 @@ function migrate(data){
  const d={...clone(seed),...data};d.settings={...seed.settings,...(data.settings||{})};d.loan={...seed.loan,...(data.loan||{})};
  if(d.loan.autoCalculate===undefined)d.loan.autoCalculate=true;
  if(!d.loan.balanceDate&&Number(d.loan.remaining)>0)d.loan.balanceDate=new Date().toISOString().slice(0,10);
+ if(!Array.isArray(d.loans))d.loans=[];
+ if(!d.loans.length&&d.loan&&(Number(d.loan.original)>0||Number(d.loan.remaining)>0||Number(d.loan.monthlyPayment)>0||String(d.loan.bank||'').trim())){
+  d.loans=[{id:Date.now(),name:'Kredit 1',...d.loan}];
+ }
+ d.loans=d.loans.slice(0,10).map((l,index)=>({
+  id:l.id||Date.now()+index,name:l.name||`Kredit ${index+1}`,bank:l.bank||'',
+  original:Number(l.original)||0,remaining:Number(l.remaining)||0,balanceDate:l.balanceDate||'',
+  interest:Number(l.interest)||0,monthlyPayment:Number(l.monthlyPayment)||0,
+  startDate:l.startDate||'',fixedUntil:l.fixedUntil||'',extraPayment:Number(l.extraPayment)||0,
+  autoCalculate:l.autoCalculate!==false,
+  effectiveInterest:Number(l.effectiveInterest)||0,
+  commitmentInterest:Number(l.commitmentInterest)||0,
+  paymentFreeMonths:Math.max(0,Number(l.paymentFreeMonths)||0),
+  notes:String(l.notes||''),
+  bankBalanceHistory:Array.isArray(l.bankBalanceHistory)?l.bankBalanceHistory:[],
+  contractYears:Math.max(0,Number(l.contractYears)||0)
+ }));
  d.owners=(Array.isArray(data.owners)?data.owners:clone(seed.owners)).slice(0,5).map((x,index)=>({...x,personNumber:index+1,propertyIds:Array.isArray(x.propertyIds)?x.propertyIds.map(String):statePropertyFallback(x)}));
  d.properties=(Array.isArray(data.properties)?data.properties:clone(seed.properties)).slice(0,5).map(x=>{
  const meterHistory=Array.isArray(x.meterHistory)?x.meterHistory:[];
@@ -879,15 +896,199 @@ function plannedMonthlyIncome(){return accountUsersV048L().reduce((a,x)=>a+owner
 function projectedMonthlyBalance(){return plannedMonthlyIncome()-plannedMonthly()}
 function projectedAccountBalance(){return Number(state.settings.startBalance||0)+projectedMonthlyBalance()}
 function monthsElapsed(start){if(!start)return 0;const d=new Date(start+'T12:00:00'),n=new Date();let m=(n.getFullYear()-d.getFullYear())*12+(n.getMonth()-d.getMonth());if(n.getDate()<d.getDate())m--;return Math.max(0,m)}
-function loanProjection(){
- const l=state.loan, original=Number(l.original)||0, entered=Math.max(0,Number(l.remaining)||0), rate=(Number(l.interest)||0)/100/12, payment=Number(l.monthlyPayment)||0;
- if(!l.autoCalculate||!entered||!payment||!l.balanceDate){return {remaining:entered,paid:Math.max(0,original-entered),months:0}}
- let remaining=entered;const months=monthsElapsed(l.balanceDate);
- for(let i=0;i<months&&remaining>0;i++){
-  const interest=remaining*rate;const principal=Math.max(0,payment-interest);remaining=Math.max(0,remaining-principal);
-  if((i+1)%12===0&&Number(l.extraPayment)>0)remaining=Math.max(0,remaining-Number(l.extraPayment));
+
+let loanCalculatorV065L={selection:'all',annualExtra:0,month:8};
+
+function loanCloneWithExtraV065L(l,extra,month){
+ return {
+  ...l,
+  // extraPayment bleibt die Vertragsgrenze.
+  // Die tatsächlich getestete Sondertilgung wird separat nur für die Vorschau gesetzt.
+  previewExtraPaymentV068L:Math.max(0,Number(extra)||0),
+  previewExtraMonthV066L:Math.min(12,Math.max(1,Number(month)||8))
+ };
+}
+function loanCalculatorMaxExtraV066L(){
+ const loans=selectedLoansForCalculatorV065L();
+ if(!loans.length)return 0;
+ if((loanCalculatorV065L.selection||'all')==='all'){
+  return loans.reduce((s,l)=>s+Math.max(0,Number(l.extraPayment)||0),0);
  }
- return {remaining,paid:Math.max(0,original-remaining),months}
+ return Math.max(0,Number(loans[0]?.extraPayment)||0);
+}
+function monthNameV066L(month){
+ const names=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+ return names[Math.min(12,Math.max(1,Number(month)||1))-1];
+}
+function loanCalendarMonthAtIndexV066L(l,monthIndex){
+ const base=l?.balanceDate||l?.startDate;
+ if(!base)return ((Number(monthIndex)||0)%12)+1;
+ const d=new Date(base+'T12:00:00');
+ if(Number.isNaN(d.getTime()))return ((Number(monthIndex)||0)%12)+1;
+ // monthIndex 0 = erster Monat nach dem Stichtag
+ d.setMonth(d.getMonth()+Number(monthIndex)+1);
+ return d.getMonth()+1;
+}
+function selectedLoansForCalculatorV065L(){
+ const value=loanCalculatorV065L.selection||'all';
+ return value==='all'?currentLoansV061L():currentLoansV061L().filter(l=>String(l.id)===String(value));
+}
+function loanSchedulesWithCalculatorV065L(){
+ const loans=selectedLoansForCalculatorV065L();
+ let extra=Math.max(0,Number(loanCalculatorV065L.annualExtra)||0);
+ const month=Math.min(12,Math.max(1,Number(loanCalculatorV065L.month)||8));
+ if(!loans.length)return [];
+
+ const maxAllowed=loanCalculatorMaxExtraV066L();
+ if(maxAllowed>0)extra=Math.min(extra,maxAllowed);
+
+ if(loanCalculatorV065L.selection==='all'){
+  // Gesamtbetrag proportional nach Restschuld verteilen.
+  const balances=loans.map(l=>loanCurrentStateV062L(l).remaining);
+  const total=balances.reduce((a,b)=>a+b,0);
+  return loans.map((l,i)=>{
+   const share=total>0?balances[i]/total:1/loans.length;
+   return loanCloneWithExtraV065L(l,extra*share,month);
+  });
+ }
+ return loans.map(l=>loanCloneWithExtraV065L(l,extra,month));
+}
+function loanFutureInterestSumV065L(loans){
+ return (loans||[]).reduce((sum,l)=>sum+loanFutureScheduleV062L(l,1200).reduce((a,r)=>a+r.interest,0),0);
+}
+function loanMaxMonthsV065L(loans){
+ return Math.max(0,...(loans||[]).map(l=>loanFutureScheduleV062L(l,1200).length));
+}
+function monthsDifferenceTextV065L(months){
+ months=Math.max(0,Math.round(months||0));
+ const y=Math.floor(months/12),m=months%12;
+ if(y&&m)return `${y} J. ${m} M.`;
+ if(y)return `${y} Jahr${y===1?'':'e'}`;
+ return `${m} Monat${m===1?'':'e'}`;
+}
+function loanMonthlyRateV062L(l){
+ return Math.max(0,Number(l?.monthlyPayment)||0);
+}
+function loanRateV062L(l){
+ return Math.max(0,Number(l?.interest)||0)/100/12;
+}
+function loanStartBalanceV062L(l){
+ const entered=Math.max(0,Number(l?.remaining)||0);
+ if(entered>0)return entered;
+ return Math.max(0,Number(l?.original)||0);
+}
+function loanMonthsFromBalanceDateV062L(l){
+ if(!l?.balanceDate)return 0;
+ return monthsElapsed(l.balanceDate);
+}
+function applyOneLoanMonthV062L(balance,l,monthIndex){
+ balance=Math.max(0,Number(balance)||0);
+ if(balance<=0)return {payment:0,interest:0,principal:0,extra:0,remaining:0};
+
+ const monthlyRate=loanRateV062L(l);
+ const scheduled=loanMonthlyRateV062L(l);
+ const interest=balance*monthlyRate;
+ const freeMonths=Math.max(0,Number(l?.paymentFreeMonths)||0);
+
+ // Tilgungsfreie Monate: Zinszahlung ja, Kapitaltilgung nein.
+ if(monthIndex<freeMonths){
+  const payment=Math.min(balance+interest,interest);
+  return {payment,interest,principal:0,extra:0,remaining:balance};
+ }
+
+ let payment=Math.min(balance+interest,scheduled);
+ let principal=Math.max(0,payment-interest);
+ let remaining=Math.max(0,balance-principal);
+
+ let extra=0;
+
+ // 0.68l: Der im Kredit gespeicherte Wert extraPayment ist ausschließlich
+ // die maximal erlaubte Sondertilgung laut Vertrag und wird NICHT automatisch bezahlt.
+ // Nur der Tilgungsrechner setzt previewExtraPaymentV068L + previewExtraMonthV066L.
+ const previewExtra=Math.max(0,Number(l?.previewExtraPaymentV068L)||0);
+ const previewMonth=Math.min(12,Math.max(1,Number(l?.previewExtraMonthV066L)||0));
+ const specialDue=previewExtra>0 && previewMonth>0
+  && loanCalendarMonthAtIndexV066L(l,monthIndex)===previewMonth;
+
+ if(specialDue && remaining>0){
+  extra=Math.min(remaining,previewExtra);
+  remaining=Math.max(0,remaining-extra);
+ }
+ return {payment,interest,principal,extra,remaining};
+}
+function loanCurrentStateV062L(l){
+ const original=Math.max(0,Number(l?.original)||0);
+ let balance=loanStartBalanceV062L(l);
+ let interestPaid=0,principalPaid=Math.max(0,original-balance),extraPaid=0;
+ const elapsed=l?.autoCalculate===false?0:loanMonthsFromBalanceDateV062L(l);
+ if(l?.autoCalculate!==false && l?.balanceDate && balance>0 && loanMonthlyRateV062L(l)>0){
+  for(let i=0;i<elapsed&&balance>0;i++){
+   const step=applyOneLoanMonthV062L(balance,l,i);
+   interestPaid+=step.interest;
+   principalPaid+=step.principal;
+   extraPaid+=step.extra;
+   balance=step.remaining;
+  }
+ }
+ return {
+  remaining:balance,
+  paidPrincipal:Math.max(0,original-balance),
+  interestPaid,
+  principalPaid,
+  extraPaid,
+  elapsedMonths:elapsed
+ };
+}
+function loanFutureScheduleV062L(l,maxMonths=600){
+ const current=loanCurrentStateV062L(l);
+ let balance=current.remaining;
+ const rows=[];
+ if(balance<=0)return rows;
+ for(let i=0;i<maxMonths&&balance>0;i++){
+  const step=applyOneLoanMonthV062L(balance,l,current.elapsedMonths+i);
+  rows.push({monthIndex:i,...step});
+  balance=step.remaining;
+  if(step.payment<=0 && step.extra<=0)break;
+  if(step.principal<=0 && step.extra<=0 && step.interest>=step.payment)break;
+ }
+ return rows;
+}
+function loanProjectionForV061L(l){
+ const c=loanCurrentStateV062L(l||{});
+ return {remaining:c.remaining,paid:c.paidPrincipal,months:c.elapsedMonths};
+}
+function loanProjection(){
+ return loanProjectionForV061L((state.loans||[])[0]||state.loan||{});
+}
+function loanNextSplitV062L(l){
+ const c=loanCurrentStateV062L(l);
+ return applyOneLoanMonthV062L(c.remaining,l,c.elapsedMonths);
+}
+function loanWeightedInterestV062L(loans){
+ const total=(loans||[]).reduce((s,l)=>s+(Number(l.original)||0),0);
+ if(!total)return 0;
+ return (loans||[]).reduce((s,l)=>s+(Number(l.original)||0)*(Number(l.interest)||0),0)/total;
+}
+function loanCombinedScheduleV062L(loans,maxMonths=360){
+ const selected=(loans||[]).filter(Boolean);
+ const schedules=selected.map(l=>loanFutureScheduleV062L(l,maxMonths));
+ const out=[];
+ for(let i=0;i<maxMonths;i++){
+  let payment=0,interest=0,principal=0,extra=0,remaining=0,has=false;
+  schedules.forEach(rows=>{
+   const r=rows[i];
+   if(r){has=true;payment+=r.payment;interest+=r.interest;principal+=r.principal;extra+=r.extra;remaining+=r.remaining}
+  });
+  // Loans already paid before this month contribute zero remaining.
+  if(!has && i>0)break;
+  out.push({monthIndex:i,payment,interest,principal:principal+extra,extra,remaining});
+  if(remaining<=0 && i>0)break;
+ }
+ return out;
+}
+function loanDateForOffsetV062L(offset){
+ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()+offset+1);
+ return d.toLocaleDateString('de-DE',{month:'2-digit',year:'numeric'});
 }
 function propertyName(id){if(id==='all'||id===''||id==null)return 'Alle Objekte';return state.properties.find(x=>String(x.id)===String(id))?.name||'Unbekanntes Objekt'}
 function runModule(name,fn){
@@ -913,45 +1114,32 @@ function monthEndDaysV38(month){
 }
 function renderImportantV38(){
  const box=$('#importantItems');if(!box)return;const items=[];
- (state.tasks||[]).filter(t=>t.status!=='Erledigt').forEach(t=>{const d=taskDueMonthDateV34(t.due);if(d){const n=Math.ceil((d-new Date())/86400000);if(n<=45)items.push({level:n<0?'red':'orange',title:t.title,text:`Aufgabe · ${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`})}});
- (state.maintenance||[]).forEach(x=>{
-  if(x.status==='Erledigt'||!x.due)return;
-  const due=maintenanceMonthDueDateV040L(x.due);
-  if(!due)return;
-  const days=Math.ceil((due-new Date())/86400000);
-  if(days<=45){
-   const level=days<0?'red':days<=14?'red':'orange';
-   const when=days<0?'überfällig':days===0?'diesen Monat fällig':days<=31?'bald fällig':`fällig ${maintenanceMonthLabelV040L(x.due)}`;
-   items.push({level,title:`Wartung: ${x.title}`,text:`${when} · ${propertyName(x.propertyId)}`});
-  }
- });
- (state.vehicles||[]).forEach(v=>{
-  const tuv=monthEndDaysV38(v.tuvDate);if(tuv!==null&&tuv<=90)items.push({level:tuv<0?'red':'orange',title:`HU / TÜV ${vehicleName(v)}`,text:`fällig ${monthYearLabelV36(v.tuvDate)}`});
-  if(v.nextOilKm&&Number(v.currentKm)>=Number(v.nextOilKm)-1000)items.push({level:Number(v.currentKm)>=Number(v.nextOilKm)?'red':'orange',title:`Ölwechsel ${vehicleName(v)}`,text:`${km(v.currentKm)} / Ziel ${km(v.nextOilKm)}`});
- });
- (state.properties||[]).forEach(p=>(p.renovationCosts||[]).filter(r=>!renovationPaidV37(r)).forEach(r=>items.push({level:'orange',title:`Offene Sanierung: ${r.title}`,text:`${p.name} · ${eur(r.amount)}`})));
+ (state.tasks||[]).filter(t=>t.status!=='Erledigt').forEach(t=>{const d=taskDueMonthDateV34(t.due);if(!d)return;const n=Math.ceil((d-new Date())/86400000);if(n<=45)items.push({level:n<0?'red':'orange',icon:'✓',title:t.title,text:`${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`,days:n})});
+ (state.maintenance||[]).forEach(x=>{if(x.status==='Erledigt'||!x.due)return;const due=maintenanceMonthDueDateV040L(x.due);if(!due)return;const days=Math.ceil((due-new Date())/86400000);if(days<=45)items.push({level:days<=14?'red':'orange',icon:'🔧',title:x.title,text:`${maintenanceMonthLabelV040L(x.due)} · ${propertyName(x.propertyId)}`,days})});
+ (state.vehicles||[]).forEach(v=>{const tuv=monthEndDaysV38(v.tuvDate);if(tuv!==null&&tuv<=90)items.push({level:tuv<0?'red':'orange',icon:'🚗',title:`HU / TÜV · ${vehicleName(v)}`,text:monthYearLabelV36(v.tuvDate),days:tuv})});
  $('#importantCountTag').textContent=`${items.length} Hinweis${items.length===1?'':'e'}`;
- box.innerHTML=items.length?items.slice(0,12).map(i=>`<div class="important-item ${i.level}"><i></i><div><strong>${esc(i.title)}</strong><span>${esc(i.text)}</span></div></div>`).join(''):'<div class="empty">Aktuell nichts Dringendes 🎉</div>';
+ box.innerHTML=items.length?items.slice(0,8).map(i=>'<article class="dash-important-card-v070l '+i.level+'"><div class="dash-important-icon-v070l">'+i.icon+'</div><div><strong>'+esc(i.title)+'</strong><span>'+esc(i.text)+'</span></div><b>'+(i.days<0?'Überfällig':i.days===0?'Jetzt':i.days+' T.')+'</b></article>').join(''):'<div class="dash-all-good-v070l"><span>✓</span><strong>Alles im grünen Bereich</strong><small>Aktuell nichts Dringendes.</small></div>';
 }
 function meterConsumptionsV38(p,key){
  const rows=(p.meterHistory||[]).filter(r=>r[key]!==''&&r[key]!=null).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
  const out=[];for(let i=1;i<rows.length;i++){const val=Number(rows[i][key])-Number(rows[i-1][key]);if(val>=0)out.push({from:rows[i-1].date,to:rows[i].date,value:val})}return out;
 }
+function consumptionBarsHtmlV070L(rows,max,cls){
+ if(!rows.length)return '<div class="consumption-no-data-v070l">Noch keine Historie</div>';
+ let bars='';rows.forEach(r=>{bars+='<i style="height:'+Math.max(8,r.value/max*100)+'%" title="'+r.value.toLocaleString('de-DE')+'"></i>'});
+ return '<div class="consumption-spark-v070l '+cls+'">'+bars+'</div>';
+}
 function renderConsumptionV38(){
- const box=$('#dashboardConsumption');if(!box)return;
- box.innerHTML=(state.properties||[]).map(p=>{
-  const e=meterConsumptionsV38(p,'electricity'),w=meterConsumptionsV38(p,'water'),le=e[e.length-1],lw=w[w.length-1];
-  const max=Math.max(1,...e.map(x=>x.value),...w.map(x=>x.value));
-  const bars=[...e.slice(-4).map(x=>({label:`⚡ ${x.to.slice(0,7)}`,v:x.value,unit:'kWh'})),...w.slice(-4).map(x=>({label:`💧 ${x.to.slice(0,7)}`,v:x.value,unit:'m³'}))];
-  return `<article class="consumption-card"><h3>${esc(p.name)}</h3><div class="consumption-kpis"><div><span>Letzter Stromverbrauch</span><strong>${le?le.value.toLocaleString('de-DE')+' kWh':'–'}</strong></div><div><span>Letzter Wasserverbrauch</span><strong>${lw?lw.value.toLocaleString('de-DE')+' m³':'–'}</strong></div></div>${bars.length?`<div class="mini-bars">${bars.map(b=>`<div><span>${esc(b.label)}</span><i><b style="width:${Math.max(4,b.v/max*100)}%"></b></i><strong>${b.v.toLocaleString('de-DE')} ${b.unit}</strong></div>`).join('')}</div>`:'<p class="helper-text">Mindestens zwei Zählerstände werden für eine Verbrauchsberechnung benötigt.</p>'}</article>`;
- }).join('')||'<div class="empty">Noch keine Objekte</div>';
+ const box=$('#dashboardConsumption');if(!box)return;const props=state.properties||[];
+ if(!props.length){box.innerHTML='<div class="empty">Noch keine Objekte</div>';return}
+ box.innerHTML=props.map(p=>{const e=meterConsumptionsV38(p,'electricity'),w=meterConsumptionsV38(p,'water'),le=e[e.length-1],lw=w[w.length-1],re=e.slice(-6),rw=w.slice(-6),me=Math.max(1,...re.map(x=>x.value)),mw=Math.max(1,...rw.map(x=>x.value));return '<article class="consumption-card-v070l"><div class="consumption-card-head-v070l"><strong>'+esc(p.name)+'</strong><span>'+(p.meterReadingDate?dateDE(p.meterReadingDate):'–')+'</span></div><div class="consumption-split-v070l"><div class="consumption-metric-v070l"><div><span>⚡ Strom</span><strong>'+(le?le.value.toLocaleString('de-DE')+' kWh':'–')+'</strong></div>'+consumptionBarsHtmlV070L(re,me,'electricity')+'</div><div class="consumption-metric-v070l"><div><span>💧 Wasser</span><strong>'+(lw?lw.value.toLocaleString('de-DE')+' m³':'–')+'</strong></div>'+consumptionBarsHtmlV070L(rw,mw,'water')+'</div></div></article>'}).join('');
 }
 function totalVehicleServiceCostV38(v){return (state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).reduce((a,s)=>a+Number(s.cost||0),0)}
 function applyDashboardWidgetsV38(){
  const cfg=state.settings.dashboardWidgets||{};document.querySelectorAll('[data-widget]').forEach(el=>{const k=el.dataset.widget;el.classList.toggle('widget-hidden',cfg[k]===false)});
 }
 function renderDashboardWidgetChoicesV38(){
- const box=$('#dashboardWidgetChoices');if(!box)return;const names={important:'Demnächst wichtig',consumption:'Verbrauch',finance:'Finanzen',loan:'Kredit',objectcosts:'Kosten je Objekt',contributions:'Personen-Einzahlungen',waste:'Müllkalender',costpositions:'Kostenpositionen',objects:'Objekte',renovations:'Sanierungen',vehicles:'Fahrzeuge',tasks:'Aufgaben'};
+ const box=$('#dashboardWidgetChoices');if(!box)return;const names={important:'Demnächst wichtig',tasks:'Aufgaben',loan:'Kredit',consumption:'Verbrauch',contributions:'Einzahlungen',waste:'Kalender',costpositions:'Kostenpositionen',objects:'Objekte',vehicles:'Fahrzeuge'};
  const cfg=state.settings.dashboardWidgets||{};box.innerHTML=Object.entries(names).map(([k,n])=>`<label class="check-row"><input type="checkbox" data-widget-choice="${k}" ${cfg[k]!==false?'checked':''}> ${n}</label>`).join('');
 }
 function applyThemeV38(){document.body.classList.toggle('dark-mode',state.settings.darkMode===true);const t=$('#darkModeToggle');if(t)t.checked=state.settings.darkMode===true}
@@ -969,7 +1157,6 @@ function render(){
  runModule('Auswahllisten',populateSelects);
  runModule('Übersicht',renderDashboard);
  runModule('Objektübersicht',renderDashboardProperties);
- runModule('Sanierungsübersicht',renderDashboardRenovationsV37);
  runModule('Fahrzeuge',renderVehicles);
  runModule('Fahrzeugübersicht',renderDashboardVehicles);
  runModule('Kostenplan',renderCosts);
@@ -983,38 +1170,13 @@ runModule('Planung',renderTasks);
  updateLocalStatus(lastSaveTime?'Gespeichert':'Lokal gespeichert');
 }
 
+function energyClassIndexV070L(value){const c=String(value||'').trim().toUpperCase().replace('+','');return ({A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7})[c]??-1}
+function energyScaleHtmlV070L(value){const idx=energyClassIndexV070L(value),letters=['A','B','C','D','E','F','G','H'];return '<div class="energy-scale-v070l">'+letters.map((l,i)=>'<span class="energy-'+l.toLowerCase()+(i===idx?' active':'')+'">'+l+'</span>').join('')+'</div>'}
 function renderDashboardProperties(){
- const box=$('#dashboardPropertyOverview');
- if(!box)return;
- const props=Array.isArray(state.properties)?state.properties:[];
- if(!props.length){
-  box.innerHTML='<div class="empty">Noch keine Objekte angelegt</div>';
-  return;
- }
- box.innerHTML=props.map(x=>`<article class="dashboard-property-card">
-  ${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}
-  <div class="dashboard-property-body">
-   <div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m² Wohnfläche</span></div>
-   <h3>${esc(x.name||'Ohne Namen')}</h3>
-   <p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
-   <div class="dashboard-property-details">
-    <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div>
-    <div><span>Grundstück</span><strong>${x.plotArea!==''&&x.plotArea!=null?Number(x.plotArea).toLocaleString('de-DE')+' m²':'–'}</strong></div>
-    <div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms).toLocaleString('de-DE'):'–'}</strong></div>
-    <div><span>Bäder</span><strong>${x.bathrooms!==''&&x.bathrooms!=null?Number(x.bathrooms).toLocaleString('de-DE'):'–'}</strong></div>
-    <div><span>WC</span><strong>${x.toilets!==''&&x.toilets!=null?Number(x.toilets).toLocaleString('de-DE'):'–'}</strong></div>
-    <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
-    <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
-    <div><span>Stromzähler</span><strong>${x.electricityMeter!==''&&x.electricityMeter!=null?Number(x.electricityMeter).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
-    <div><span>Wasserzähler</span><strong>${x.waterMeter!==''&&x.waterMeter!=null?Number(x.waterMeter).toLocaleString('de-DE')+' m³':'–'}</strong></div>
-    <div><span>Ablesedatum</span><strong>${x.meterReadingDate?dateDE(x.meterReadingDate):'–'}</strong></div><div><span>Sanierung bezahlt</span><strong>${eur(renovationPaidTotalV37(x))}</strong></div>
-   </div>
-   ${x.notes?`<p class="property-notes"><strong>Notiz:</strong> ${esc(x.notes)}</p>`:''}
-  </div>
- </article>`).join('');
+ const box=$('#dashboardPropertyOverview');if(!box)return;const props=state.properties||[];
+ if(!props.length){box.innerHTML='<div class="empty">Noch keine Objekte angelegt</div>';return}
+ box.innerHTML=props.map(x=>`<article class="dashboard-property-card">${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}<div class="dashboard-property-body"><div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m²</span></div><h3>${esc(x.name||'Ohne Namen')}</h3><p>${esc(x.address||'Adresse noch nicht eingetragen')}</p><div class="property-quickfacts-v070l"><div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div><div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms):'–'}</strong></div><div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div></div><div class="energy-block-v070l"><div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>${energyScaleHtmlV070L(x.energyClass)}</div></div></article>`).join('');
 }
-
-
 async function imageFileToDataUrlV31(file,maxWidth=1400,maxHeight=1000,quality=.82){
  if(!file)return '';
  const raw=await new Promise((resolve,reject)=>{
@@ -1159,41 +1321,16 @@ function renderDashboardVehicles(){
 }
 
 function renderDashboard(){
- const monthlyCosts=plannedMonthly(),monthlyIncome=plannedMonthlyIncome(),monthNet=projectedMonthlyBalance();
- $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
- const l=state.loan, original=Number(l.original)||0,projection=loanProjection(),remaining=Math.min(projection.remaining,original||projection.remaining),paid=projection.paid,pct=original?Math.min(100,Math.max(0,paid/original*100)):0;$('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';$('#loanDonut').style.setProperty('--p',pct);$('#loanOriginal').textContent=eur(original);$('#loanPaid').textContent=eur(paid);$('#loanRemaining').textContent=eur(remaining);$('#loanPayment').textContent=eur(l.monthlyPayment);const monthInterest=remaining*(Number(l.interest)||0)/100/12,monthPrincipal=Math.max(0,Math.min(remaining,Number(l.monthlyPayment)-monthInterest));$('#loanDetails').innerHTML=`<div><span>Bank</span><strong>${esc(l.bank||'nicht eingetragen')}</strong></div><div><span>Sollzins</span><strong>${Number(l.interest||0).toLocaleString('de-DE')} %</strong></div><div><span>Zinsanteil nächster Monat</span><strong>${eur(monthInterest)}</strong></div><div><span>Tilgungsanteil nächster Monat</span><strong>${eur(monthPrincipal)}</strong></div><div><span>Zinsbindung bis</span><strong>${dateDE(l.fixedUntil)}</strong></div><div><span>Berechnung</span><strong>${l.autoCalculate?'Automatisch ab '+dateDE(l.balanceDate)+' · '+projection.months+' Monate':'Manuelle Restschuld'}</strong></div>`;
- const propCosts=state.properties.map(property=>{
-  const persons=accountUsersV048L().filter(user=>(user.propertyIds||[]).map(String).includes(String(property.id)));
-  const value=(state.costPlans||[]).filter(cost=>String(cost.propertyId)===String(property.id)).reduce((sum,cost)=>sum+costMonthly(cost),0);
-  return {name:property.name,value,persons:persons.length};
-
-
- renderDashboardProperties();
-
- renderDashboardVehicles();
-});
-const combined=plannedCostMonthly();
-$('#dashboardObjectCosts').innerHTML=[
- ...propCosts.map(item=>({name:item.name,value:item.value,note:`${item.persons} zugeordnete Benutzer`})),
- {name:'Beide Objekte zusammen',value:combined,note:'Gesamte Kostenpositionen'}
-].map((item,index)=>`<div class="${index===propCosts.length?'total-row':''}"><span>${esc(item.name)}<small>${esc(item.note)}</small></span><strong>${eur(item.value)} / Monat · ${eur(item.value*12)} / Jahr</strong></div>`).join('');
- $('#ownerIncomeSummary').innerHTML=accountUsersV048L().map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Benutzer</div>';
- const upcoming=[...state.tasks].sort((a,b)=>{
-  const ad=a.status==='Erledigt'?1:0,bd=b.status==='Erledigt'?1:0;
-  if(ad!==bd)return ad-bd;
-  return (a.due||'9999').localeCompare(b.due||'9999');
- });
- $('#upcomingItems').innerHTML=upcoming.length?upcoming.map(dashboardTaskCardV33).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>'
-
- const dashboardCostBox=$('#dashboardCostPositions');
- if(dashboardCostBox){
-  dashboardCostBox.innerHTML=(state.costPlans||[]).length?[
-  ...state.costPlans.map(cost=>`<div class="cost-info-row ${costIsPaid(cost)?'cost-info-paid':''}"><span class="cost-category-cell"><strong>${esc(cost.category)}</strong><small>${esc(cost.name||"")}${costIsPaid(cost)?' · ✓ bezahlt':''}</small></span><span>${esc(propertyName(cost.propertyId))}</span><strong>${costIsPaid(cost)?`<s>${eur(costMonthlyOriginal(cost))}</s>`:eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${costIsPaid(cost)?`<s>${eur(costYearlyOriginal(cost))}</s>`:eur(costYearly(cost))}</strong></div>`),
-  `<div class="cost-info-row cost-info-total"><span></span><span class="total-label">Gesamt</span><strong>${eur(plannedCostMonthly())}</strong><span>Monatsdurchschnitt</span><strong>${eur(state.costPlans.reduce((sum,cost)=>sum+costYearly(cost),0))}</strong></div>`
- ].join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
- }
+ const loans=currentLoansV061L(),lt=loanTotalsV061L(),original=lt.original,remaining=lt.remaining,paid=lt.paid,pct=original?Math.min(100,Math.max(0,paid/original*100)):0;
+ const openTasks=(state.tasks||[]).filter(t=>String(t.status||'').toLowerCase()!=='erledigt').length;
+ if($('#dashOpenTaskCountV070L'))$('#dashOpenTaskCountV070L').textContent=openTasks;if($('#dashLoanCountV070L'))$('#dashLoanCountV070L').textContent=loans.length;if($('#dashPropertyCountV070L'))$('#dashPropertyCountV070L').textContent=(state.properties||[]).length;if($('#dashVehicleCountV070L'))$('#dashVehicleCountV070L').textContent=(state.vehicles||[]).length;
+ if($('#dashboardLoanCountTagV070L'))$('#dashboardLoanCountTagV070L').textContent=`${loans.length} Kredit${loans.length===1?'':'e'}`;if($('#loanPercent'))$('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';if($('#loanDonut'))$('#loanDonut').style.setProperty('--p',pct);if($('#loanOriginal'))$('#loanOriginal').textContent=eur(original);if($('#loanPaid'))$('#loanPaid').textContent=eur(paid);if($('#loanRemaining'))$('#loanRemaining').textContent=eur(remaining);if($('#loanPayment'))$('#loanPayment').textContent=eur(lt.monthlyPayment);
+ const lb=$('#loanDetails');if(lb)lb.innerHTML=loans.length?loans.map((l,index)=>{const p=loanProjectionForV061L(l),interest=p.remaining*(Number(l.interest)||0)/100/12,principal=Math.max(0,Math.min(p.remaining,Number(l.monthlyPayment)-interest)),lp=Number(l.original)>0?Math.min(100,Math.max(0,(Number(l.original)-p.remaining)/Number(l.original)*100)):0;return `<article class="dash-loan-card-v070l"><div class="dash-loan-card-head-v070l"><span>🏦</span><div><strong>${esc(l.name||`Kredit ${index+1}`)}</strong><small>${esc(l.bank||'Keine Bank')}</small></div><b>${lp.toLocaleString('de-DE',{maximumFractionDigits:1})}%</b></div><div class="dash-loan-progress-v070l"><i style="width:${lp}%"></i></div><div class="dash-loan-stats-v070l"><div><span>Restschuld</span><strong>${eur(p.remaining)}</strong></div><div><span>Rate</span><strong>${eur(l.monthlyPayment)}</strong></div><div><span>Zins</span><strong>${eur(interest)}</strong></div><div><span>Tilgung</span><strong>${eur(principal)}</strong></div></div></article>`}).join(''):'<div class="empty">Noch keine Kredite eingetragen.</div>';
+ const users=accountUsersV048L(),tc=users.reduce((s,u)=>s+ownerMonthlyContribution(u),0);if($('#dashboardContributionTotalV070L'))$('#dashboardContributionTotalV070L').textContent=eur(tc)+' / Monat';const cb=$('#ownerIncomeSummary');if(cb)cb.innerHTML=users.length?users.map(u=>{const amount=ownerMonthlyContribution(u),share=tc>0?amount/tc*100:0;return `<article class="dash-contribution-card-v070l"><div class="dash-contribution-avatar-v070l">${esc(ownerInitialsV045L(u.name))}</div><div class="dash-contribution-main-v070l"><div><strong>${esc(u.name)}</strong><b>${eur(amount)}</b></div><div class="dash-contribution-bar-v070l"><i style="width:${share}%"></i></div><small>${share.toLocaleString('de-DE',{maximumFractionDigits:1})} % der Einzahlungen</small></div></article>`}).join(''):'<div class="empty">Keine aktiven Benutzer</div>';
+ const pr={sofort:0,hoch:1,mittel:2,niedrig:3},up=[...(state.tasks||[])].sort((a,b)=>{const ad=String(a.status||'').toLowerCase()==='erledigt'?1:0,bd=String(b.status||'').toLowerCase()==='erledigt'?1:0;if(ad!==bd)return ad-bd;const ap=pr[String(a.priority||'').toLowerCase()]??4,bp=pr[String(b.priority||'').toLowerCase()]??4;if(ap!==bp)return ap-bp;return (a.due||'9999').localeCompare(b.due||'9999')});const tb=$('#upcomingItems');if(tb)tb.innerHTML=up.length?up.slice(0,8).map(dashboardTaskCardV33).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>';
+ const ac=(state.costPlans||[]).filter(c=>!costIsPaid(c)).map(c=>({...c,_monthly:costMonthly(c)})).sort((a,b)=>b._monthly-a._monthly);if($('#dashboardCostCountV070L'))$('#dashboardCostCountV070L').textContent=`${ac.length} Position${ac.length===1?'':'en'}`;const chart=$('#dashboardCostChartV070L');if(chart){const top=ac.slice(0,6),max=Math.max(1,...top.map(c=>c._monthly));chart.innerHTML=top.length?top.map(c=>`<div class="dash-cost-bar-row-v070l"><span>${esc(c.name||c.category||'Kosten')}</span><i><b style="width:${Math.max(4,c._monthly/max*100)}%"></b></i><strong>${eur(c._monthly)}</strong></div>`).join(''):'<div class="empty">Keine laufenden Kosten</div>'}const cost=$('#dashboardCostPositions');if(cost)cost.innerHTML=ac.length?ac.slice(0,5).map(c=>`<article class="dash-cost-card-v070l"><span class="dash-cost-icon-v070l">${costIconV046L(c.category,c.name)}</span><div><strong>${esc(c.name||'Kostenposition')}</strong><small>${esc(c.category||'Kosten')} · ${esc(propertyName(c.propertyId))}</small></div><b>${eur(c._monthly)}<small>/Monat</small></b></article>`).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
+ renderDashboardProperties();renderDashboardVehicles();
 }
-
 const wasteColors={'Restmüll':'#111111','Biotonne':'#8B5E3C','Papiertonne':'#2E8B57','Plastik':'#EAB308','Sonstige':'#7C3AED'};
 function wasteColor(type){return wasteColors[type]||'#64748b'}
 function monthTitle(d){return d.toLocaleDateString('de-DE',{month:'long',year:'numeric'})}
@@ -2013,7 +2150,341 @@ function planningCard(x,type){
   </div>
  </article>`;
 }
-function renderSettings(){$('#settingName').value=state.settings.name;$('#settingStartBalance').value=state.settings.startBalance;$('#settingMinimumReserve').value=state.settings.minimumReserve;$('#settingMonthlyReserve').value=state.settings.monthlyReserve;applyThemeV38()}
+
+function loanLifetimeStatsV063L(l){
+ const future=loanFutureScheduleV062L(l,1200);
+ const current=loanCurrentStateV062L(l);
+ const futureInterest=future.reduce((s,r)=>s+r.interest,0);
+ const futurePayments=future.reduce((s,r)=>s+r.payment+r.extra,0);
+ return {
+  remaining:current.remaining,
+  monthsRemaining:future.length,
+  futureInterest,
+  futurePayments,
+  payoffDate:future.length?loanDateForOffsetV062L(future.length-1):'–'
+ };
+}
+function loanYearsMonthsV063L(months){
+ months=Math.max(0,Number(months)||0);
+ const y=Math.floor(months/12),m=months%12;
+ if(!months)return '0 Monate';
+ if(!y)return `${m} Monat${m===1?'':'e'}`;
+ if(!m)return `${y} Jahr${y===1?'':'e'}`;
+ return `${y} J. ${m} M.`;
+}
+
+function loanContractEndV067L(l){
+ const years=Math.max(0,Number(l?.contractYears)||0);
+ if(!years||!l?.startDate)return '–';
+ const d=new Date(l.startDate+'T12:00:00');
+ if(Number.isNaN(d.getTime()))return '–';
+ d.setFullYear(d.getFullYear()+years);
+ return d.toLocaleDateString('de-DE',{month:'2-digit',year:'numeric'});
+}
+function currentLoansV061L(){return Array.isArray(state.loans)?state.loans:[]}
+function loanTotalsV061L(){
+ const loans=currentLoansV061L();
+ return loans.reduce((a,l)=>{
+  const c=loanCurrentStateV062L(l),n=loanNextSplitV062L(l);
+  a.original+=Number(l.original)||0;
+  a.remaining+=c.remaining;
+  a.paid+=c.paidPrincipal;
+  a.monthlyPayment+=Number(l.monthlyPayment)||0;
+  a.nextInterest+=n.interest;
+  a.nextPrincipal+=n.principal;
+  a.nextExtra+=n.extra;
+  return a;
+ },{original:0,remaining:0,paid:0,monthlyPayment:0,nextInterest:0,nextPrincipal:0,nextExtra:0});
+}
+function loanFixedYearsV062L(l){
+ if(!l?.startDate||!l?.fixedUntil)return '–';
+ const a=new Date(l.startDate+'T12:00:00'),b=new Date(l.fixedUntil+'T12:00:00');
+ if(Number.isNaN(a)||Number.isNaN(b))return '–';
+ const months=Math.max(0,(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth()));
+ const years=Math.floor(months/12),rest=months%12;
+ return rest?`${years} J. ${rest} M.`:`${years} Jahre`;
+}
+function loanInitialPrincipalRateV062L(l){
+ const original=Number(l?.original)||0;
+ if(!original)return 0;
+ return Math.max(0,(Number(l.monthlyPayment)||0)*12/original*100-(Number(l.interest)||0));
+}
+function loanEndFixedDebtV062L(l){
+ if(!l?.fixedUntil)return null;
+ const now=new Date(),end=new Date(l.fixedUntil+'T12:00:00');
+ let months=Math.max(0,(end.getFullYear()-now.getFullYear())*12+(end.getMonth()-now.getMonth()));
+ const sched=loanFutureScheduleV062L(l,Math.min(months+1,600));
+ if(months<=0)return loanCurrentStateV062L(l).remaining;
+ if(!sched.length)return loanCurrentStateV062L(l).remaining;
+ return sched[Math.min(months-1,sched.length-1)]?.remaining ?? sched[sched.length-1].remaining;
+}
+function loanTotalFutureInterestV062L(l){
+ return loanFutureScheduleV062L(l,600).reduce((s,r)=>s+r.interest,0);
+}
+function renderLoanDetailCardsV062L(loans){
+ const box=$('#loanManagerList'); if(!box)return;
+ if(!loans.length){box.innerHTML='<div class="empty">Noch kein Kredit eingetragen.</div>';return}
+ box.innerHTML=loans.map((l,index)=>{
+  const c=loanCurrentStateV062L(l),next=loanNextSplitV062L(l),life=loanLifetimeStatsV063L(l);
+  const pct=Number(l.original)>0?Math.min(100,Math.max(0,c.paidPrincipal/Number(l.original)*100)):0;
+  const endDebt=loanEndFixedDebtV062L(l);
+  return `<article class="loan-detail-card-v062l">
+   <div class="loan-detail-top-v062l">
+    <div class="loan-detail-index-v062l">${index+1}</div>
+    <div class="loan-detail-name-v062l">
+      <span>${esc(l.bank||'Kreditgeber nicht eingetragen')}</span>
+      <h3>${esc(l.name||`Kredit ${index+1}`)}</h3>
+    </div>
+    <div class="loan-detail-rate-v062l"><span>Monatsrate</span><strong>${eur(l.monthlyPayment)}</strong></div>
+    <div class="loan-detail-actions-v062l"><button class="secondary small" onclick="editLoanV061L('${l.id}')">Bearbeiten</button><button class="danger small" onclick="deleteLoanV061L('${l.id}')">Löschen</button></div>
+   </div>
+   <div class="loan-detail-primary-v062l">
+     <div><span>Darlehen</span><strong>${eur(l.original)}</strong></div>
+     <div><span>Restschuld</span><strong>${eur(c.remaining)}</strong></div>
+     <div><span>Sollzins</span><strong>${Number(l.interest||0).toLocaleString('de-DE',{maximumFractionDigits:3})} %</strong></div>
+     <div><span>Zinsbindung</span><strong>${loanFixedYearsV062L(l)}</strong></div>
+     <div><span>Vertragslaufzeit</span><strong>${Number(l.contractYears)>0?`${Number(l.contractYears)} Jahre`:'–'}</strong></div>
+     <div><span>Getilgt</span><strong>${pct.toLocaleString('de-DE',{maximumFractionDigits:1})} %</strong></div>
+   </div>
+   <div class="loan-detail-secondary-v062l">
+     <div><span>Anfängliche Tilgung ca.</span><strong>${loanInitialPrincipalRateV062L(l).toLocaleString('de-DE',{maximumFractionDigits:2})} %</strong></div>
+     <div><span>Zinsen nächster Monat</span><strong>${eur(next.interest)}</strong></div>
+     <div><span>Tilgung nächster Monat</span><strong>${eur(next.principal)}</strong></div>
+     <div><span>Sondertilgung nächster Monat</span><strong>${next.extra>0?eur(next.extra):'–'}</strong></div>
+     <div><span>Restlaufzeit ca.</span><strong>${loanYearsMonthsV063L(life.monthsRemaining)}</strong></div>
+     <div><span>Restschuld Ende Zinsbindung</span><strong>${endDebt==null?'–':eur(endDebt)}</strong></div>
+   </div>
+   <div class="loan-detail-tertiary-v063l">
+     <span>Voraussichtliche weitere Zinsen: <strong>${eur(life.futureInterest)}</strong></span>
+     <span>Voraussichtlich schuldenfrei: <strong>${life.payoffDate}</strong></span>
+     ${Number(l.contractYears)>0?`<span>Vertragliches Laufzeitende: <strong>${loanContractEndV067L(l)}</strong></span>`:''}
+     ${Number(l.effectiveInterest)>0?`<span>Effektivzins: <strong>${Number(l.effectiveInterest).toLocaleString('de-DE',{maximumFractionDigits:3})} %</strong></span>`:''}
+     ${Number(l.extraPayment)>0?`<span>Max. Sondertilgung: <strong>${eur(l.extraPayment)} / Jahr</strong></span>`:''}
+   </div>
+   <div class="loan-detail-progress-v062l"><i style="width:${pct}%"></i></div>
+  </article>`;
+ }).join('');
+}
+function loanSelectOptionsV062L(){
+ return `<option value="all">Alle Kredite</option>`+currentLoansV061L().map((l,i)=>`<option value="${esc(l.id)}">${esc(l.name||`Kredit ${i+1}`)}</option>`).join('');
+}
+function selectedLoansV062L(value){
+ return value==='all'?currentLoansV061L():currentLoansV061L().filter(l=>String(l.id)===String(value));
+}
+function renderLoanChartV062L(){
+ const select=$('#loanChartSelectV062L'),box=$('#loanBalanceChartV062L'); if(!select||!box)return;
+ const loans=selectedLoansV062L(select.value||'all');
+ const rows=loanCombinedScheduleV062L(loans,360);
+ const start=loans.reduce((s,l)=>s+loanCurrentStateV062L(l).remaining,0);
+ if(!rows.length||start<=0){box.innerHTML='<div class="empty">Keine Restschuld für eine Prognose vorhanden.</div>';return}
+ const sample=[{monthIndex:-1,remaining:start},...rows.filter((r,i)=>i%6===5||i===rows.length-1)];
+ const max=Math.max(start,...sample.map(r=>r.remaining),1);
+ const w=640,h=210,pad=24;
+ const pts=sample.map((r,i)=>{
+  const x=pad+(w-pad*2)*(i/Math.max(sample.length-1,1));
+  const y=pad+(h-pad*2)*(1-r.remaining/max);
+  return `${x.toFixed(1)},${y.toFixed(1)}`;
+ }).join(' ');
+ const years=Math.ceil(rows.length/12);
+ box.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Restschuld-Verlauf">
+   <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" class="loan-chart-axis-v062l"/>
+   <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" class="loan-chart-axis-v062l"/>
+   <polyline points="${pts}" class="loan-chart-line-v062l"/>
+   <text x="${pad}" y="${h-5}" class="loan-chart-label-v062l">0</text>
+   <text x="${w-pad}" y="${h-5}" text-anchor="end" class="loan-chart-label-v062l">${years} Jahre</text>
+   <text x="${pad+4}" y="${pad+10}" class="loan-chart-label-v062l">${Math.round(max).toLocaleString('de-DE')} €</text>
+  </svg>
+  <div class="loan-chart-foot-v062l"><span>Aktuell <strong>${eur(start)}</strong></span><span>Prognose bis <strong>${loanDateForOffsetV062L(rows.length-1)}</strong></span></div>`;
+}
+function renderLoanRateDonutV062L(){
+ const box=$('#loanRateDonutV062L'); if(!box)return;
+ const loans=currentLoansV061L();
+ const split=loans.reduce((a,l)=>{
+  const n=loanNextSplitV062L(l);
+  a.interest+=n.interest;
+  a.principal+=n.principal;
+  a.payment+=n.payment;
+  a.extra+=n.extra;
+  return a;
+ },{interest:0,principal:0,payment:0,extra:0});
+ const total=Math.max(split.interest+split.principal,0);
+ const interestPct=total?split.interest/total*100:0;
+ box.innerHTML=`<div class="loan-rate-donut-v062l" style="--interest:${interestPct}%">
+   <div><strong>${eur(split.payment)}</strong><span>reguläre Monatsrate</span></div>
+  </div>
+  <div class="loan-rate-legend-v062l">
+   <div><i class="interest"></i><span>Zinsen</span><strong>${eur(split.interest)}</strong></div>
+   <div><i class="principal"></i><span>Tilgung</span><strong>${eur(split.principal)}</strong></div>
+   ${split.extra>0?`<div><i class="extra-v064l"></i><span>Sondertilgung</span><strong>${eur(split.extra)}</strong></div>`:''}
+  </div>`;
+}
+function renderLoanPlanV062L(){
+ const select=$('#loanPlanSelectV062L'),box=$('#loanPlanRowsV062L'); if(!select||!box)return;
+
+ let loans=selectedLoansV062L(select.value||'all');
+
+ // Wenn der Tilgungsrechner aktiv ist und dieselbe Auswahl betrifft,
+ // wird die Vorschau direkt im Tilgungsplan verwendet.
+ if(Number(loanCalculatorV065L.annualExtra)>0){
+  const calcSel=loanCalculatorV065L.selection||'all';
+  const planSel=select.value||'all';
+  if(calcSel===planSel){
+   loans=loanSchedulesWithCalculatorV065L();
+  }
+ }
+
+ const rows=loanCombinedScheduleV062L(loans,240);
+ box.innerHTML=rows.length?rows.slice(0,120).map((r,i)=>`<div class="loan-plan-row-v062l">
+  <span>${loanDateForOffsetV062L(i)}</span>
+  <strong>${eur(r.payment)}</strong>
+  <span>${eur(r.interest)}</span>
+  <span>${eur(r.principal)}</span>
+  <span class="${r.extra>0?'loan-extra-payment-v064l':''}">${r.extra>0?eur(r.extra):'–'}</span>
+  <strong>${eur(r.remaining)}</strong>
+ </div>`).join(''):'<div class="empty">Kein Tilgungsplan verfügbar.</div>';
+}
+
+function renderLoanCalculatorV065L(){
+ const select=$('#loanCalculatorSelectV065L');
+ const input=$('#loanAnnualExtraInputV065L');
+ const monthSelect=$('#loanExtraMonthV066L');
+ const hint=$('#loanExtraMaxHintV066L');
+ const box=$('#loanCalcResultV065L');
+ if(!select||!input||!box)return;
+
+ const opts=loanSelectOptionsV062L();
+ const old=loanCalculatorV065L.selection||select.value||'all';
+ select.innerHTML=opts;
+ if([...select.options].some(o=>o.value===old))select.value=old;
+ else select.value='all';
+ loanCalculatorV065L.selection=select.value;
+
+ const maxExtra=loanCalculatorMaxExtraV066L();
+ input.max=maxExtra>0?String(maxExtra):'0';
+ if(hint)hint.textContent=maxExtra>0
+  ?`Maximal laut Kredit: ${eur(maxExtra)} pro Jahr`
+  :'Für diesen Kredit ist keine Sondertilgung hinterlegt.';
+
+ if(document.activeElement!==input)input.value=loanCalculatorV065L.annualExtra||'';
+
+ if(monthSelect){
+  monthSelect.value=String(loanCalculatorV065L.month||8);
+ }
+
+ const baseLoans=selectedLoansForCalculatorV065L();
+ const calcLoans=loanSchedulesWithCalculatorV065L();
+ if(!baseLoans.length){
+  box.innerHTML='<div class="empty">Kein Kredit ausgewählt.</div>';
+  return;
+ }
+
+ const baseMonths=loanMaxMonthsV065L(baseLoans);
+ const calcMonths=loanMaxMonthsV065L(calcLoans);
+ const baseInterest=loanFutureInterestSumV065L(baseLoans);
+ const calcInterest=loanFutureInterestSumV065L(calcLoans);
+ const saved=Math.max(0,baseInterest-calcInterest);
+ const earlier=Math.max(0,baseMonths-calcMonths);
+
+ box.innerHTML=`
+  <div><span>Restlaufzeit aktuell</span><strong>${loanYearsMonthsV063L(baseMonths)}</strong></div>
+  <div><span>Mit ${eur(loanCalculatorV065L.annualExtra)} im ${monthNameV066L(loanCalculatorV065L.month)}</span><strong>${loanYearsMonthsV063L(calcMonths)}</strong></div>
+  <div><span>Zinsersparnis</span><strong>${eur(saved)}</strong></div>
+  <div><span>Früher schuldenfrei</span><strong>${earlier?monthsDifferenceTextV065L(earlier):'–'}</strong></div>`;
+}
+function applyLoanCalculatorV065L(){
+ const select=$('#loanCalculatorSelectV065L');
+ const input=$('#loanAnnualExtraInputV065L');
+ const monthSelect=$('#loanExtraMonthV066L');
+
+ loanCalculatorV065L.selection=select?.value||'all';
+ loanCalculatorV065L.month=Math.min(12,Math.max(1,Number(monthSelect?.value)||8));
+
+ const maxExtra=loanCalculatorMaxExtraV066L();
+ let entered=Math.max(0,Number(input?.value)||0);
+
+ if(maxExtra<=0 && entered>0){
+  alert('Für den ausgewählten Kredit ist keine Sondertilgung hinterlegt.');
+  entered=0;
+ }
+ if(maxExtra>0 && entered>maxExtra){
+  entered=maxExtra;
+  if(input)input.value=String(maxExtra);
+  alert(`Maximal mögliche Sondertilgung laut Kredit: ${eur(maxExtra)}.`);
+ }
+ loanCalculatorV065L.annualExtra=entered;
+
+ const plan=$('#loanPlanSelectV062L');
+ if(plan && [...plan.options].some(o=>o.value===loanCalculatorV065L.selection)){
+  plan.value=loanCalculatorV065L.selection;
+ }
+
+ renderLoanCalculatorV065L();
+ renderLoanPlanV062L();
+}
+function resetLoanCalculatorV065L(){
+ loanCalculatorV065L.annualExtra=0;
+ const input=$('#loanAnnualExtraInputV065L'); if(input)input.value='';
+ renderLoanCalculatorV065L();
+ renderLoanPlanV062L();
+}
+function renderLoanManagerV061L(){
+ const loans=currentLoansV061L(),total=loanTotalsV061L();
+ if($('#loanManagerCount'))$('#loanManagerCount').textContent=String(loans.length);
+ if($('#loanManagerOriginal'))$('#loanManagerOriginal').textContent=eur(total.original);
+ if($('#loanManagerRemaining'))$('#loanManagerRemaining').textContent=eur(total.remaining);
+ if($('#loanManagerPayment'))$('#loanManagerPayment').textContent=eur(total.monthlyPayment);
+ if($('#loanManagerPaidV062L'))$('#loanManagerPaidV062L').textContent=eur(total.paid);
+ if($('#loanNextInterestV062L'))$('#loanNextInterestV062L').textContent=eur(total.nextInterest);
+ if($('#loanNextPrincipalV062L'))$('#loanNextPrincipalV062L').textContent=eur(total.nextPrincipal);
+ if($('#loanNextExtraV064L'))$('#loanNextExtraV064L').textContent=eur(total.nextExtra);
+ if($('#loanAverageInterestV062L'))$('#loanAverageInterestV062L').textContent=loanWeightedInterestV062L(loans).toLocaleString('de-DE',{maximumFractionDigits:2})+' %';
+
+ const add=$('#addLoanBtn');
+ if(add){add.disabled=loans.length>=10;add.textContent=loans.length>=10?'Maximum 10 Kredite':'+ Kredit hinzufügen'}
+
+ renderLoanDetailCardsV062L(loans);
+
+ const opts=loanSelectOptionsV062L();
+ const chartSel=$('#loanChartSelectV062L'),planSel=$('#loanPlanSelectV062L');
+ if(chartSel){
+  const old=chartSel.value||'all';chartSel.innerHTML=opts;
+  if([...chartSel.options].some(o=>o.value===old))chartSel.value=old;
+ }
+ if(planSel){
+  const old=planSel.value||'all';planSel.innerHTML=opts;
+  if([...planSel.options].some(o=>o.value===old))planSel.value=old;
+ }
+ renderLoanChartV062L();
+ renderLoanRateDonutV062L();
+ renderLoanCalculatorV065L();
+ renderLoanPlanV062L();
+}
+function openLoanV061L(id=null){
+ const loans=currentLoansV061L();
+ if(!id&&loans.length>=10){alert('Es können maximal 10 Kredite angelegt werden.');return}
+ const l=id?loans.find(x=>String(x.id)===String(id)):null,f=$('#loanForm');
+ f.reset();
+ f.elements.id.value=l?.id||'';f.elements.name.value=l?.name||'';f.elements.bank.value=l?.bank||'';
+ f.elements.original.value=l?.original??'';f.elements.remaining.value=l?.remaining??'';f.elements.balanceDate.value=l?.balanceDate||'';
+ f.elements.interest.value=l?.interest??'';f.elements.monthlyPayment.value=l?.monthlyPayment??'';f.elements.startDate.value=l?.startDate||'';
+ f.elements.fixedUntil.value=l?.fixedUntil||'';f.elements.extraPayment.value=l?.extraPayment??0;f.elements.autoCalculate.checked=l?.autoCalculate!==false;
+ f.elements.effectiveInterest.value=l?.effectiveInterest??'';
+ f.elements.commitmentInterest.value=l?.commitmentInterest??'';
+ f.elements.paymentFreeMonths.value=l?.paymentFreeMonths??0;
+ f.elements.notes.value=l?.notes||'';
+ f.elements.contractYears.value=l?.contractYears??'';
+ f.dataset.originalLoan=id?JSON.stringify(l):'';
+ $('#loanModalTitle').textContent=l?'Kredit bearbeiten':'Kredit hinzufügen';
+ renderLoanPreviewV063L();
+ $('#loanModal').showModal();
+}
+function editLoanV061L(id){openLoanV061L(id)}
+function deleteLoanV061L(id){
+ const l=currentLoansV061L().find(x=>String(x.id)===String(id));
+ if(!l||!confirm(`Kredit „${l.name||l.bank||'Kredit'}“ wirklich löschen?`))return;
+ state.loans=state.loans.filter(x=>String(x.id)!==String(id));save();
+}
+function renderSettings(){renderLoanManagerV061L();$('#settingName').value=state.settings.name;$('#settingStartBalance').value=state.settings.startBalance;$('#settingMinimumReserve').value=state.settings.minimumReserve;$('#settingMonthlyReserve').value=state.settings.monthlyReserve;applyThemeV38()}
 function populateSelects(){
  const opts=`<option value="all">Alle Objekte / gemeinsam</option>`+
   state.properties.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');
@@ -2125,7 +2596,7 @@ function completeItem(type,id){
  save();
 }
 function deletePlanning(type,id){if(!confirm('Eintrag wirklich löschen?'))return;const key=type==='task'?'tasks':type==='maintenance'?'maintenance':'reserves';state[key]=state[key].filter(x=>x.id!==id);save()}
-function openLoan(){const f=$('#loanForm'),l=state.loan;Object.keys(l).forEach(k=>{if(!f.elements[k])return;if(f.elements[k].type==='checkbox')f.elements[k].checked=Boolean(l[k]);else f.elements[k].value=l[k]??''});$('#loanModal').showModal()}
+function openLoan(){openLoanV061L(null)}
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',tasks:'Planung',settings:'Einstellungen'};$('#pageTitle').textContent=titles[name]||'Hausverwaltung';window.scrollTo({top:0,behavior:'smooth'})}
 $$('.bottom-nav .nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.target)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.go)));$$('[data-modal]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.modal;if(m==='ownerModal')openOwnerModal();else if(m==='propertyModal'){if((state.properties||[]).length>=5){alert('Es können maximal 5 Objekte angelegt werden.');return}openPropertyModal();}else if(m==='costModal')openCostModal();else if(m==='loanModal')openLoan();else document.getElementById(m).showModal()}));
 $$('[data-task-tab]').forEach(b=>b.addEventListener('click',()=>{
@@ -2184,7 +2655,111 @@ $('#costForm').addEventListener('submit',e=>{
  else state.costPlans.push({id:Date.now(),paid:false,paidAt:'',...data});
  e.target.reset();$('#costModal').close();save()
 });
-$('#loanForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.loan={bank:f.get('bank'),original:Number(f.get('original')),remaining:Number(f.get('remaining')),balanceDate:f.get('balanceDate'),interest:Number(f.get('interest')),monthlyPayment:Number(f.get('monthlyPayment')),startDate:f.get('startDate'),fixedUntil:f.get('fixedUntil'),extraPayment:Number(f.get('extraPayment')),autoCalculate:f.get('autoCalculate')==='on'};$('#loanModal').close();save()});
+$('#loanForm')?.addEventListener('input',renderLoanPreviewV063L);
+$('#loanAcceptBankBalanceV063L')?.addEventListener('click',acceptBankBalanceV063L);
+
+function loanFromFormV063L(){
+ const f=$('#loanForm');if(!f)return null;
+ const fd=new FormData(f);
+ return {
+  original:Number(fd.get('original'))||0,
+  remaining:Number(fd.get('remaining'))||0,
+  balanceDate:fd.get('balanceDate')||'',
+  interest:Number(fd.get('interest'))||0,
+  monthlyPayment:Number(fd.get('monthlyPayment'))||0,
+  startDate:fd.get('startDate')||'',
+  fixedUntil:fd.get('fixedUntil')||'',
+  extraPayment:Number(fd.get('extraPayment'))||0,
+  effectiveInterest:Number(fd.get('effectiveInterest'))||0,
+  commitmentInterest:Number(fd.get('commitmentInterest'))||0,
+  paymentFreeMonths:Math.max(0,Number(fd.get('paymentFreeMonths'))||0),
+  autoCalculate:fd.get('autoCalculate')==='on'
+ };
+}
+function renderLoanPreviewV063L(){
+ const box=$('#loanCalculatedPreviewV063L');if(!box)return;
+ const l=loanFromFormV063L();
+ if(!l||!l.original||!l.remaining||!l.interest||!l.monthlyPayment){
+  box.innerHTML='<span>Nach Eingabe der Grunddaten erscheint hier eine Vorschau der Berechnung.</span>';
+  return;
+ }
+ const c=loanCurrentStateV062L(l),n=loanNextSplitV062L(l),life=loanLifetimeStatsV063L(l);
+ box.innerHTML=`<div><span>Berechnete Restschuld heute</span><strong>${eur(c.remaining)}</strong></div>
+ <div><span>Zinsen nächster Monat</span><strong>${eur(n.interest)}</strong></div>
+ <div><span>Tilgung nächster Monat</span><strong>${eur(n.principal)}</strong></div>
+ <div><span>Sondertilgung nächster Monat</span><strong>${n.extra>0?eur(n.extra):'–'}</strong></div>
+ <div><span>Restlaufzeit ca.</span><strong>${loanYearsMonthsV063L(life.monthsRemaining)}</strong></div>`;
+}
+function acceptBankBalanceV063L(){
+ const f=$('#loanForm');if(!f)return;
+ const id=String(f.elements.id.value||'');
+ const remaining=Number(f.elements.remaining.value)||0;
+ const date=String(f.elements.balanceDate.value||'');
+ if(!remaining||!date){alert('Bitte neue Restschuld und neuen Stichtag eintragen.');return}
+ if(id){
+  const loan=currentLoansV061L().find(x=>String(x.id)===id);
+  if(loan){
+   loan.bankBalanceHistory=Array.isArray(loan.bankBalanceHistory)?loan.bankBalanceHistory:[];
+   const duplicate=loan.bankBalanceHistory.some(x=>x.date===date&&Number(x.remaining)===remaining);
+   if(!duplicate)loan.bankBalanceHistory.push({date,remaining,recordedAt:new Date().toISOString()});
+  }
+ }
+ renderLoanPreviewV063L();
+ alert('Bank-Restschuld übernommen. Mit „Speichern“ wird der Kredit dauerhaft aktualisiert.');
+}
+
+
+$('#loanCalculatorSelectV065L')?.addEventListener('change',e=>{
+ loanCalculatorV065L.selection=e.target.value||'all';
+ loanCalculatorV065L.annualExtra=0;
+ const input=$('#loanAnnualExtraInputV065L');if(input)input.value='';
+ renderLoanCalculatorV065L();
+ renderLoanPlanV062L();
+});
+$('#loanExtraMonthV066L')?.addEventListener('change',e=>{
+ loanCalculatorV065L.month=Number(e.target.value)||8;
+});
+$('#loanCalcApplyV065L')?.addEventListener('click',applyLoanCalculatorV065L);
+$('#loanCalcResetV065L')?.addEventListener('click',resetLoanCalculatorV065L);
+$('#loanAnnualExtraInputV065L')?.addEventListener('keydown',e=>{
+ if(e.key==='Enter'){e.preventDefault();applyLoanCalculatorV065L()}
+});
+$('#loanChartSelectV062L')?.addEventListener('change',renderLoanChartV062L);
+$('#loanPlanSelectV062L')?.addEventListener('change',renderLoanPlanV062L);
+$('#addLoanBtn')?.addEventListener('click',()=>openLoanV061L(null));
+$('#loanForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const f=new FormData(e.target),id=String(f.get('id')||'');
+ const data={name:String(f.get('name')||'').trim(),bank:String(f.get('bank')||'').trim(),original:Number(f.get('original'))||0,
+  remaining:Number(f.get('remaining'))||0,balanceDate:f.get('balanceDate')||'',interest:Number(f.get('interest'))||0,
+  monthlyPayment:Number(f.get('monthlyPayment'))||0,startDate:f.get('startDate')||'',fixedUntil:f.get('fixedUntil')||'',
+  extraPayment:Number(f.get('extraPayment'))||0,
+  effectiveInterest:Number(f.get('effectiveInterest'))||0,
+  commitmentInterest:Number(f.get('commitmentInterest'))||0,
+  paymentFreeMonths:Math.max(0,Number(f.get('paymentFreeMonths'))||0),
+  notes:String(f.get('notes')||'').trim(),
+  contractYears:Math.max(0,Number(f.get('contractYears'))||0),
+  autoCalculate:f.get('autoCalculate')==='on'};
+ if(!data.name||!data.bank){alert('Bitte Bezeichnung und Bank eintragen.');return}
+ if(data.original<=0||data.remaining<=0||data.interest<=0||data.monthlyPayment<=0||!data.balanceDate||!data.startDate||!data.fixedUntil){
+  alert('Bitte alle Grunddaten des Kredits vollständig eintragen.');return
+ }
+ if(data.monthlyPayment<=data.remaining*(data.interest/100/12)){
+  alert('Die Monatsrate ist nicht höher als der monatliche Zins. Der Kredit würde so nicht getilgt. Bitte Rate oder Zinssatz prüfen.');return
+ }
+ state.loans=Array.isArray(state.loans)?state.loans:[];
+ if(id){
+  const loan=state.loans.find(x=>String(x.id)===id);
+  if(loan){
+   data.bankBalanceHistory=Array.isArray(loan.bankBalanceHistory)?loan.bankBalanceHistory:[];
+   Object.assign(loan,data);
+  }
+ }else{
+  if(state.loans.length>=10){alert('Es können maximal 10 Kredite angelegt werden.');return}
+  state.loans.push({id:Date.now(),bankBalanceHistory:[],...data});
+ }
+ $('#loanModal').close();e.target.reset();save();
+});
 
 $('#addVehicleBtn').addEventListener('click',()=>{if((state.vehicles||[]).length>=6){alert('Es können maximal 6 Fahrzeuge angelegt werden.');return}openVehicleModal(null)});
 
@@ -2484,4 +3059,4 @@ $('#propertyDocumentForm')?.addEventListener('submit',async e=>{
 $('#dashboardWidgetChoices')?.addEventListener('change',e=>{const k=e.target?.dataset?.widgetChoice;if(!k)return;state.settings.dashboardWidgets={...(state.settings.dashboardWidgets||{}),[k]:e.target.checked};save()});
 $('#darkModeToggle')?.addEventListener('change',e=>{state.settings.darkMode=e.target.checked;save()});
 
-Object.assign(window,{editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24,editTenantUserV27,deleteTenantUserV27,toggleCostPaid,openRenovationModalV35,deleteRenovationV35});render();applyUiLanguage();bootstrapAuthV27();
+Object.assign(window,{editLoanV061L,deleteLoanV061L,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24,editTenantUserV27,deleteTenantUserV27,toggleCostPaid,openRenovationModalV35,deleteRenovationV35});render();applyUiLanguage();bootstrapAuthV27();

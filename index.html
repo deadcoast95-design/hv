@@ -21,63 +21,27 @@
 <header class="topbar"><div><p class="eyebrow" data-i18n="private">PRIVATE IMMOBILIENVERWALTUNG</p><h1 id="pageTitle" data-i18n="overview">Übersicht</h1><span id="localStatus" class="local-status" data-i18n="local">Lokal gespeichert</span></div><button id="installBtn" class="ghost hidden">Installieren</button></header>
 <div id="appNotice" class="app-notice hidden"></div>
 <main id="app">
-  <section class="view active" data-view="dashboard">
-    
-    <section class="panel" data-widget="important">
-      <div class="panel-head"><h2>⚠️ Demnächst wichtig</h2><span id="importantCountTag" class="tag">0 Hinweise</span></div>
-      <div id="importantItems" class="important-list"></div>
-    </section>
-    
-    <section class="panel" data-widget="consumption">
-      <div class="panel-head"><h2>📊 Verbrauchsanalyse</h2><span class="tag">Zählerhistorie</span></div>
-      <div id="dashboardConsumption" class="consumption-overview"></div>
-    </section>
-    
-    
-    
-    <div class="hero-card hero-finance" data-widget="finance">
-      <div><span>Monatliche Ausgaben</span><strong id="monthlyNeed">0,00 €</strong></div>
-      <div><span>Monatliche Einnahmen</span><strong id="monthlyIncome">0,00 €</strong></div>
-      <div><span>Monatlicher Saldo</span><strong id="monthlyNet">0,00 €</strong></div>
-    </div>
-<section class="panel" data-widget="loan">
-      <div class="panel-head"><h2 data-i18n="loan">Kreditübersicht</h2></div>
-      <div class="loan-layout">
-        <div class="donut" id="loanDonut"><div><strong id="loanPercent">0 %</strong><span>getilgt</span></div></div>
-        <div class="loan-facts">
-          <div><span>Darlehenssumme</span><strong id="loanOriginal">0,00 €</strong></div>
-          <div><span>Bereits getilgt</span><strong id="loanPaid">0,00 €</strong></div>
-          <div><span>Restschuld</span><strong id="loanRemaining">0,00 €</strong></div>
-          <div><span>Monatsrate</span><strong id="loanPayment">0,00 €</strong></div>
-        </div>
-      </div>
-      <div id="loanDetails" class="detail-grid"></div>
-    </section><section class="panel" data-widget="objectcosts"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel" data-widget="contributions"><div class="panel-head"><h2 data-i18n="contributions">Monatliche Einzahlungen der Benutzer</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
-    
-
-    <section class="panel waste-panel" data-widget="waste">
-      <div class="panel-head"><h2 data-i18n="waste">Müllabfuhr-Kalender</h2><span class="tag">Datum antippen</span></div>
-      <div class="calendar-head"><button id="wastePrev" class="secondary tiny" type="button">‹</button><strong id="wasteMonthTitle"></strong><button id="wasteNext" class="secondary tiny" type="button">›</button></div>
-      <div id="wasteCalendar" class="waste-calendar"></div>
-      <div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div>
-    </section>
-    <section class="panel" data-widget="costpositions"><div class="panel-head"><h2 data-i18n="costs">Kostenpositionen</h2><span class="tag">Nur Information</span></div><div class="cost-info-table"><div class="cost-info-head"><span data-i18n="category">Kategorie</span><span data-i18n="object">Objekt</span><span data-i18n="monthly">Monatlich</span><span data-i18n="interval">Intervall</span><span data-i18n="yearTotal">Jahr gesamt</span></div><div id="dashboardCostPositions"></div></div></section>
-    <section class="panel" data-widget="objects">
-  <div class="panel-head"><h2 data-i18n="objectOverview">Objektübersicht</h2><span class="tag">Nur Information</span></div>
-  <div id="dashboardPropertyOverview" class="dashboard-property-grid"></div>
+  <section class="view active dashboard-v070l" data-view="dashboard">
+<section class="dashboard-status-strip-v070l">
+<article><span class="dash-status-icon-v070l">✓</span><div><strong id="dashOpenTaskCountV070L">0</strong><small>offene Aufgaben</small></div></article>
+<article><span class="dash-status-icon-v070l">🏦</span><div><strong id="dashLoanCountV070L">0</strong><small>Kredite</small></div></article>
+<article><span class="dash-status-icon-v070l">🏠</span><div><strong id="dashPropertyCountV070L">0</strong><small>Objekte</small></div></article>
+<article><span class="dash-status-icon-v070l">🚗</span><div><strong id="dashVehicleCountV070L">0</strong><small>Fahrzeuge</small></div></article>
+</section>
+<section class="panel" data-widget="important"><div class="panel-head"><div><h2>⚠️ Demnächst wichtig</h2><p class="helper-text">Nur was bald Aufmerksamkeit braucht.</p></div><span id="importantCountTag" class="tag">0 Hinweise</span></div><div id="importantItems" class="dashboard-important-list-v070l"></div></section>
+<section class="panel" data-widget="tasks"><div class="panel-head"><div><h2>✅ Aufgaben</h2><p class="helper-text">Nach Priorität und Termin sortiert.</p></div><span class="tag">Planung</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
+<section class="panel" data-widget="loan"><div class="panel-head"><div><h2>🏦 Kreditübersicht</h2><p class="helper-text">Tilgungsfortschritt auf einen Blick.</p></div><span id="dashboardLoanCountTagV070L" class="tag">0 Kredite</span></div><div class="dashboard-loan-visual-v070l"><div class="donut dashboard-loan-donut-v070l" id="loanDonut"><div><strong id="loanPercent">0 %</strong><span>getilgt</span></div></div><div class="dashboard-loan-kpis-v070l"><div><span>Darlehen</span><strong id="loanOriginal">0,00 €</strong></div><div><span>Restschuld</span><strong id="loanRemaining">0,00 €</strong></div><div><span>Getilgt</span><strong id="loanPaid">0,00 €</strong></div><div><span>Raten / Monat</span><strong id="loanPayment">0,00 €</strong></div></div></div><div id="loanDetails" class="dashboard-loan-list-v070l"></div></section>
+<section class="panel" data-widget="consumption"><div class="panel-head"><div><h2>⚡💧 Verbrauch</h2><p class="helper-text">Strom und Wasser aus der Zählerhistorie.</p></div><span class="tag">Zählerstände</span></div><div id="dashboardConsumption" class="consumption-overview-v070l"></div></section>
+<section class="panel" data-widget="contributions"><div class="panel-head"><div><h2>👥 Monatliche Einzahlungen</h2><p class="helper-text">Verteilung auf die Kontobenutzer.</p></div><span id="dashboardContributionTotalV070L" class="tag">0,00 €</span></div><div id="ownerIncomeSummary" class="dashboard-contribution-grid-v070l"></div></section>
+<div class="dashboard-two-column-v070l">
+<section class="panel waste-panel" data-widget="waste"><div class="panel-head"><div><h2>📅 Kalender</h2><p class="helper-text">Mülltermine auf einen Blick.</p></div><span class="tag">Datum antippen</span></div><div class="calendar-head"><button id="wastePrev" class="secondary tiny" type="button">‹</button><strong id="wasteMonthTitle"></strong><button id="wasteNext" class="secondary tiny" type="button">›</button></div><div id="wasteCalendar" class="waste-calendar"></div><div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div></section>
+<section class="panel" data-widget="costpositions"><div class="panel-head"><div><h2>💳 Kostenpositionen</h2><p class="helper-text">Größte laufende Monatskosten.</p></div><span id="dashboardCostCountV070L" class="tag">0 Positionen</span></div><div id="dashboardCostChartV070L" class="dashboard-cost-chart-v070l"></div><div id="dashboardCostPositions" class="dashboard-cost-cards-v070l"></div></section>
+</div>
+<section class="panel" data-widget="objects"><div class="panel-head"><div><h2>🏠 Objektübersicht</h2><p class="helper-text">Gebäudedaten und Energieklasse.</p></div><span class="tag">max. 5</span></div><div id="dashboardPropertyOverview" class="dashboard-property-grid"></div></section>
+<section class="panel" data-widget="vehicles"><div class="panel-head"><div><h2>🚗 Fahrzeugübersicht</h2><p class="helper-text">Kilometerstand und nächste Wartungen.</p></div><span class="tag">Fahrzeuge</span></div><div id="dashboardVehicleOverview" class="dashboard-vehicle-grid"></div></section>
 </section>
 
-<section class="panel" data-widget="renovations"><div class="panel-head"><h2>Sanierungsübersicht</h2><span class="tag">Nur Information</span></div><div id="dashboardRenovationOverview" class="dashboard-renovation-overview"></div></section>
-
-<section class="panel" data-widget="vehicles">
-  <div class="panel-head"><h2 data-i18n="vehicleOverview">Fahrzeugübersicht</h2><span class="tag">Nur Information</span></div>
-  <div id="dashboardVehicleOverview" class="dashboard-vehicle-grid"></div>
-</section>
-
-<section class="panel" data-widget="tasks"><div class="panel-head"><h2 data-i18n="taskOverview">Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
-  </section>
-
-  <section class="view account-view-v045l" data-view="transactions">
+<section class="view account-view-v045l" data-view="transactions">
   <div class="account-hero-v045l">
     <div>
       <span class="account-kicker-v045l">KONTO</span>
@@ -182,7 +146,120 @@
 
   <section class="view" data-view="vehicles"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button"><span data-i18n="addVehicle">+ Fahrzeug</span></button></div><section class="panel compact"><div class="panel-head"><h2 data-i18n="vehicleFile">Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p data-i18n="vehicleHint">Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
 <section class="view" data-view="settings">
-    <section class="panel"><div class="panel-head"><h2 data-i18n="loanManagement">Kreditverwaltung</h2><button class="primary" data-modal="loanModal"><span data-i18n="editLoan">Kredit bearbeiten</span></button></div><p>Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.</p></section>
+    <section class="panel loan-finance-v062l">
+  <div class="loan-finance-head-v062l">
+    <div>
+      <span class="loan-kicker-v062l">FINANZIERUNG</span>
+      <h2>Kreditverwaltung</h2>
+      <p>Alle Kredite, Restschulden und Tilgungen übersichtlich an einem Ort.</p>
+    </div>
+    <button id="addLoanBtn" class="primary" type="button">+ Kredit hinzufügen</button>
+  </div>
+
+  <div class="loan-overview-v062l">
+    <div><span>Kredite</span><strong id="loanManagerCount">0</strong><small>von max. 10</small></div>
+    <div><span>Darlehensbetrag gesamt</span><strong id="loanManagerOriginal">0,00 €</strong></div>
+    <div><span>Ø Sollzins</span><strong id="loanAverageInterestV062L">0,00 %</strong></div>
+    <div><span>Monatliche Raten</span><strong id="loanManagerPayment">0,00 €</strong></div>
+  </div>
+
+  <div class="loan-overview-detail-v062l">
+    <div><span>Restschuld aktuell</span><strong id="loanManagerRemaining">0,00 €</strong></div>
+    <div><span>Bereits getilgt</span><strong id="loanManagerPaidV062L">0,00 €</strong></div>
+    <div><span>Zinsen nächster Monat</span><strong id="loanNextInterestV062L">0,00 €</strong></div>
+    <div><span>Tilgung nächster Monat</span><strong id="loanNextPrincipalV062L">0,00 €</strong></div>
+    <div><span>Sondertilgung nächster Monat</span><strong id="loanNextExtraV064L">0,00 €</strong></div>
+  </div>
+
+  <div class="loan-section-title-v062l">
+    <div><h3>Finanzierungsdetails</h3><p>Jeder Kredit wird getrennt berechnet.</p></div>
+  </div>
+  <div id="loanManagerList" class="loan-detail-list-v062l"></div>
+
+  <div class="loan-analysis-grid-v062l">
+    <section class="loan-analysis-card-v062l loan-payoff-calculator-v065l">
+      <div class="loan-analysis-head-v062l">
+        <div>
+          <h3>Sondertilgung testen</h3>
+          <p>Betrag und Monat auswählen – nur diese Sondertilgung wird in der Vorschau berechnet.</p>
+        </div>
+        <select id="loanCalculatorSelectV065L"><option value="all">Alle Kredite</option></select>
+      </div>
+
+      <div class="loan-calc-panel-v067l">
+        <div class="loan-calc-fields-v067l">
+          <label>
+            <span>Sondertilgung</span>
+            <div class="loan-calc-money-v067l">
+              <input id="loanAnnualExtraInputV065L" type="number" min="0" step="100" placeholder="4.000">
+              <b>€ / Jahr</b>
+            </div>
+            <small id="loanExtraMaxHintV066L">Maximal laut Kredit: –</small>
+          </label>
+
+          <label>
+            <span>Monat</span>
+            <select id="loanExtraMonthV066L">
+              <option value="1">Januar</option>
+              <option value="2">Februar</option>
+              <option value="3">März</option>
+              <option value="4">April</option>
+              <option value="5">Mai</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Dezember</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="loan-calc-buttons-v067l">
+          <button id="loanCalcApplyV065L" type="button" class="primary">Berechnen</button>
+          <button id="loanCalcResetV065L" type="button" class="secondary">Zurücksetzen</button>
+        </div>
+      </div>
+
+      <div id="loanCalcResultV065L" class="loan-calc-result-v065l">
+        <div><span>Restlaufzeit aktuell</span><strong>–</strong></div>
+        <div><span>Restlaufzeit mit Extra-Tilgung</span><strong>–</strong></div>
+        <div><span>Zinsersparnis</span><strong>–</strong></div>
+        <div><span>Früher schuldenfrei</span><strong>–</strong></div>
+      </div>
+
+      <div class="loan-calc-note-v065l">
+        Der eingegebene Betrag ersetzt für die Vorschau die hinterlegte Sondertilgung. Monat und Betrag gelten nur für den Rechner und den Tilgungsplan, bis du zurücksetzt.
+      </div>
+    </section>
+
+    <section class="loan-analysis-card-v062l">
+      <div class="loan-analysis-head-v062l">
+        <div><h3>Monatliche Rate</h3><p>Zins- und Tilgungsanteil im nächsten Monat.</p></div>
+      </div>
+      <div id="loanRateDonutV062L" class="loan-rate-donut-wrap-v062l"></div>
+    </section>
+  </div>
+
+  <section class="loan-plan-v062l">
+    <div class="loan-analysis-head-v062l">
+      <div><h3>Tilgungsplan</h3><p>Monatliche Entwicklung von Rate, Zins, Tilgung und Restschuld.</p></div>
+      <select id="loanPlanSelectV062L"><option value="all">Alle Kredite</option></select>
+    </div>
+    <div class="loan-plan-table-v062l">
+      <div class="loan-plan-head-v062l">
+        <span>Monat</span>
+        <span>Rate</span>
+        <span>Zinsen</span>
+        <span>Tilgung</span>
+        <span>Sondertilgung</span>
+        <span>Restschuld</span>
+      </div>
+      <div id="loanPlanRowsV062L"></div>
+    </div>
+  </section>
+</section>
     <section class="panel local-user-storage-v051l">
   <div class="panel-head">
     <div>
@@ -306,7 +383,7 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere eine Vollsicherung mit App-Daten, Konto und Benutzern oder importiere eine vorhandene Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.60l</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.70l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -484,7 +561,96 @@
 <option>Sonstige Betriebskosten</option>
 <option>Sonstiges</option>
 </datalist>
-<dialog id="loanModal"><form method="dialog" id="loanForm"><h2>Kredit bearbeiten</h2><label>Bank<input name="bank" /></label><label>Darlehenssumme<input name="original" type="number" min="0" step="0.01" /></label><label>Restschuld laut Bank am Stichtag<input name="remaining" type="number" min="0" step="0.01" /></label><label>Stichtag der Restschuld<input name="balanceDate" type="date" /></label><label>Sollzins p.a. %<input name="interest" type="number" min="0" step="0.001" /></label><label>Monatsrate<input name="monthlyPayment" type="number" min="0" step="0.01" /></label><label>Beginn<input name="startDate" type="date" /></label><label>Zinsbindung bis<input name="fixedUntil" type="date" /></label><label>Sondertilgung p.a.<input name="extraPayment" type="number" min="0" step="0.01" /></label><label class="check-row"><input name="autoCalculate" type="checkbox" checked /> Restschuld jeden Monat automatisch berechnen</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
+<dialog id="loanModal" class="loan-dialog-v063l">
+<form method="dialog" id="loanForm">
+  <div class="loan-dialog-title-v061l">
+    <span>🏦</span>
+    <div>
+      <h2 id="loanModalTitle">Kredit hinzufügen</h2>
+      <p>Die wichtigsten Kreditdaten eintragen – den Rest berechnet die App automatisch.</p>
+    </div>
+  </div>
+
+  <input name="id" type="hidden">
+
+  <div class="loan-required-hint-v063l">
+    <strong>Grunddaten</strong>
+    <span>Diese Angaben reichen für Restschuld, Tilgungsplan und Zins-/Tilgungsberechnung.</span>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Bezeichnung *<input name="name" placeholder="z. B. KfW 124" required></label>
+    <label>Bank *<input name="bank" placeholder="z. B. KfW / DSL" required></label>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Darlehenssumme € *<input name="original" type="number" min="0" step="0.01" required></label>
+    <label>Aktuelle Restschuld laut Bank € *<input name="remaining" type="number" min="0" step="0.01" required></label>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Stichtag der Restschuld *<input name="balanceDate" type="date" required></label>
+    <label>Sollzins p.a. % *<input name="interest" type="number" min="0" step="0.001" required></label>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Monatsrate € *<input name="monthlyPayment" type="number" min="0" step="0.01" required></label>
+    <label>Beginn des Kredits *<input name="startDate" type="date" required></label>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Zinsbindung bis *<input name="fixedUntil" type="date" required></label>
+    <label>Vertragslaufzeit
+      <div class="loan-duration-input-v067l">
+        <input name="contractYears" type="number" min="0" max="60" step="1" placeholder="z. B. 20">
+        <span>Jahre</span>
+      </div>
+    </label>
+  </div>
+
+  <div class="loan-auto-box-v063l">
+    <label class="check-row">
+      <input name="autoCalculate" type="checkbox" checked>
+      <span><strong>Restschuld automatisch berechnen</strong><small>Die App schreibt die Restschuld ab dem Bank-Stichtag monatlich fort.</small></span>
+    </label>
+  </div>
+
+  <details class="loan-more-v063l">
+    <summary>Weitere Angaben <span>optional</span></summary>
+    <div class="loan-more-body-v063l">
+      <div class="form-two-columns">
+        <label>Maximale Sondertilgung pro Jahr €
+          <input name="extraPayment" type="number" min="0" step="0.01" value="0">
+          <small class="loan-field-help-v068l">Nur Vertragsgrenze – wird nicht automatisch getilgt.</small>
+        </label>
+        <label>Effektivzins %<input name="effectiveInterest" type="number" min="0" step="0.001"></label>
+      </div>
+
+      <div class="form-two-columns">
+        <label>Bereitstellungszins %<input name="commitmentInterest" type="number" min="0" step="0.001"></label>
+        <label>Tilgungsfreie Monate<input name="paymentFreeMonths" type="number" min="0" step="1" value="0"></label>
+      </div>
+
+      <label>Notizen<textarea name="notes" rows="3" placeholder="z. B. Sondervereinbarung, Förderprogramm, Tilgungssatzwechsel …"></textarea></label>
+    </div>
+  </details>
+
+  <div id="loanCalculatedPreviewV063L" class="loan-preview-v063l"></div>
+
+  <div class="loan-bank-update-v063l">
+    <div>
+      <strong>Neue Bank-Restschuld erhalten?</strong>
+      <span>Neue Restschuld + neuen Stichtag oben eintragen und anschließend übernehmen.</span>
+    </div>
+    <button id="loanAcceptBankBalanceV063L" type="button" class="secondary">Restschuld aktualisieren</button>
+  </div>
+
+  <div class="dialog-actions">
+    <button value="cancel" class="secondary">Abbrechen</button>
+    <button value="default" class="primary">Speichern</button>
+  </div>
+</form>
+</dialog>
 <dialog id="vehicleModal"><form method="dialog" id="vehicleForm"><h2 id="vehicleModalTitle" data-i18n="vehicleAddTitle">Fahrzeug hinzufügen</h2><input name="id" type="hidden">
     <label class="vehicle-photo-field">
       <span>Foto</span>

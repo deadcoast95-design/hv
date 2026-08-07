@@ -1023,3 +1023,336 @@ button.tiny{padding:4px 6px!important;min-height:0!important}
 .settings-export-v060l{width:100%;min-height:43px;font-weight:900;box-shadow:0 8px 20px rgba(37,99,235,.15)}
 .settings-export-note-v060l{margin:7px 2px 0;font-size:8px;color:#64748b}
 @media(max-width:600px){.settings-save-actions-v060l{grid-template-columns:1fr}}
+
+/* 0.61l – Mehrfach-Kreditverwaltung */
+.loan-manager-summary-v061l{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.loan-manager-summary-v061l>div{display:flex;flex-direction:column;gap:3px;padding:10px 11px;border:1px solid #e2e8f0;border-radius:11px;background:#f8fafc}
+.loan-manager-summary-v061l span{font-size:8px;color:#64748b}.loan-manager-summary-v061l strong{font-size:11px;color:#0f172a}
+.loan-manager-list-v061l{display:grid;gap:9px}.loan-manager-card-v061l{border:1px solid #e2e8f0;border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 5px 16px rgba(15,23,42,.035)}
+.loan-manager-card-main-v061l{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px}
+.loan-manager-icon-v061l{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#eff6ff;font-size:18px}
+.loan-manager-card-main-v061l span{font-size:7px;color:#2563eb;font-weight:900}.loan-manager-card-main-v061l h3{margin:1px 0;font-size:12px}.loan-manager-card-main-v061l p{margin:0;color:#64748b;font-size:8px}
+.loan-manager-progress-value-v061l{display:flex;flex-direction:column;text-align:right}.loan-manager-progress-value-v061l strong{font-size:12px}.loan-manager-progress-value-v061l span{color:#64748b}
+.loan-manager-facts-v061l{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:0 12px 10px}.loan-manager-facts-v061l>div{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:9px;background:#f8fafc}.loan-manager-facts-v061l span{font-size:7px;color:#64748b}.loan-manager-facts-v061l strong{font-size:9px}
+.loan-manager-progress-v061l{height:5px;background:#e2e8f0;margin:0 12px 10px;border-radius:999px;overflow:hidden}.loan-manager-progress-v061l i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#22c55e);border-radius:999px}
+.loan-manager-actions-v061l{display:flex;justify-content:flex-end;gap:6px;padding:9px 12px;border-top:1px solid #eef2f7;background:#fbfdff}
+.loan-dialog-v061l form{max-width:650px}.loan-dialog-title-v061l{display:flex;gap:10px;align-items:center;margin-bottom:12px}.loan-dialog-title-v061l>span{width:42px;height:42px;border-radius:13px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:19px}.loan-dialog-title-v061l h2{margin:0}.loan-dialog-title-v061l p{margin:2px 0 0;font-size:9px;color:#64748b}
+.dashboard-loan-row-v061l{display:grid;grid-template-columns:1.4fr .8fr .7fr .9fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #e8edf3}.dashboard-loan-row-v061l:last-child{border-bottom:0}.dashboard-loan-row-v061l>span{display:flex;flex-direction:column;gap:2px}.dashboard-loan-row-v061l small{font-size:7px;color:#64748b}.dashboard-loan-row-v061l b,.dashboard-loan-row-v061l strong{font-size:9px}
+.dark-mode .loan-manager-summary-v061l>div,.dark-mode .loan-manager-facts-v061l>div,.dark-mode .loan-manager-card-v061l,.dark-mode .loan-manager-actions-v061l{background:#111827!important;border-color:#334155!important}.dark-mode .loan-manager-summary-v061l strong{color:#e5e7eb}
+@media(max-width:700px){.loan-manager-summary-v061l{grid-template-columns:1fr 1fr}.loan-manager-facts-v061l{grid-template-columns:1fr 1fr}.dashboard-loan-row-v061l{grid-template-columns:1fr 1fr}}
+
+/* 0.62l – Kreditverwaltung nach Finanzierungsübersicht */
+.loan-finance-v062l{padding:0!important;overflow:hidden}
+.loan-finance-head-v062l{
+ display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+ padding:18px 20px;background:linear-gradient(135deg,#f8fbff,#eef5ff);border-bottom:1px solid #e5edf7
+}
+.loan-kicker-v062l{display:block;font-size:7px;letter-spacing:.18em;font-weight:1000;color:#2563eb;margin-bottom:4px}
+.loan-finance-head-v062l h2{margin:0;font-size:19px}.loan-finance-head-v062l p{margin:4px 0 0;font-size:9px;color:#64748b}
+.loan-overview-v062l{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #e5edf7}
+.loan-overview-v062l>div{display:flex;flex-direction:column;gap:3px;padding:15px 16px;border-right:1px solid #e5edf7}
+.loan-overview-v062l>div:last-child{border-right:0}.loan-overview-v062l span{font-size:8px;color:#64748b}.loan-overview-v062l strong{font-size:17px}.loan-overview-v062l small{font-size:7px;color:#94a3b8}
+.loan-overview-detail-v062l{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:#fbfdff;border-bottom:1px solid #e5edf7}
+.loan-overview-detail-v062l>div{padding:9px 10px;border:1px solid #e5edf7;border-radius:10px;background:#fff;display:flex;flex-direction:column;gap:2px}
+.loan-overview-detail-v062l span{font-size:7px;color:#64748b}.loan-overview-detail-v062l strong{font-size:10px}
+.loan-section-title-v062l{padding:16px 18px 8px}.loan-section-title-v062l h3,.loan-analysis-head-v062l h3{margin:0;font-size:14px}.loan-section-title-v062l p,.loan-analysis-head-v062l p{margin:2px 0 0;font-size:8px;color:#64748b}
+.loan-detail-list-v062l{display:grid;gap:10px;padding:0 16px 16px}
+.loan-detail-card-v062l{border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff}
+.loan-detail-top-v062l{display:grid;grid-template-columns:38px minmax(0,1fr) 130px auto;gap:10px;align-items:center;padding:11px 12px;background:#fbfdff;border-bottom:1px solid #edf2f7}
+.loan-detail-index-v062l{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#2563eb;color:#fff;font-weight:1000}
+.loan-detail-name-v062l span{font-size:7px;color:#64748b}.loan-detail-name-v062l h3{margin:1px 0 0;font-size:12px}
+.loan-detail-rate-v062l{display:flex;flex-direction:column;text-align:right}.loan-detail-rate-v062l span{font-size:7px;color:#64748b}.loan-detail-rate-v062l strong{font-size:12px}
+.loan-detail-actions-v062l{display:flex;gap:5px}
+.loan-detail-primary-v062l,.loan-detail-secondary-v062l{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:10px 12px}
+.loan-detail-secondary-v062l{background:#fbfdff;border-top:1px solid #edf2f7}
+.loan-detail-primary-v062l>div,.loan-detail-secondary-v062l>div{display:flex;flex-direction:column;gap:2px}
+.loan-detail-primary-v062l span,.loan-detail-secondary-v062l span{font-size:7px;color:#64748b}
+.loan-detail-primary-v062l strong,.loan-detail-secondary-v062l strong{font-size:9px}
+.loan-detail-progress-v062l{height:5px;background:#e5e7eb}.loan-detail-progress-v062l i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#22c55e)}
+.loan-analysis-grid-v062l{display:grid;grid-template-columns:1.5fr .8fr;gap:12px;padding:0 16px 16px}
+.loan-analysis-card-v062l,.loan-plan-v062l{border:1px solid #e2e8f0;border-radius:14px;background:#fff;padding:13px}
+.loan-analysis-head-v062l{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+.loan-analysis-head-v062l select{min-width:150px}
+.loan-balance-chart-v062l{min-height:230px}.loan-balance-chart-v062l svg{width:100%;height:210px;display:block}
+.loan-chart-axis-v062l{stroke:#cbd5e1;stroke-width:1}.loan-chart-line-v062l{fill:none;stroke:#2563eb;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.loan-chart-label-v062l{font-size:10px;fill:#64748b}.loan-chart-foot-v062l{display:flex;justify-content:space-between;font-size:8px;color:#64748b;padding:0 5px}
+.loan-rate-donut-wrap-v062l{display:grid;place-items:center;gap:15px;padding:15px 5px}
+.loan-rate-donut-v062l{width:150px;height:150px;border-radius:50%;background:conic-gradient(#2563eb 0 var(--interest),#93c5fd var(--interest) 100%);display:grid;place-items:center}
+.loan-rate-donut-v062l:before{content:"";width:105px;height:105px;border-radius:50%;background:#fff;grid-area:1/1}
+.loan-rate-donut-v062l>div{grid-area:1/1;z-index:1;text-align:center;display:flex;flex-direction:column}.loan-rate-donut-v062l strong{font-size:12px}.loan-rate-donut-v062l span{font-size:7px;color:#64748b}
+.loan-rate-legend-v062l{width:100%;display:grid;gap:7px}.loan-rate-legend-v062l>div{display:grid;grid-template-columns:10px 1fr auto;gap:7px;align-items:center;font-size:8px}
+.loan-rate-legend-v062l i{width:8px;height:8px;border-radius:50%}.loan-rate-legend-v062l .interest{background:#2563eb}.loan-rate-legend-v062l .principal{background:#93c5fd}
+.loan-plan-v062l{margin:0 16px 18px}
+.loan-plan-table-v062l{overflow:auto;max-height:420px;border:1px solid #e5e7eb;border-radius:10px}
+.loan-plan-head-v062l,.loan-plan-row-v062l{display:grid;grid-template-columns:1.05fr .9fr .9fr .9fr 1fr 1.1fr;gap:8px;align-items:center;padding:9px 10px;min-width:720px}
+.loan-plan-head-v062l{position:sticky;top:0;background:#f8fafc;z-index:2;font-size:7px;color:#64748b;font-weight:900}
+.loan-plan-row-v062l{border-top:1px solid #eef2f7;font-size:8px}.loan-plan-row-v062l strong{font-size:8px}
+.dark-mode .loan-finance-head-v062l,.dark-mode .loan-overview-detail-v062l,.dark-mode .loan-detail-top-v062l,.dark-mode .loan-detail-secondary-v062l,.dark-mode .loan-plan-head-v062l{background:#1e293b!important}
+.dark-mode .loan-detail-card-v062l,.dark-mode .loan-analysis-card-v062l,.dark-mode .loan-plan-v062l,.dark-mode .loan-overview-detail-v062l>div{background:#111827!important;border-color:#334155!important}
+.dark-mode .loan-rate-donut-v062l:before{background:#111827}
+@media(max-width:850px){
+ .loan-overview-v062l,.loan-overview-detail-v062l{grid-template-columns:1fr 1fr}
+ .loan-detail-primary-v062l,.loan-detail-secondary-v062l{grid-template-columns:1fr 1fr}
+ .loan-analysis-grid-v062l{grid-template-columns:1fr}
+ .loan-detail-top-v062l{grid-template-columns:38px 1fr}
+ .loan-detail-rate-v062l{text-align:left}.loan-detail-actions-v062l{grid-column:2}
+}
+
+/* 0.63l – vereinfachtes Kreditformular */
+.loan-dialog-v063l form{max-width:680px}
+.loan-required-hint-v063l{
+ display:flex;flex-direction:column;gap:2px;padding:9px 11px;margin-bottom:12px;
+ border:1px solid #dbeafe;border-radius:11px;background:#f8fbff
+}
+.loan-required-hint-v063l strong{font-size:9px;color:#1d4ed8}
+.loan-required-hint-v063l span{font-size:8px;color:#64748b}
+.loan-auto-box-v063l{
+ margin:10px 0;padding:9px 11px;border:1px solid #dbeafe;border-radius:11px;background:#eff6ff
+}
+.loan-auto-box-v063l .check-row{margin:0}
+.loan-auto-box-v063l .check-row>span{display:flex;flex-direction:column;gap:2px}
+.loan-auto-box-v063l small{font-size:8px;color:#64748b}
+.loan-more-v063l{
+ margin:11px 0;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;background:#fff
+}
+.loan-more-v063l summary{
+ cursor:pointer;list-style:none;padding:11px 12px;font-size:9px;font-weight:900;
+ display:flex;justify-content:space-between;align-items:center;background:#f8fafc
+}
+.loan-more-v063l summary::-webkit-details-marker{display:none}
+.loan-more-v063l summary span{font-size:7px;color:#64748b;background:#e2e8f0;padding:3px 7px;border-radius:999px}
+.loan-more-body-v063l{padding:12px;border-top:1px solid #e2e8f0}
+.loan-preview-v063l{
+ display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:11px 0
+}
+.loan-preview-v063l>div{
+ padding:9px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;
+ display:flex;flex-direction:column;gap:2px
+}
+.loan-preview-v063l>div span{font-size:7px;color:#64748b}
+.loan-preview-v063l>div strong{font-size:9px}
+.loan-preview-v063l>span{grid-column:1/-1;font-size:8px;color:#64748b;padding:8px}
+.loan-bank-update-v063l{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:10px 11px;margin:11px 0;border:1px dashed #bfdbfe;border-radius:11px;background:#fbfdff
+}
+.loan-bank-update-v063l>div{display:flex;flex-direction:column;gap:2px}
+.loan-bank-update-v063l strong{font-size:9px}.loan-bank-update-v063l span{font-size:8px;color:#64748b}
+.loan-detail-tertiary-v063l{
+ display:flex;flex-wrap:wrap;gap:7px 16px;padding:8px 12px;border-top:1px solid #edf2f7;
+ background:#fff;font-size:7px;color:#64748b
+}
+.loan-detail-tertiary-v063l strong{color:#0f172a}
+.dark-mode .loan-more-v063l,.dark-mode .loan-more-v063l summary,.dark-mode .loan-preview-v063l>div,
+.dark-mode .loan-bank-update-v063l,.dark-mode .loan-detail-tertiary-v063l,.dark-mode .loan-required-hint-v063l,
+.dark-mode .loan-auto-box-v063l{background:#111827!important;border-color:#334155!important}
+.dark-mode .loan-detail-tertiary-v063l strong{color:#e5e7eb}
+@media(max-width:650px){
+ .loan-preview-v063l{grid-template-columns:1fr 1fr}
+ .loan-bank-update-v063l{align-items:stretch;flex-direction:column}
+ .loan-bank-update-v063l button{width:100%}
+}
+
+/* 0.64l – Sondertilgung getrennt von Monatsrate */
+.loan-extra-payment-v064l{
+ font-weight:900!important;
+ color:#7c3aed!important;
+}
+.loan-rate-legend-v062l .extra-v064l{
+ background:#7c3aed;
+}
+.loan-overview-detail-v062l{
+ grid-template-columns:repeat(5,1fr);
+}
+.loan-detail-secondary-v062l{
+ grid-template-columns:repeat(6,1fr);
+}
+@media(max-width:850px){
+ .loan-overview-detail-v062l{grid-template-columns:1fr 1fr}
+ .loan-detail-secondary-v062l{grid-template-columns:1fr 1fr}
+}
+
+/* 0.65l – Tilgungsrechner statt Restschuld-Diagramm */
+.loan-payoff-calculator-v065l{min-height:310px}
+.loan-calc-input-v065l{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;
+ padding:12px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff
+}
+.loan-calc-input-v065l label{margin:0}
+.loan-calc-input-v065l label span{display:block;font-size:8px;font-weight:900;margin-bottom:5px;color:#334155}
+.loan-calc-actions-v065l{display:flex;gap:6px}
+.loan-calc-actions-v065l button{min-height:38px}
+.loan-calc-result-v065l{
+ display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
+}
+.loan-calc-result-v065l>div{
+ display:flex;flex-direction:column;gap:3px;padding:10px;
+ border:1px solid #e2e8f0;border-radius:10px;background:#fff
+}
+.loan-calc-result-v065l span{font-size:7px;color:#64748b}
+.loan-calc-result-v065l strong{font-size:11px}
+.loan-calc-note-v065l{
+ margin-top:9px;padding:8px 10px;border-radius:9px;background:#f8fafc;
+ font-size:7px;line-height:1.45;color:#64748b
+}
+.dark-mode .loan-calc-input-v065l,.dark-mode .loan-calc-result-v065l>div,.dark-mode .loan-calc-note-v065l{
+ background:#111827!important;border-color:#334155!important
+}
+.dark-mode .loan-calc-input-v065l label span{color:#e5e7eb}
+@media(max-width:650px){
+ .loan-calc-input-v065l{grid-template-columns:1fr}
+ .loan-calc-actions-v065l{display:grid;grid-template-columns:1fr 1fr}
+ .loan-calc-result-v065l{grid-template-columns:1fr 1fr}
+}
+
+/* 0.66l – Betrag + Monat im Tilgungsrechner */
+.loan-calc-input-v066l{
+ grid-template-columns:minmax(0,1.15fr) minmax(150px,.7fr) auto;
+}
+.loan-calc-input-v066l label small{
+ display:block;margin-top:4px;font-size:7px;color:#64748b
+}
+.loan-calc-input-v066l select{width:100%;min-height:38px}
+@media(max-width:780px){
+ .loan-calc-input-v066l{grid-template-columns:1fr 1fr}
+ .loan-calc-actions-v065l{grid-column:1/-1}
+}
+@media(max-width:520px){
+ .loan-calc-input-v066l{grid-template-columns:1fr}
+ .loan-calc-actions-v065l{grid-column:auto}
+}
+
+/* 0.67l – schöner Tilgungsrechner + Vertragslaufzeit */
+.loan-calc-panel-v067l{
+ display:flex;
+ align-items:flex-end;
+ justify-content:space-between;
+ gap:14px;
+ padding:14px;
+ border:1px solid #dbeafe;
+ border-radius:14px;
+ background:linear-gradient(135deg,#f8fbff,#f3f7ff);
+}
+.loan-calc-fields-v067l{
+ display:grid;
+ grid-template-columns:minmax(220px,1.25fr) minmax(160px,.75fr);
+ gap:12px;
+ flex:1;
+}
+.loan-calc-fields-v067l label{margin:0}
+.loan-calc-fields-v067l label>span{
+ display:block;
+ margin-bottom:6px;
+ font-size:8px;
+ font-weight:900;
+ color:#334155;
+}
+.loan-calc-fields-v067l select{
+ width:100%;
+ min-height:40px;
+ border-radius:10px;
+}
+.loan-calc-money-v067l{
+ display:flex;
+ align-items:center;
+ gap:0;
+ border:1px solid #cbd5e1;
+ border-radius:10px;
+ overflow:hidden;
+ background:#fff;
+}
+.loan-calc-money-v067l input{
+ flex:1;
+ min-width:0;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+.loan-calc-money-v067l b{
+ padding:0 11px;
+ white-space:nowrap;
+ font-size:8px;
+ color:#475569;
+}
+.loan-calc-fields-v067l small{
+ display:block;
+ margin-top:5px;
+ font-size:7px;
+ color:#64748b;
+}
+.loan-calc-buttons-v067l{
+ display:flex;
+ gap:7px;
+}
+.loan-calc-buttons-v067l button{
+ min-width:105px;
+ min-height:40px;
+}
+.loan-calc-result-v065l{
+ grid-template-columns:repeat(4,1fr)!important;
+}
+.loan-calc-result-v065l>div{
+ min-height:62px;
+ justify-content:center;
+}
+.loan-duration-input-v067l{
+ display:flex;
+ align-items:center;
+ border:1px solid #cbd5e1;
+ border-radius:10px;
+ overflow:hidden;
+ background:#fff;
+}
+.loan-duration-input-v067l input{
+ flex:1;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+.loan-duration-input-v067l span{
+ padding:0 10px;
+ font-size:8px;
+ font-weight:800;
+ color:#64748b;
+}
+.loan-detail-primary-v062l{
+ grid-template-columns:repeat(6,1fr)!important;
+}
+.dark-mode .loan-calc-panel-v067l,
+.dark-mode .loan-calc-money-v067l,
+.dark-mode .loan-duration-input-v067l{
+ background:#111827!important;
+ border-color:#334155!important;
+}
+.dark-mode .loan-calc-fields-v067l label>span{color:#e5e7eb}
+@media(max-width:850px){
+ .loan-calc-panel-v067l{flex-direction:column;align-items:stretch}
+ .loan-calc-buttons-v067l{display:grid;grid-template-columns:1fr 1fr}
+ .loan-calc-buttons-v067l button{width:100%}
+ .loan-calc-result-v065l{grid-template-columns:1fr 1fr!important}
+ .loan-detail-primary-v062l{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:560px){
+ .loan-calc-fields-v067l{grid-template-columns:1fr}
+ .loan-calc-result-v065l{grid-template-columns:1fr!important}
+}
+
+/* 0.68l – maximale Sondertilgung ist nur Vertragsgrenze */
+.loan-field-help-v068l{
+ display:block;
+ margin-top:4px;
+ font-size:7px;
+ line-height:1.35;
+ color:#64748b;
+ font-weight:600;
+}
+.dark-mode .loan-field-help-v068l{color:#94a3b8}
+
+.dashboard-v070l{display:grid;gap:13px}.dashboard-status-strip-v070l{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.dashboard-status-strip-v070l article{min-height:64px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;display:flex;align-items:center;gap:11px;padding:11px 13px}.dash-status-icon-v070l{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#eff6ff;font-size:17px}.dashboard-status-strip-v070l article div{display:flex;flex-direction:column}.dashboard-status-strip-v070l strong{font-size:17px}.dashboard-status-strip-v070l small{font-size:7px;color:#64748b}
+.dashboard-important-list-v070l{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dash-important-card-v070l{display:grid;grid-template-columns:36px 1fr auto;gap:9px;align-items:center;padding:9px;border:1px solid #e2e8f0;border-radius:12px}.dash-important-card-v070l.red{border-left:4px solid #ef4444}.dash-important-card-v070l.orange{border-left:4px solid #f59e0b}.dash-important-icon-v070l{width:32px;height:32px;border-radius:10px;background:#f8fafc;display:grid;place-items:center}.dash-important-card-v070l div:nth-child(2){display:flex;flex-direction:column}.dash-important-card-v070l strong{font-size:9px}.dash-important-card-v070l span{font-size:7px;color:#64748b}.dash-important-card-v070l>b{font-size:8px}.dash-all-good-v070l{min-height:65px;display:flex;align-items:center;justify-content:center;gap:8px}
+.dashboard-loan-visual-v070l{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:center}.dashboard-loan-donut-v070l{width:150px!important;height:150px!important;margin:auto}.dashboard-loan-kpis-v070l{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dashboard-loan-kpis-v070l>div{padding:10px;border-radius:11px;background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-direction:column}.dashboard-loan-kpis-v070l span{font-size:7px;color:#64748b}.dashboard-loan-kpis-v070l strong{font-size:11px}.dashboard-loan-list-v070l{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.dash-loan-card-v070l{border:1px solid #e2e8f0;border-radius:13px;padding:10px}.dash-loan-card-head-v070l{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center}.dash-loan-card-head-v070l>span{width:29px;height:29px;border-radius:9px;background:#eff6ff;display:grid;place-items:center}.dash-loan-card-head-v070l>div{display:flex;flex-direction:column}.dash-loan-card-head-v070l strong{font-size:9px}.dash-loan-card-head-v070l small{font-size:7px;color:#64748b}.dash-loan-progress-v070l{height:5px;margin:8px 0;background:#e2e8f0;border-radius:999px;overflow:hidden}.dash-loan-progress-v070l i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#22c55e)}.dash-loan-stats-v070l{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.dash-loan-stats-v070l>div{display:flex;flex-direction:column}.dash-loan-stats-v070l span{font-size:6px;color:#64748b}.dash-loan-stats-v070l strong{font-size:8px}
+.consumption-overview-v070l{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.consumption-card-v070l{border:1px solid #e2e8f0;border-radius:14px;padding:11px}.consumption-card-head-v070l{display:flex;justify-content:space-between;margin-bottom:10px}.consumption-card-head-v070l span{font-size:7px;color:#64748b}.consumption-split-v070l{display:grid;grid-template-columns:1fr 1fr;gap:8px}.consumption-metric-v070l{padding:9px;background:#f8fafc;border-radius:11px}.consumption-metric-v070l>div:first-child{display:flex;justify-content:space-between}.consumption-metric-v070l span{font-size:7px;color:#64748b}.consumption-metric-v070l strong{font-size:9px}.consumption-spark-v070l{height:65px;display:flex;align-items:flex-end;gap:4px;margin-top:8px}.consumption-spark-v070l i{flex:1;min-height:5px;background:#2563eb;border-radius:4px 4px 2px 2px}.consumption-spark-v070l.water i{background:#06b6d4}.consumption-no-data-v070l{height:65px;display:grid;place-items:center;font-size:7px;color:#94a3b8}
+.dashboard-contribution-grid-v070l{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dash-contribution-card-v070l{display:grid;grid-template-columns:38px 1fr;gap:9px;align-items:center;padding:10px;border:1px solid #e2e8f0;border-radius:12px}.dash-contribution-avatar-v070l{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#2563eb;color:#fff;font-size:8px;font-weight:900}.dash-contribution-main-v070l>div:first-child{display:flex;justify-content:space-between}.dash-contribution-main-v070l strong,.dash-contribution-main-v070l b{font-size:9px}.dash-contribution-main-v070l small{font-size:7px;color:#64748b}.dash-contribution-bar-v070l{height:5px!important;background:#e2e8f0;border-radius:999px;margin:6px 0;overflow:hidden}.dash-contribution-bar-v070l i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+.dashboard-two-column-v070l{display:grid;grid-template-columns:1fr 1fr;gap:13px;align-items:start}.dashboard-cost-chart-v070l{display:grid;gap:8px;margin-bottom:12px}.dash-cost-bar-row-v070l{display:grid;grid-template-columns:105px 1fr 85px;gap:7px;align-items:center}.dash-cost-bar-row-v070l>span{font-size:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dash-cost-bar-row-v070l>i{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden}.dash-cost-bar-row-v070l>i>b{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#f97316)}.dash-cost-bar-row-v070l>strong{text-align:right;font-size:8px}.dashboard-cost-cards-v070l{display:grid;gap:6px;border-top:1px solid #edf2f7;padding-top:9px}.dash-cost-card-v070l{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:7px;background:#f8fafc;border-radius:9px}.dash-cost-icon-v070l{width:30px;height:30px;border-radius:9px;background:#fff;display:grid;place-items:center}.dash-cost-card-v070l>div{display:flex;flex-direction:column}.dash-cost-card-v070l strong{font-size:8px}.dash-cost-card-v070l small{font-size:6px;color:#64748b}.dash-cost-card-v070l>b{font-size:8px;display:flex;flex-direction:column;text-align:right}
+.property-quickfacts-v070l{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.property-quickfacts-v070l>div{padding:7px;background:#f8fafc;border-radius:9px;display:flex;flex-direction:column}.property-quickfacts-v070l span{font-size:6px;color:#64748b}.property-quickfacts-v070l strong{font-size:8px}.energy-block-v070l{margin-top:9px;padding:9px;background:#f8fafc;border-radius:11px}.energy-block-v070l>div{display:flex;justify-content:space-between;margin-bottom:7px}.energy-scale-v070l{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}.energy-scale-v070l span{height:22px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:7px;font-weight:1000;opacity:.55}.energy-scale-v070l span.active{opacity:1;transform:scale(1.08);box-shadow:0 0 0 2px #fff}.energy-a{background:#138a36}.energy-b{background:#44a833}.energy-c{background:#8fbd26}.energy-d{background:#d7c51d}.energy-e{background:#f2a51f}.energy-f{background:#e9781d}.energy-g{background:#d94832}.energy-h{background:#a91f2a}
+@media(max-width:900px){.dashboard-important-list-v070l,.dashboard-loan-list-v070l,.consumption-overview-v070l,.dashboard-contribution-grid-v070l,.dashboard-two-column-v070l{grid-template-columns:1fr}.dashboard-status-strip-v070l{grid-template-columns:1fr 1fr}}@media(max-width:650px){.dashboard-loan-visual-v070l{grid-template-columns:1fr}.dashboard-loan-kpis-v070l{grid-template-columns:1fr 1fr}.consumption-split-v070l{grid-template-columns:1fr}.dash-loan-stats-v070l{grid-template-columns:1fr 1fr}}

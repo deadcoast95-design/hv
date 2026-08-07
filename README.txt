@@ -1,44 +1,13 @@
-APP-VERSION 0.60l – STABILE BENUTZER + VOLLSICHERUNG
+APP-VERSION 0.70l – VISUELLES DASHBOARD
 
-BENUTZER
-Jeder Kontobenutzer wird jetzt mehrfach lokal gespeichert:
-- IndexedDB
-- zentrale LocalStorage-Registry
-- zusätzlicher lokaler Benutzer-Speicher pro Konto
+Entfernt: Finanz-Block mit Ausgaben/Einnahmen/Saldo, Kosten je Objekt und Sanierungsübersicht.
+Aufgaben stehen jetzt weit oben.
 
-Nach dem Erstellen/Bearbeiten wird automatisch geprüft,
-ob der Benutzer wirklich in IndexedDB UND im Kontospeicher vorhanden ist.
-Erst dann gilt das Speichern als erfolgreich.
-
-Beim Start kann die App Benutzer aus dem konto-spezifischen Fallback
-wiederherstellen, falls die zentrale Registry fehlen sollte.
-
-NEUER BUTTON
-Mehr → App-Einstellungen:
-„Speichern & JSON exportieren“
-
-Der Button:
-1. speichert sämtliche App-Daten lokal
-2. speichert die Benutzer-Registry
-3. schreibt den konto-spezifischen Benutzer-Backup
-4. erzeugt eine vollständige JSON-Datei
-
-VOLLSICHERUNG
-Enthält:
-- Konto / Kontocode
-- Benutzer inkl. Login-Hash/Salt
-- Rollen und Rechte
-- Eigentumsanteile
-- Kostenanteile
-- Objektzuordnungen
-- sämtliche App-Daten des aktuellen Kontos
-- NAS-ready Kennzeichnung
-
-IMPORT
-0.60l kann die neue Vollsicherung inklusive Benutzern wieder importieren.
-Alte reine App-JSON-Dateien bleiben weiterhin kompatibel.
-
-NAS
-Noch nicht verbunden.
-Die Benutzer-IDs und die Vollsicherung sind so vorbereitet,
-dass später die NAS-Synchronisierung darauf aufbauen kann.
+Demnächst wichtig wurde kompakter gestaltet.
+Kreditübersicht hat Tilgungsring, Kennzahlen und Fortschrittsbalken pro Kredit.
+Verbrauch zeigt Strom/Wasser als Mini-Säulendiagramme.
+Monatliche Einzahlungen zeigen Benutzeranteile als Balken.
+Müllabfuhr-Kalender heißt auf der Übersicht nur noch Kalender.
+Kostenpositionen zeigen ein Balkendiagramm und kompakte Karten.
+Objekte zeigen die Energieklasse als farbige A–H-Skala.
+Fahrzeugübersicht bleibt bestehen.

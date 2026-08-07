@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – 0.60l",
+  "name": "Private Immobilienverwaltung – 0.70l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Hausverwaltung mit stabiler Benutzerpersistenz und Vollsicherung",
+  "description": "Visuelles Dashboard mit Diagrammen und Energieklassen-Skala",
   "icons": [
     {
       "src": "icon.svg",
