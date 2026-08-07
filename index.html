@@ -52,7 +52,7 @@
         </div>
       </div>
       <div id="loanDetails" class="detail-grid"></div>
-    </section><section class="panel" data-widget="objectcosts"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel" data-widget="contributions"><div class="panel-head"><h2 data-i18n="contributions">Monatliche Einzahlungen der Personen</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
+    </section><section class="panel" data-widget="objectcosts"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel" data-widget="contributions"><div class="panel-head"><h2 data-i18n="contributions">Monatliche Einzahlungen der Benutzer</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
     
 
     <section class="panel waste-panel" data-widget="waste">
@@ -77,15 +77,79 @@
 <section class="panel" data-widget="tasks"><div class="panel-head"><h2 data-i18n="taskOverview">Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
   </section>
 
-  <section class="view" data-view="transactions">
-    <div class="toolbar"><button class="primary" data-modal="costModal"><span data-i18n="addCost">+ Kostenposition</span></button></div>
-    <div class="summary-strip"><div><span>Monatlich geplant</span><strong id="costMonthlyTotal">0,00 €</strong></div><div><span>Jährlich geplant</span><strong id="costYearlyTotal">0,00 €</strong></div></div>
-    <section class="panel compact"><div class="panel-head"><h2 data-i18n="objectCosts">Kosten je Objekt</h2></div><div id="costObjectSummary" class="cost-summary"></div></section>
+  <section class="view account-view-v045l" data-view="transactions">
+  <div class="account-hero-v045l">
+    <div>
+      <span class="account-kicker-v045l">KONTO</span>
+      <h2>Finanzübersicht</h2>
+      <p>Geplante Kosten, Objektanteile und monatliche Einzahlungen auf einen Blick.</p>
+    </div>
+    <button class="primary account-add-cost-v045l" data-modal="costModal">+ Kostenposition</button>
+  </div>
+
+  <section class="account-stat-grid-v045l">
+    <article class="account-stat-card-v045l blue">
+      <div class="account-stat-icon-v045l">📅</div>
+      <span>Monatlich geplant</span>
+      <strong id="costMonthlyTotal">0,00 €</strong>
+      <small>Aktive Kostenpositionen</small>
+    </article>
+    <article class="account-stat-card-v045l green">
+      <div class="account-stat-icon-v045l">🗓️</div>
+      <span>Jährlich geplant</span>
+      <strong id="costYearlyTotal">0,00 €</strong>
+      <small>Hochrechnung pro Jahr</small>
+    </article>
+    <article class="account-stat-card-v045l orange">
+      <div class="account-stat-icon-v045l">🏠</div>
+      <span>Kosten je Objekt</span>
+      <strong id="accountObjectStatTotal">0,00 €</strong>
+      <small id="accountObjectCount">0 Objekte</small>
+    </article>
+    <article class="account-stat-card-v045l purple">
+      <div class="account-stat-icon-v045l">👥</div>
+      <span>Monatliche Einzahlungen</span>
+      <strong id="accountContributionTotal">0,00 €</strong>
+      <small id="accountOwnerCount">0 Personen</small>
+    </article>
+  </section>
+
+  <section class="panel account-object-panel-v045l">
+    <div class="panel-head">
+      <div><h2>Kosten je Objekt</h2><p class="helper-text">Monatliche und jährliche Verteilung der laufenden Kosten.</p></div>
+      <span class="tag">Nur Information</span>
+    </div>
+    <div class="account-object-layout-v045l">
+      <div class="account-object-donut-v045l" id="accountObjectDonut">
+        <div><strong id="accountObjectDonutTotal">0 €</strong><span>pro Jahr</span></div>
+      </div>
+      <div id="costObjectSummary" class="account-object-list-v045l"></div>
+    </div>
+  </section>
+
+  <section class="panel account-person-panel-v045l">
+    <div class="panel-head">
+      <div><h2>Monatliche Einzahlung der Benutzer</h2><p class="helper-text">Pfeil öffnen, um die getragenen Kosten und Benutzeranteile zu sehen.</p></div>
+      <span class="tag">Nur Information</span>
+    </div>
+    <div id="accountPersonContributions" class="account-person-list-v045l"></div>
+  </section>
+
+  <section class="account-costplan-head-v045l account-costplan-head-v047l">
+    <div>
+      <span class="account-kicker-v045l">KOSTENPLAN</span>
+      <h2>Kostenpositionen</h2>
+      <p>Hier werden alle laufenden Kostenpositionen übersichtlich aufgelistet.</p>
+    </div>
+  </section>
+
+  <div id="costPlanList" class="list card-list account-cost-list-v045l"></div>
+</section>
     <div id="costPlanList" class="list card-list"></div>
   </section>
 
   <section class="view" data-view="properties"><div class="toolbar"><button class="primary" data-modal="propertyModal"><span data-i18n="addObject">+ Objekt</span></button></div><div id="propertyList" class="card-grid"></div></section>
-  <section class="view" data-view="owners"><div class="toolbar"><button class="primary" data-modal="ownerModal"><span data-i18n="addPerson">+ Person</span></button></div><section class="panel compact"><div class="panel-head"><h2>Anteile</h2><strong id="shareCheck">100 %</strong></div><p>Bis zu fünf Personen. Zahlanteile können unabhängig vom Grundbuchanteil eingestellt werden.</p></section><div id="ownerList" class="card-grid"></div></section>
+  <div id="ownerList" class="card-grid"></div></section>
 
   <section class="view planning-view-v40" data-view="tasks">
   <div class="planning-hero-v40">
@@ -100,54 +164,149 @@
     </div>
   </div>
 
-  <div class="planning-tabs-v40">
+  <div class="planning-tabs-v40 planning-tabs-v044l">
     <button class="active" data-task-tab="tasks"><span class="planning-tab-icon">☑</span><span>Aufgaben</span><small id="taskOpenTabCount">0 offen</small></button>
     <button data-task-tab="maintenance"><span class="planning-tab-icon">🔧</span><span>Wartungen</span><small id="maintenanceTabCount">0 Einträge</small></button>
+    <button data-task-tab="history"><span class="planning-tab-icon">🕘</span><span>Verlauf</span><small id="historyTabCount">0 Einträge</small></button>
   </div>
 
   <div class="planning-toolbar-v40">
-    <div class="planning-filters-v40">
-      <button class="active" data-planning-filter="all">Alle</button>
-      <button data-planning-filter="open">Offen</button>
-      <button data-planning-filter="done">Erledigt</button>
-    </div>
+    <div class="planning-sort-info-v043l">Automatisch nach Fälligkeit & Priorität sortiert</div>
     <button id="planningAddBtn" class="primary planning-add-v40"><span>+ Aufgabe hinzufügen</span></button>
   </div>
 
   <div id="taskList" class="planning-list-v40"></div>
   <div id="maintenanceList" class="planning-list-v40 hidden"></div>
+  <div id="planningHistoryList" class="planning-history-v044l hidden"></div>
 </section>
 
   <section class="view" data-view="vehicles"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button"><span data-i18n="addVehicle">+ Fahrzeug</span></button></div><section class="panel compact"><div class="panel-head"><h2 data-i18n="vehicleFile">Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p data-i18n="vehicleHint">Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
 <section class="view" data-view="settings">
     <section class="panel"><div class="panel-head"><h2 data-i18n="loanManagement">Kreditverwaltung</h2><button class="primary" data-modal="loanModal"><span data-i18n="editLoan">Kredit bearbeiten</span></button></div><p>Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.</p></section>
-    <section class="panel"><h2 data-i18n="management">Verwaltung</h2><p>Personen und Objekte verwalten.</p><div class="button-row"><button class="secondary" data-go="owners">👥 Personen</button><button class="secondary" data-go="properties">🏠 Objekte</button></div></section>
+    <section class="panel local-user-storage-v051l">
+  <div class="panel-head">
+    <div>
+      <h2>Benutzerspeicher</h2>
+      <p class="helper-text">Kontobenutzer werden dauerhaft lokal auf diesem Gerät gespeichert.</p>
+    </div>
+    <span class="tag local-storage-badge-v051l">Lokal aktiv</span>
+  </div>
+  <div class="local-user-storage-grid-v051l">
+    <div><span>Speichermodus</span><strong>Lokal</strong></div>
+    <div><span>Kontobenutzer</span><strong id="localUserStorageCount">0</strong></div>
+    <div><span>NAS</span><strong id="localUserNasStatus">Noch nicht verbunden</strong></div>
+    <div><span>Status</span><strong>NAS-ready</strong></div>
+  </div>
+  <p class="helper-text">Später kann dieselbe Benutzerstruktur auf den NAS synchronisiert werden. Bis dahin bleibt die lokale Kopie die maßgebliche Datenquelle.</p>
+</section>
     <section class="panel" id="tenantAccountPanel"><div class="panel-head"><h2>Konto &amp; Benutzer</h2><span class="tag">Lokal</span></div>
 <div id="tenantAccountSummary" class="tenant-summary"></div><div class="tenant-actions"><button id="addTenantUserBtn" class="primary" type="button">+ Benutzer</button><button id="logoutBtn" class="secondary" type="button">Abmelden</button></div>
-<div id="tenantUserList" class="tenant-user-list"></div><p class="helper-text">Maximal 5 zusätzliche Benutzer neben dem Administrator. Später kann dieselbe Struktur an dein NAS/Backend angebunden werden.</p></section><section class="panel">
-  <div class="panel-head"><h2 data-i18n="language">Sprache</h2></div>
-  <label><span data-i18n="language">Sprache</span>
-    <select id="uiLanguageSelect" onchange="setUiLanguage(this.value)">
-      <option value="de">Deutsch</option>
-      <option value="ru">Русский</option>
-    </select>
-  </label>
-</section>
-<section class="panel">
-  <div class="panel-head"><h2>🧩 Dashboard anpassen</h2><span class="tag">Dieses Gerät</span></div>
-  <p>Wähle aus, welche Bereiche auf der Übersicht sichtbar sein sollen.</p>
-  <div id="dashboardWidgetChoices" class="dashboard-widget-choices"></div>
-</section>
-<section class="panel">
-  <div class="panel-head"><h2>🌙 Darstellung</h2></div>
-  <label class="check-row"><input id="darkModeToggle" type="checkbox"> Dunkelmodus</label>
+<div id="tenantUserList" class="tenant-user-list"></div><p class="helper-text">Maximal 5 zusätzliche Benutzer neben dem Administrator. Später kann dieselbe Struktur an dein NAS/Backend angebunden werden.</p></section><section class="panel settings-hub-v052l">
+  <div class="settings-hub-head-v052l">
+    <div>
+      <span class="settings-kicker-v052l">EINSTELLUNGEN</span>
+      <h2>App-Einstellungen</h2>
+      <p>Sprache, Darstellung, Dashboard und Grundeinstellungen zentral verwalten.</p>
+    </div>
+    <span class="tag">Dieses Gerät</span>
+  </div>
+
+  <div class="settings-hub-grid-v052l">
+
+    <section class="settings-section-v052l settings-language-v052l">
+      <div class="settings-section-title-v052l">
+        <span class="settings-section-icon-v052l">🌐</span>
+        <div>
+          <h3 data-i18n="language">Sprache</h3>
+          <p>Sprache der Benutzeroberfläche auswählen.</p>
+        </div>
+      </div>
+      <label class="settings-control-v052l">
+        <span data-i18n="language">Sprache</span>
+        <select id="uiLanguageSelect" onchange="setUiLanguage(this.value)">
+          <option value="de">Deutsch</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="settings-section-v052l settings-display-v052l">
+      <div class="settings-section-title-v052l">
+        <span class="settings-section-icon-v052l">◐</span>
+        <div>
+          <h3>Darstellung</h3>
+          <p>Optik der App auf diesem Gerät einstellen.</p>
+        </div>
+      </div>
+      <label class="settings-toggle-row-v052l">
+        <span>
+          <strong>Dunkelmodus</strong>
+          <small>Helle oder dunkle Darstellung verwenden</small>
+        </span>
+        <input id="darkModeToggle" type="checkbox">
+      </label>
+    </section>
+
+    <section class="settings-section-v052l settings-dashboard-v052l">
+      <div class="settings-section-title-v052l">
+        <span class="settings-section-icon-v052l">▦</span>
+        <div>
+          <h3>Dashboard anpassen</h3>
+          <p>Festlegen, welche Bereiche auf der Übersicht sichtbar sind.</p>
+        </div>
+      </div>
+      <div id="dashboardWidgetChoices" class="dashboard-widget-choices settings-dashboard-choices-v052l"></div>
+    </section>
+
+    <section class="settings-section-v052l settings-basic-v052l">
+      <div class="settings-section-title-v052l">
+        <span class="settings-section-icon-v052l">⚙</span>
+        <div>
+          <h3 data-i18n="basicSettings">Grundeinstellungen</h3>
+          <p>Allgemeine Werte der lokalen Hausverwaltung.</p>
+        </div>
+      </div>
+
+      <div class="settings-basic-grid-v052l">
+        <label>
+          <span data-i18n="name">Bezeichnung</span>
+          <input id="settingName" />
+        </label>
+        <label>
+          <span data-i18n="startBalance">Startkontostand</span>
+          <input id="settingStartBalance" type="number" step="0.01" />
+        </label>
+        <label>
+          <span data-i18n="minReserve">Mindestreserve</span>
+          <input id="settingMinimumReserve" type="number" step="0.01" />
+        </label>
+        <label>
+          <span data-i18n="monthlyReserve">Monatliche Rücklage</span>
+          <input id="settingMonthlyReserve" type="number" step="0.01" />
+        </label>
+      </div>
+
+      <div class="settings-save-actions-v060l">
+        <button id="saveSettings" class="secondary settings-save-v052l">
+          <span data-i18n="save">Einstellungen speichern</span>
+        </button>
+        <button id="saveAndExportBtn" type="button" class="primary settings-export-v060l">
+          💾 Speichern &amp; JSON exportieren
+        </button>
+      </div>
+      <p class="settings-export-note-v060l">Speichert App-Daten und Kontobenutzer lokal und erstellt danach eine vollständige JSON-Sicherung.</p>
+    </section>
+
+  </div>
 </section>
 
-<section class="panel form-panel"><h2 data-i18n="basicSettings">Grundeinstellungen</h2><label><span data-i18n="name">Bezeichnung</span><input id="settingName" /></label><label><span data-i18n="startBalance">Startkontostand</span><input id="settingStartBalance" type="number" step="0.01" /></label><label><span data-i18n="minReserve">Mindestreserve</span><input id="settingMinimumReserve" type="number" step="0.01" /></label><label><span data-i18n="monthlyReserve">Monatliche Rücklage</span><input id="settingMonthlyReserve" type="number" step="0.01" /></label><button id="saveSettings" class="primary full"><span data-i18n="save">Speichern</span></button></section>
-    <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
+
+
+
+    <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere eine Vollsicherung mit App-Daten, Konto und Benutzern oder importiere eine vorhandene Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.42l</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.60l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -184,11 +343,147 @@
   </button>
 </nav>
 
-<dialog id="tenantUserModal"><form method="dialog" id="tenantUserForm"><h2 id="tenantUserModalTitle">Benutzer hinzufügen</h2><input name="id" type="hidden">
-<label>Name<input name="displayName" required></label><label>Benutzername<input name="username" required value="2m6d1m4"></label><label>Rolle<select name="role"><option value="owner">Eigentümer</option><option value="member">Familienmitglied</option><option value="caretaker">Hausmeister</option><option value="tax">Steuerberater</option><option value="admin">Administrator</option></select></label>
-<label id="tenantUserPasswordLabel"><span>Passwort</span><input name="password" type="password" minlength="6" required></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
-<dialog id="costModal"><form method="dialog" id="costForm"><h2 id="costModalTitle">Kostenposition</h2><input name="id" type="hidden"/><label>Kategorie<input name="category" list="categoryList" required /></label><label>Bezeichnung<input name="name" required /></label><fieldset class="person-fieldset"><legend>Beteiligte Personen</legend><div id="costPersonChoices" class="person-choice-grid"></div><small>Nur ausgewählte Personen tragen diese Kostenposition. Der Betrag wird gleichmäßig verteilt.</small></fieldset><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Betrag je Zahlung<input name="amount" type="number" min="0" step="0.01" required /></label><label>Intervall<select name="interval"><option value="monthly">Monatlich</option><option value="fiveyearly">5× im Jahr</option><option value="quarterly">Vierteljährlich</option><option value="semiannual">Halbjährlich</option><option value="yearly">Jährlich</option></select></label><label>Fälligkeit / Hinweis<input name="note" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
-<datalist id="categoryList"><option>Kredit</option><option>Strom</option><option>Wasser</option><option>Internet</option><option>Versicherung</option><option>Grundsteuer</option><option>Müll</option><option>Wartung</option><option>Reparatur</option><option>Sonstiges</option></datalist>
+<dialog id="tenantUserModal" class="tenant-user-modal-v048l">
+<form method="dialog" id="tenantUserForm">
+  <div class="tenant-user-modal-title-v048l">
+    <span>👤</span>
+    <div><h2 id="tenantUserModalTitle">Benutzer hinzufügen</h2><p>Login, Rechte, Anteile und Objektzuordnung in einem Benutzerkonto.</p></div>
+  </div>
+  <input name="id" type="hidden">
+  <div class="form-two-columns">
+    <label>Name<input name="displayName" required></label>
+    <label>Benutzername<input name="username" required></label>
+  </div>
+  <label>Rolle
+    <select name="role">
+      <option value="owner">Eigentümer</option>
+      <option value="member">Familienmitglied</option>
+      <option value="caretaker">Hausmeister</option>
+      <option value="tax">Steuerberater</option>
+      <option value="admin">Administrator</option>
+    </select>
+  </label>
+  <div class="form-two-columns">
+    <label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" value="0"></label>
+    <label>Kostenanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" value="0"></label>
+  </div>
+  <fieldset class="object-picker">
+    <legend>Benutzer gehört zu diesen Objekten</legend>
+    <div id="tenantUserPropertyChoices" class="check-grid"></div>
+    <small>Diese Zuordnung wird für Objektübersichten und Kosteninformationen verwendet.</small>
+  </fieldset>
+  <label id="tenantUserPasswordLabel"><span>Passwort</span><input name="password" type="password" minlength="6" required></label>
+  <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
+</form>
+</dialog>
+<dialog id="costModal" class="cost-dialog-v047l">
+<form method="dialog" id="costForm">
+  <div class="cost-dialog-title-v047l">
+    <span>€</span>
+    <div>
+      <h2 id="costModalTitle">Kostenposition hinzufügen</h2>
+      <p>Laufende oder wiederkehrende Hauskosten anlegen.</p>
+    </div>
+  </div>
+
+  <input name="id" type="hidden"/>
+
+  <div class="form-two-columns">
+    <label>Kostenart / Kategorie
+      <input name="category" list="categoryList" placeholder="Auswählen oder selbst schreiben" required />
+    </label>
+    <label>Bezeichnung
+      <input name="name" placeholder="z. B. Gebäudeversicherung Hauptgebäude" required />
+    </label>
+  </div>
+
+  <fieldset class="person-fieldset">
+    <legend>Beteiligte Benutzer</legend>
+    <div id="costPersonChoices" class="person-choice-grid"></div>
+    <small>Nur ausgewählte Benutzer tragen diese Kostenposition. Die Verteilung erfolgt nach dem hinterlegten Kostenanteil; sind keine Anteile gesetzt, wird gleichmäßig verteilt.</small>
+  </fieldset>
+
+  <div class="form-two-columns">
+    <label>Objekt
+      <select name="propertyId" class="property-select"></select>
+    </label>
+    <label>Betrag je Zahlung €
+      <input name="amount" type="number" min="0" step="0.01" required />
+    </label>
+  </div>
+
+  <div class="form-two-columns">
+    <label>Intervall
+      <select name="interval">
+        <option value="monthly">Monatlich</option>
+        <option value="fiveyearly">5× im Jahr</option>
+        <option value="quarterly">Vierteljährlich</option>
+        <option value="semiannual">Halbjährlich</option>
+        <option value="yearly">Jährlich</option>
+      </select>
+    </label>
+    <label>Fälligkeit
+      <select name="dueTiming">
+        <option value="start">Anfang des Monats</option>
+        <option value="middle">Mitte des Monats</option>
+        <option value="end">Ende des Monats</option>
+      </select>
+    </label>
+  </div>
+
+  <label>Notiz
+    <textarea name="note" rows="3" placeholder="Optional, z. B. Vertragsnummer oder Hinweis"></textarea>
+  </label>
+
+  <div class="dialog-actions">
+    <button value="cancel" class="secondary">Abbrechen</button>
+    <button value="default" class="primary">Speichern</button>
+  </div>
+</form>
+</dialog>
+<datalist id="categoryList">
+<option>Kredit / Finanzierung</option>
+<option>Grundsteuer</option>
+<option>Gebäudeversicherung</option>
+<option>Hausratversicherung</option>
+<option>Haus- und Grundbesitzerhaftpflicht</option>
+<option>Elementarversicherung</option>
+<option>Rechtsschutz</option>
+<option>Strom</option>
+<option>Heizstrom</option>
+<option>Gas</option>
+<option>Heizkosten</option>
+<option>Wärmepumpe</option>
+<option>Fernwärme</option>
+<option>Pellets / Brennstoff</option>
+<option>Wasser</option>
+<option>Abwasser</option>
+<option>Niederschlagswasser</option>
+<option>Müll / Abfallgebühren</option>
+<option>Straßenreinigung</option>
+<option>Winterdienst</option>
+<option>Schornsteinfeger</option>
+<option>Heizungswartung</option>
+<option>Wärmepumpenwartung</option>
+<option>Lüftungswartung</option>
+<option>Aufzug / Wartung</option>
+<option>Rauchmelder / Wartung</option>
+<option>Trinkwasserprüfung</option>
+<option>Internet</option>
+<option>Telefon</option>
+<option>Kabel / TV</option>
+<option>Hausmeister</option>
+<option>Gebäudereinigung</option>
+<option>Gartenpflege</option>
+<option>Ungezieferbekämpfung</option>
+<option>Photovoltaik / Betriebskosten</option>
+<option>PV-Speicher / Wartung</option>
+<option>Wallbox / Ladestrom</option>
+<option>Wartungsvertrag</option>
+<option>Reparatur</option>
+<option>Sonstige Betriebskosten</option>
+<option>Sonstiges</option>
+</datalist>
 <dialog id="loanModal"><form method="dialog" id="loanForm"><h2>Kredit bearbeiten</h2><label>Bank<input name="bank" /></label><label>Darlehenssumme<input name="original" type="number" min="0" step="0.01" /></label><label>Restschuld laut Bank am Stichtag<input name="remaining" type="number" min="0" step="0.01" /></label><label>Stichtag der Restschuld<input name="balanceDate" type="date" /></label><label>Sollzins p.a. %<input name="interest" type="number" min="0" step="0.001" /></label><label>Monatsrate<input name="monthlyPayment" type="number" min="0" step="0.01" /></label><label>Beginn<input name="startDate" type="date" /></label><label>Zinsbindung bis<input name="fixedUntil" type="date" /></label><label>Sondertilgung p.a.<input name="extraPayment" type="number" min="0" step="0.01" /></label><label class="check-row"><input name="autoCalculate" type="checkbox" checked /> Restschuld jeden Monat automatisch berechnen</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="vehicleModal"><form method="dialog" id="vehicleForm"><h2 id="vehicleModalTitle" data-i18n="vehicleAddTitle">Fahrzeug hinzufügen</h2><input name="id" type="hidden">
     <label class="vehicle-photo-field">
@@ -283,7 +578,7 @@
 <label>Datei<input name="file" type="file" accept="image/*,.pdf,application/pdf" required></label>
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
-<dialog id="ownerModal"><form method="dialog" id="ownerForm"><h2 id="ownerModalTitle">Person hinzufügen</h2><input name="id" type="hidden" /><label>Name<input name="name" required /></label><label>Rolle<select name="personType"><option>Eigentümer</option><option>Bewohner</option><option>Verwalter</option><option>Sonstige Person</option></select></label><label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" required /></label><label>Zahlanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" required /></label><label>Aufgabe<input name="role" /></label><fieldset class="object-picker"><legend>Person gehört zu diesen Objekten</legend><div id="ownerPropertyChoices" class="check-grid"></div></fieldset><label class="check-row"><input name="active" type="checkbox" checked /> Person ist aktiv</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
+
 <dialog id="taskModal"><form method="dialog" id="taskForm"><h2>Aufgabe hinzufügen</h2><label>Aufgabe<input name="title" required /></label>
 <label>Foto zur Aufgabe<input name="photoFile" type="file" accept="image/*" /></label>
 <div id="taskPhotoPreviewWrap" class="task-photo-preview-wrap hidden"><img id="taskPhotoPreview" alt="Aufgabenfoto Vorschau"><button id="removeTaskPhotoBtn" type="button" class="danger small">Foto entfernen</button></div><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Fällig (Monat / Jahr)<input name="due" type="month" /></label><label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>

@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v042l';
+const KEY='hausverwaltung_pwa_v060l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -65,7 +65,6 @@ function applyUiLanguage(){
  try{renderDashboard()}catch{}
  try{renderProperties()}catch{}
  try{renderDashboardProperties()}catch{}
- try{renderOwners()}catch{}
  try{renderCosts()}catch{}
  try{renderTasks()}catch{}
  populateLanguagesV24();
@@ -150,7 +149,7 @@ const seed={
  settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600,
  darkMode:false,
  dashboardWidgets:{important:true,consumption:true,finance:true,loan:true,objectcosts:true,contributions:true,waste:true,costpositions:true,objects:true,renovations:true,vehicles:true,tasks:true}},
- owners:[{id:1,name:'Dmitrij',ownershipShare:33.33,paymentShare:33.33,role:'Technik / Verwaltung',personType:'Eigentümer',active:true,propertyIds:[1,2]},{id:2,name:'Freundin',ownershipShare:33.33,paymentShare:33.33,role:'Finanzen / Verträge',personType:'Eigentümer',active:true,propertyIds:[1,2]},{id:3,name:'Schwager',ownershipShare:33.34,paymentShare:33.34,role:'Abstimmung / Grundstück',personType:'Eigentümer',active:true,propertyIds:[1,2]}],
+ owners:[],
  properties:[{id:1,name:'Haus 1',address:'',area:159,usage:'Eigennutzung',photo:''},{id:2,name:'Haus 2',address:'',area:152,usage:'Mietfreie Überlassung',photo:''}],
  loan:{bank:'',original:0,remaining:0,interest:0,monthlyPayment:0,startDate:'2024-01-01',fixedUntil:'2034-01-01',extraPayment:0,autoCalculate:true,balanceDate:''},
  costPlans:[{id:1,category:'Kredit',name:'Kreditrate',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3},{id:2,category:'Versicherung',name:'Gebäudeversicherung',propertyId:'all',amount:0,interval:'yearly',note:'',splitCount:3},{id:3,category:'Grundsteuer',name:'Grundsteuer',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:4,category:'Strom',name:'Strom Haus 1',propertyId:1,amount:0,interval:'monthly',note:'',splitCount:3},{id:5,category:'Strom',name:'Strom Haus 2',propertyId:2,amount:0,interval:'monthly',note:'',splitCount:3},{id:6,category:'Wasser',name:'Wasser / Abwasser',propertyId:'all',amount:0,interval:'quarterly',note:'',splitCount:3},{id:7,category:'Internet',name:'Internet',propertyId:'all',amount:0,interval:'monthly',note:'',splitCount:3}],
@@ -256,7 +255,7 @@ const ROLE_DEFS_V27={
 };
 const BOOTSTRAP_ACCOUNT_V30={
  tenant:{id:'tenant_bootstrap_00001',name:'2m6d1m4',code:'00001',createdAt:'2026-08-07T00:00:00.000Z',maxUsers:6,bootstrap:true},
- user:{id:'user_bootstrap_admin_00001',tenantId:'tenant_bootstrap_00001',displayName:'Dmitrij Kovalevich',username:'2m6d1m4',role:'admin',active:true,salt:'v30-bootstrap-salt-00001',passwordHash:'9691eefb',bootstrap:true,hashType:'local-v1'}
+ user:{id:'user_bootstrap_admin_00001',tenantId:'tenant_bootstrap_00001',displayName:'Dmitrij Kovalevich',username:'2m6d1m4',role:'admin',active:true,ownershipShare:0,paymentShare:100,propertyIds:[],salt:'v30-bootstrap-salt-00001',passwordHash:'9691eefb',bootstrap:true,hashType:'local-v1'}
 };
 async function ensureBootstrapAccountV30(){
  let tenant=authRegistryV27.tenants.find(t=>t.code===BOOTSTRAP_ACCOUNT_V30.tenant.code);
@@ -273,6 +272,7 @@ async function ensureBootstrapAccountV30(){
    displayName:BOOTSTRAP_ACCOUNT_V30.user.displayName,
    username:BOOTSTRAP_ACCOUNT_V30.user.username,
    role:'admin',active:true,
+   ownershipShare:user.ownershipShare??0,paymentShare:user.paymentShare??100,propertyIds:Array.isArray(user.propertyIds)?user.propertyIds:[],
    salt:BOOTSTRAP_ACCOUNT_V30.user.salt,
    passwordHash:BOOTSTRAP_ACCOUNT_V30.user.passwordHash,
    hashType:'local-v1',bootstrap:true
@@ -299,17 +299,143 @@ async function hashV27(p,s){
  for(let i=0;i<text.length;i++){h^=text.charCodeAt(i)&255;h=Math.imul(h,16777619)>>>0}
  return h.toString(16).padStart(8,'0');
 }
+
+const AUTH_LOCAL_BACKUP_KEY_V051L='hausverwaltung_auth_registry_local_v051l';
+const AUTH_SYNC_META_KEY_V051L='hausverwaltung_auth_sync_meta_v051l';
+
+function authSyncMetaV051L(){
+ try{return JSON.parse(localStorage.getItem(AUTH_SYNC_META_KEY_V051L)||'{}')}catch{return {}}
+}
+function setAuthSyncMetaV051L(patch={}){
+ const meta={mode:'local',nasEnabled:false,lastLocalSave:'',lastNasSync:'',...authSyncMetaV051L(),...patch};
+ try{localStorage.setItem(AUTH_SYNC_META_KEY_V051L,JSON.stringify(meta))}catch{}
+ return meta;
+}
+function saveAuthLocalBackupV051L(){
+ try{
+  localStorage.setItem(AUTH_LOCAL_BACKUP_KEY_V051L,JSON.stringify(authRegistryV27));
+  setAuthSyncMetaV051L({mode:'local',nasEnabled:false,lastLocalSave:new Date().toISOString()});
+  return true;
+ }catch(error){
+  console.warn('Lokale Benutzer-Sicherung fehlgeschlagen',error);
+  return false;
+ }
+}
+function loadAuthLocalBackupV051L(){
+ try{
+  const raw=localStorage.getItem(AUTH_LOCAL_BACKUP_KEY_V051L);
+  if(!raw)return null;
+  const parsed=JSON.parse(raw);
+  return parsed&&typeof parsed==='object'?parsed:null;
+ }catch(error){
+  console.warn('Lokale Benutzer-Sicherung konnte nicht gelesen werden',error);
+  return null;
+ }
+}
+function authNasExportPayloadV051L(){
+ const tid=currentTenantIdV27();
+ return {
+  schema:'hausverwaltung-users-v1',
+  generatedAt:new Date().toISOString(),
+  tenantId:tid,
+  tenants:(authRegistryV27.tenants||[]).filter(t=>t.id===tid),
+  users:(authRegistryV27.users||[]).filter(u=>u.tenantId===tid)
+ };
+}
+
+const USER_TENANT_STORE_PREFIX_V060L='hausverwaltung_users_tenant_v060l:';
+const USER_REGISTRY_BACKUP_V060L='hausverwaltung_auth_registry_v060l';
+
+function tenantUserStoreKeyV060L(tid){
+ return USER_TENANT_STORE_PREFIX_V060L+String(tid||'');
+}
+function saveTenantUsersLocalV060L(tid=currentTenantIdV27()){
+ if(!tid)return false;
+ try{
+  const users=(authRegistryV27.users||[]).filter(u=>u.tenantId===tid);
+  const tenant=(authRegistryV27.tenants||[]).find(t=>t.id===tid)||null;
+  const payload={schema:'hausverwaltung-local-users-v1',tenantId:tid,savedAt:new Date().toISOString(),tenant,users};
+  localStorage.setItem(tenantUserStoreKeyV060L(tid),JSON.stringify(payload));
+  localStorage.setItem(USER_REGISTRY_BACKUP_V060L,JSON.stringify(authRegistryV27));
+  return true;
+ }catch(error){
+  console.error('Lokaler Benutzerspeicher fehlgeschlagen',error);
+  return false;
+ }
+}
+function readTenantUsersLocalV060L(tid){
+ try{
+  const raw=localStorage.getItem(tenantUserStoreKeyV060L(tid));
+  if(!raw)return null;
+  const p=JSON.parse(raw);
+  return p&&Array.isArray(p.users)?p:null;
+ }catch{return null}
+}
+function restoreAllTenantUsersLocalV060L(){
+ let changed=false;
+ try{
+  for(let i=0;i<localStorage.length;i++){
+   const key=localStorage.key(i);
+   if(!key||!key.startsWith(USER_TENANT_STORE_PREFIX_V060L))continue;
+   let p=null;
+   try{p=JSON.parse(localStorage.getItem(key)||'null')}catch{}
+   if(!p||!p.tenantId||!Array.isArray(p.users))continue;
+   if(p.tenant && !(authRegistryV27.tenants||[]).some(t=>t.id===p.tenant.id)){
+    authRegistryV27.tenants.push(p.tenant);changed=true;
+   }
+   p.users.forEach(user=>{
+    if(!(authRegistryV27.users||[]).some(u=>u.id===user.id)){
+     authRegistryV27.users.push(user);changed=true;
+    }
+   });
+  }
+ }catch(error){console.warn('Benutzer-Fallback konnte nicht geladen werden',error)}
+ return changed;
+}
+async function verifyTenantUserSavedV060L(userId,tid=currentTenantIdV27()){
+ const local=readTenantUsersLocalV060L(tid);
+ const inBackup=!!local?.users?.some(u=>u.id===userId);
+ let registry=null;
+ try{registry=await dbRawGet(AUTH_REGISTRY_KEY_V27)}catch{}
+ const inDb=!!registry?.users?.some(u=>u.id===userId);
+ return inBackup && inDb;
+}
 async function loadRegistryV27(){
  let r=null;
  try{r=await dbRawGet(AUTH_REGISTRY_KEY_V27)}catch(error){console.warn('IndexedDB Auth-Fallback',error)}
  if(!r){try{r=JSON.parse(localStorage.getItem(AUTH_REGISTRY_KEY_V27)||'null')}catch{}}
+ if(!r){try{r=JSON.parse(localStorage.getItem(USER_REGISTRY_BACKUP_V060L)||'null')}catch{}}
+ if(!r)r=loadAuthLocalBackupV051L();
+
  authRegistryV27=r&&typeof r==='object'?r:{version:1,tenants:[],users:[]};
  authRegistryV27.tenants=Array.isArray(authRegistryV27.tenants)?authRegistryV27.tenants:[];
  authRegistryV27.users=Array.isArray(authRegistryV27.users)?authRegistryV27.users:[];
+
+ const restored=restoreAllTenantUsersLocalV060L();
+ if(restored){
+  try{await dbRawPut(AUTH_REGISTRY_KEY_V27,authRegistryV27)}catch{}
+ }
+ try{
+  localStorage.setItem(AUTH_REGISTRY_KEY_V27,JSON.stringify(authRegistryV27));
+  localStorage.setItem(USER_REGISTRY_BACKUP_V060L,JSON.stringify(authRegistryV27));
+ }catch{}
+ saveAuthLocalBackupV051L();
 }
 async function saveRegistryV27(){
- try{await dbRawPut(AUTH_REGISTRY_KEY_V27,authRegistryV27)}catch(error){console.warn('IndexedDB Auth-Speicherung',error)}
- try{localStorage.setItem(AUTH_REGISTRY_KEY_V27,JSON.stringify(authRegistryV27))}catch{}
+ let dbOk=true;
+ try{await dbRawPut(AUTH_REGISTRY_KEY_V27,authRegistryV27)}
+ catch(error){dbOk=false;console.warn('IndexedDB Auth-Speicherung',error)}
+
+ let localOk=true;
+ try{
+  localStorage.setItem(AUTH_REGISTRY_KEY_V27,JSON.stringify(authRegistryV27));
+  localStorage.setItem(USER_REGISTRY_BACKUP_V060L,JSON.stringify(authRegistryV27));
+ }catch(error){localOk=false;console.warn('LocalStorage Auth-Speicherung',error)}
+
+ saveAuthLocalBackupV051L();
+ const tid=currentTenantIdV27();
+ if(tid)saveTenantUsersLocalV060L(tid);
+ return dbOk||localOk;
 }
 function showAuthV27(mode){document.body.classList.add('auth-locked');$('#authGate').classList.remove('hidden');$('#loginCard').classList.toggle('hidden',mode!=='login');$('#setupCard').classList.toggle('hidden',mode!=='setup')}
 function hideAuthV27(){$('#authGate').classList.add('hidden');document.body.classList.remove('auth-locked')}
@@ -325,11 +451,12 @@ async function loadTenantStateV27(){
   catch(error){s=state}
  }
  state=migrate(s||state);
+ await migrateLegacyPersonsToUsersV048L();
  try{await dbRawPut(`tenant:${tid}:state`,state)}catch{}
  try{localStorage.setItem(fallbackKey,JSON.stringify(state))}catch{}
  render();applyUiLanguage();applyAuthPermissionsV27();renderTenantAdminV27();updateLocalStatus('Lokal gespeichert');
 }
-async function createTenantV27(form){const f=new FormData(form),name=String(f.get('tenantName')).trim(),code=normV27(f.get('tenantCode')),dn=String(f.get('displayName')).trim(),un=normV27(f.get('username')),p=String(f.get('password')),p2=String(f.get('password2'));if(p!==p2)throw Error('Passwörter stimmen nicht überein.');if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');if(authRegistryV27.tenants.some(t=>t.code===code))throw Error('Kontocode existiert bereits.');const t={id:makeIdV27('tenant'),name,code,createdAt:new Date().toISOString(),maxUsers:6},s=saltV27(),u={id:makeIdV27('user'),tenantId:t.id,displayName:dn,username:un,role:'admin',active:true,salt:s,passwordHash:await hashV27(p,s)};authRegistryV27.tenants.push(t);authRegistryV27.users.push(u);await saveRegistryV27();const legacy=await dbRawGet(LEGACY_DB_STATE_KEY);await dbRawPut(`tenant:${t.id}:state`,migrate(legacy||state));setAuthSessionV27({tenantId:t.id,userId:u.id});await loadTenantStateV27();hideAuthV27()}
+async function createTenantV27(form){const f=new FormData(form),name=String(f.get('tenantName')).trim(),code=normV27(f.get('tenantCode')),dn=String(f.get('displayName')).trim(),un=normV27(f.get('username')),p=String(f.get('password')),p2=String(f.get('password2'));if(p!==p2)throw Error('Passwörter stimmen nicht überein.');if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');if(authRegistryV27.tenants.some(t=>t.code===code))throw Error('Kontocode existiert bereits.');const t={id:makeIdV27('tenant'),name,code,createdAt:new Date().toISOString(),maxUsers:6},s=saltV27(),u={id:makeIdV27('user'),tenantId:t.id,displayName:dn,username:un,role:'admin',active:true,ownershipShare:100,paymentShare:100,propertyIds:[],sync:{source:'local',dirty:true,updatedAt:new Date().toISOString(),lastSyncedAt:''},salt:s,passwordHash:await hashV27(p,s)};authRegistryV27.tenants.push(t);authRegistryV27.users.push(u);await saveRegistryV27();const legacy=await dbRawGet(LEGACY_DB_STATE_KEY);await dbRawPut(`tenant:${t.id}:state`,migrate(legacy||state));setAuthSessionV27({tenantId:t.id,userId:u.id});await loadTenantStateV27();hideAuthV27()}
 async function loginV27(form){
  const f=new FormData(form);
  const code=normV27(f.get('tenantCode'));
@@ -367,11 +494,193 @@ async function loginV27(form){
 async function logoutV27(){await persistState(false);setAuthSessionV27(null);showAuthV27('login')}
 function roleLabelV27(r){return ROLE_DEFS_V27[r]?.label||r}
 function tenantUsersV27(){return authRegistryV27.users.filter(u=>u.tenantId===currentTenantIdV27())}
-function renderTenantAdminV27(){const t=currentTenantV27(),me=currentAuthUserV27(),sum=$('#tenantAccountSummary'),list=$('#tenantUserList'),add=$('#addTenantUserBtn');if(!sum||!list||!t||!me)return;const us=tenantUsersV27(),admin=currentRightsV27().userAdmin;sum.innerHTML=`<div class="tenant-summary-grid"><div><span>Konto</span><strong>${esc(t.name)}</strong></div><div><span>Kontocode</span><strong>${esc(t.code)}</strong></div><div><span>Angemeldet als</span><strong>${esc(me.displayName)}</strong></div><div><span>Rolle</span><strong>${esc(roleLabelV27(me.role))}</strong></div></div>`;add.disabled=!admin||us.length>=6;add.textContent=us.length>=6?'Max. 6 Benutzer':'+ Benutzer';list.innerHTML=us.map(u=>`<article class="tenant-user-row"><div><strong>${esc(u.displayName)}</strong><span>@${esc(u.username)} · ${esc(roleLabelV27(u.role))}</span></div><div>${admin&&u.id!==me.id?`<button class="secondary small" onclick="editTenantUserV27('${u.id}')">Bearbeiten</button><button class="danger small" onclick="deleteTenantUserV27('${u.id}')">Löschen</button>`:''}</div></article>`).join('')}
-function openTenantUserModalV27(u=null){if(!currentRightsV27().userAdmin)return;if(!u&&tenantUsersV27().length>=6){alert('Maximal 5 zusätzliche Benutzer.');return}const f=$('#tenantUserForm');f.reset();f.elements.id.value=u?.id||'';f.elements.displayName.value=u?.displayName||'';f.elements.username.value=u?.username||'';f.elements.role.value=u?.role||'member';f.elements.password.required=!u;$('#tenantUserPasswordLabel span').textContent=u?'Neues Passwort (optional)':'Passwort';$('#tenantUserModalTitle').textContent=u?'Benutzer bearbeiten':'Benutzer hinzufügen';$('#tenantUserModal').showModal()}
+
+function normalizePersonNameV048L(v){return normV27(String(v||'').replace(/[^\p{L}\p{N}]+/gu,' '))}
+async function migrateLegacyPersonsToUsersV048L(){
+ const users=tenantUsersV27();
+ if(!users.length)return false;
+ const legacy=Array.isArray(state.owners)?state.owners:[];
+ let changed=false;
+ const used=new Set();
+
+ legacy.forEach((person,index)=>{
+  const pn=normalizePersonNameV048L(person.name);
+  let user=users.find(u=>{
+   if(used.has(u.id))return false;
+   const un=normalizePersonNameV048L(u.displayName);
+   return pn&&un&&(pn===un||pn.split(' ')[0]===un.split(' ')[0]);
+  });
+  if(!user)user=users.find(u=>!used.has(u.id));
+  if(!user)return;
+  used.add(user.id);
+  if(user.ownershipShare==null&&person.ownershipShare!=null){user.ownershipShare=Number(person.ownershipShare)||0;changed=true}
+  if(user.paymentShare==null&&person.paymentShare!=null){user.paymentShare=Number(person.paymentShare)||0;changed=true}
+  if((!Array.isArray(user.propertyIds)||!user.propertyIds.length)&&Array.isArray(person.propertyIds)){user.propertyIds=person.propertyIds.map(String);changed=true}
+ });
+
+ users.forEach((u,index)=>{
+  if(u.ownershipShare==null){u.ownershipShare=0;changed=true}
+  if(u.paymentShare==null){u.paymentShare=users.length===1?100:0;changed=true}
+  if(!Array.isArray(u.propertyIds)){u.propertyIds=[];changed=true}
+ });
+
+ (state.costPlans||[]).forEach(cost=>{
+  if(Array.isArray(cost.userIds)&&cost.userIds.length)return;
+  const oldIds=Array.isArray(cost.personIds)?cost.personIds.map(Number):[];
+  const mapped=[];
+  oldIds.forEach(oldId=>{
+   const oldIndex=legacy.findIndex(p=>Number(p.id)===Number(oldId));
+   const oldPerson=oldIndex>=0?legacy[oldIndex]:null;
+   let user=null;
+   if(oldPerson){
+    const pn=normalizePersonNameV048L(oldPerson.name);
+    user=users.find(u=>{
+     const un=normalizePersonNameV048L(u.displayName);
+     return pn&&un&&(pn===un||pn.split(' ')[0]===un.split(' ')[0]);
+    });
+   }
+   if(!user&&oldIndex>=0)user=users[oldIndex]||null;
+   if(user&&!mapped.includes(user.id))mapped.push(user.id);
+  });
+  if(!mapped.length&&users.length){
+   const count=Math.min(Math.max(1,Number(cost.splitCount)||users.length),users.length);
+   mapped.push(...users.slice(0,count).map(u=>u.id));
+  }
+  cost.userIds=mapped;
+  changed=true;
+ });
+
+ if(changed)await saveRegistryV27();
+ return changed;
+}
+
+
+function renderLocalUserStorageStatusV051L(){
+ const count=tenantUsersV27().length;
+ if($('#localUserStorageCount'))$('#localUserStorageCount').textContent=String(count);
+ const meta=authSyncMetaV051L();
+ if($('#localUserNasStatus'))$('#localUserNasStatus').textContent=meta.nasEnabled?'Verbunden':'Noch nicht verbunden';
+}
+function renderTenantAdminV27(){
+ const t=currentTenantV27(),me=currentAuthUserV27(),sum=$('#tenantAccountSummary'),list=$('#tenantUserList'),add=$('#addTenantUserBtn');
+ if(!sum||!list||!t||!me)return;
+ renderLocalUserStorageStatusV051L();
+ const us=tenantUsersV27(),admin=currentRightsV27().userAdmin;
+ const totalShare=us.filter(u=>u.active!==false).reduce((s,u)=>s+Number(u.paymentShare||0),0);
+ sum.innerHTML=`<div class="tenant-summary-grid">
+  <div><span>Konto</span><strong>${esc(t.name)}</strong></div>
+  <div><span>Kontocode</span><strong>${esc(t.code)}</strong></div>
+  <div><span>Angemeldet als</span><strong>${esc(me.displayName)}</strong></div>
+  <div><span>Kostenanteile gesamt</span><strong class="${Math.abs(totalShare-100)>.01?'warning-text':''}">${totalShare.toLocaleString('de-DE',{maximumFractionDigits:2})} %</strong></div>
+ </div>`;
+ add.disabled=!admin||us.length>=6;
+ add.textContent=us.length>=6?'Max. 6 Benutzer':'+ Benutzer';
+ list.innerHTML=us.map((u,index)=>`<article class="tenant-user-row tenant-user-row-v048l">
+  <div class="tenant-user-avatar-v048l">${esc(ownerInitialsV045L(u.displayName))}</div>
+  <div class="tenant-user-main-v048l">
+   <strong>${esc(u.displayName)} ${u.id===me.id?'<small class="tag">Du</small>':''}</strong>
+   <span>@${esc(u.username)} · ${esc(roleLabelV27(u.role))}</span>
+   <small>${(u.propertyIds||[]).length?`Objekte: ${(u.propertyIds||[]).map(propertyName).map(esc).join(', ')}`:'Keine Objektzuordnung'}</small>
+  </div>
+  <div class="tenant-user-share-v048l"><span>Eigentum</span><strong>${Number(u.ownershipShare||0).toLocaleString('de-DE',{maximumFractionDigits:2})} %</strong></div>
+  <div class="tenant-user-share-v048l"><span>Kostenanteil</span><strong>${Number(u.paymentShare||0).toLocaleString('de-DE',{maximumFractionDigits:2})} %</strong></div>
+  <div class="tenant-user-actions-v048l">
+   ${admin?`<button class="secondary small" onclick="editTenantUserV27('${u.id}')">Bearbeiten</button>`:''}
+   ${admin&&u.id!==me.id?`<button class="danger small" onclick="deleteTenantUserV27('${u.id}')">Löschen</button>`:''}
+  </div>
+ </article>`).join('')
+}
+function renderTenantUserPropertyChoicesV048L(selectedIds=[]){
+ const selected=new Set((selectedIds||[]).map(String));
+ const box=$('#tenantUserPropertyChoices');if(!box)return;
+ box.innerHTML=(state.properties||[]).length
+  ?state.properties.map(p=>`<label class="check-row"><input type="checkbox" name="propertyIds" value="${esc(p.id)}" ${selected.has(String(p.id))?'checked':''}> ${esc(p.name)}</label>`).join('')
+  :'<span class="helper-text">Noch keine Objekte vorhanden.</span>';
+}
+function openTenantUserModalV27(u=null){
+ if(!currentRightsV27().userAdmin)return;
+ if(!u&&tenantUsersV27().length>=6){alert('Maximal 5 zusätzliche Benutzer.');return}
+ const f=$('#tenantUserForm');f.reset();
+ f.elements.id.value=u?.id||'';
+ f.elements.displayName.value=u?.displayName||'';
+ f.elements.username.value=u?.username||'';
+ f.elements.role.value=u?.role||'member';
+ f.elements.ownershipShare.value=Number(u?.ownershipShare||0);
+ f.elements.paymentShare.value=Number(u?.paymentShare||0);
+ renderTenantUserPropertyChoicesV048L(u?.propertyIds||[]);
+ f.elements.password.required=!u;
+ $('#tenantUserPasswordLabel span').textContent=u?'Neues Passwort (optional)':'Passwort';
+ $('#tenantUserModalTitle').textContent=u?'Benutzer bearbeiten':'Benutzer hinzufügen';
+ $('#tenantUserModal').showModal()
+}
 function editTenantUserV27(id){const u=tenantUsersV27().find(x=>x.id===id);if(u)openTenantUserModalV27(u)}
-async function deleteTenantUserV27(id){if(!currentRightsV27().userAdmin||id===currentUserIdV27())return;const u=tenantUsersV27().find(x=>x.id===id);if(!u||!confirm(`Benutzer „${u.displayName}“ löschen?`))return;authRegistryV27.users=authRegistryV27.users.filter(x=>x.id!==id);await saveRegistryV27();renderTenantAdminV27()}
-async function saveTenantUserV27(form){if(!currentRightsV27().userAdmin)return;const f=new FormData(form),id=String(f.get('id')||''),dn=String(f.get('displayName')).trim(),un=normV27(f.get('username')),role=String(f.get('role')),p=String(f.get('password')||''),tid=currentTenantIdV27();if(authRegistryV27.users.some(u=>u.tenantId===tid&&u.id!==id&&normV27(u.username)===un))throw Error('Benutzername bereits vergeben.');if(id){const u=authRegistryV27.users.find(x=>x.id===id&&x.tenantId===tid);u.displayName=dn;u.username=un;u.role=role;if(p){if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');u.salt=saltV27();u.passwordHash=await hashV27(p,u.salt)}}else{if(tenantUsersV27().length>=6)throw Error('Maximal 5 zusätzliche Benutzer.');if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');const s=saltV27();authRegistryV27.users.push({id:makeIdV27('user'),tenantId:tid,displayName:dn,username:un,role,active:true,salt:s,passwordHash:await hashV27(p,s)})}await saveRegistryV27();renderTenantAdminV27();applyAuthPermissionsV27()}
+async function deleteTenantUserV27(id){
+ if(!currentRightsV27().userAdmin||id===currentUserIdV27())return;
+ const u=tenantUsersV27().find(x=>x.id===id);
+ if(!u||!confirm(`Benutzer „${u.displayName}“ löschen? Seine Zuordnung wird auch aus Kostenpositionen entfernt.`))return;
+ authRegistryV27.users=authRegistryV27.users.filter(x=>x.id!==id);
+ (state.costPlans||[]).forEach(c=>{if(Array.isArray(c.userIds))c.userIds=c.userIds.filter(uid=>String(uid)!==String(id))});
+ await saveRegistryV27();saveTenantUsersLocalV060L(currentTenantIdV27());await persistState(false);renderTenantAdminV27();render()
+}
+async function saveTenantUserV27(form){
+ if(!currentRightsV27().userAdmin)throw Error('Keine Berechtigung zur Benutzerverwaltung.');
+
+ const f=new FormData(form);
+ const id=String(f.get('id')||'');
+ const dn=String(f.get('displayName')||'').trim();
+ const un=normV27(f.get('username'));
+ const role=String(f.get('role')||'member');
+ const p=String(f.get('password')||'');
+ const tid=currentTenantIdV27();
+ const ownershipShare=Number(f.get('ownershipShare'))||0;
+ const paymentShare=Number(f.get('paymentShare'))||0;
+ const propertyIds=f.getAll('propertyIds').map(String);
+
+ if(!tid)throw Error('Kein lokales Konto aktiv.');
+ if(!dn||!un)throw Error('Name und Benutzername sind erforderlich.');
+ if(authRegistryV27.users.some(u=>u.tenantId===tid&&u.id!==id&&normV27(u.username)===un))
+  throw Error('Benutzername bereits vergeben.');
+
+ let savedUser=null;
+
+ if(id){
+  const u=authRegistryV27.users.find(x=>x.id===id&&x.tenantId===tid);
+  if(!u)throw Error('Benutzer nicht gefunden.');
+  u.displayName=dn;u.username=un;u.role=role;u.ownershipShare=ownershipShare;u.paymentShare=paymentShare;u.propertyIds=propertyIds;u.active=true;
+  u.sync={...(u.sync||{}),source:'local',dirty:true,updatedAt:new Date().toISOString()};
+  if(p){
+   if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');
+   u.salt=saltV27();u.passwordHash=await hashV27(p,u.salt);
+  }
+  savedUser=u;
+ }else{
+  if(tenantUsersV27().length>=6)throw Error('Maximal 5 zusätzliche Benutzer.');
+  if(p.length<6)throw Error('Passwort mindestens 6 Zeichen.');
+  const salt=saltV27();
+  savedUser={
+   id:makeIdV27('user'),tenantId:tid,displayName:dn,username:un,role,active:true,
+   ownershipShare,paymentShare,propertyIds,salt,passwordHash:await hashV27(p,salt),
+   createdAt:new Date().toISOString(),
+   sync:{source:'local',dirty:true,updatedAt:new Date().toISOString(),lastSyncedAt:''}
+  };
+  authRegistryV27.users.push(savedUser);
+ }
+
+ const ok=await saveRegistryV27();
+ saveTenantUsersLocalV060L(tid);
+ if(!ok)throw Error('Benutzer konnte lokal nicht gespeichert werden.');
+
+ let verified=await verifyTenantUserSavedV060L(savedUser.id,tid);
+ if(!verified){
+  try{await dbRawPut(AUTH_REGISTRY_KEY_V27,authRegistryV27)}catch{}
+  saveTenantUsersLocalV060L(tid);
+  verified=await verifyTenantUserSavedV060L(savedUser.id,tid);
+ }
+ if(!verified)throw Error('Lokale Speicherung konnte nicht bestätigt werden.');
+
+ renderTenantAdminV27();render();applyAuthPermissionsV27();
+ return savedUser;
+}
 function authRightV27(btn){const s=(btn.getAttribute('onclick')||'')+' '+(btn.id||'')+' '+(btn.dataset.modal||'');if(/Vehicle|vehicle/.test(s))return'vehicles';if(/Property|property|Owner|owner/.test(s))return'objects';if(/Task|task|Planning|planning|Reserve|reserve|completeItem/.test(s))return'planning';if(/Transaction|transaction|Cost|cost|Loan|loan/.test(s))return'finance';return''}
 function applyAuthPermissionsV27(){const r=currentRightsV27();document.querySelectorAll('button').forEach(b=>{if(b.closest('#authGate')||b.closest('#tenantAccountPanel'))return;const right=authRightV27(b);if(!right)return;const del=b.classList.contains('danger')||/delete|Löschen|Entfernen/.test(b.getAttribute('onclick')||'');const dis=!r[right]||(del&&!r.remove);b.disabled=dis;b.classList.toggle('permission-disabled',dis)});document.body.classList.toggle('role-no-finance',!r.finance);renderTenantAdminV27()}
 async function bootstrapAuthV27(){
@@ -520,33 +829,53 @@ function costYearly(x){return costIsPaid(x)?0:costYearlyOriginal(x)}
 function costMonthly(x){return costIsPaid(x)?0:costMonthlyOriginal(x)}
 function plannedCostMonthly(){return state.costPlans.reduce((a,x)=>a+costMonthly(x),0)}
 function plannedMonthly(){return plannedCostMonthly()+Number(state.settings.monthlyReserve||0)}
-function activeOwnersList(){return state.owners.filter(x=>x.active!==false)}
-function activePaymentShareTotal(){return activeOwnersList().reduce((a,x)=>a+Number(x.paymentShare||0),0)}
+function accountUsersV048L(){
+ return tenantUsersV27().filter(u=>u.active!==false).map((u,index)=>({
+  ...u,
+  userNumber:index+1,
+  name:u.displayName||u.username||'Benutzer',
+  ownershipShare:Number(u.ownershipShare||0),
+  paymentShare:Number(u.paymentShare||0),
+  propertyIds:Array.isArray(u.propertyIds)?u.propertyIds.map(String):[]
+ }));
+}
+function activeOwnersList(){return accountUsersV048L()}
+function activePaymentShareTotal(){return accountUsersV048L().reduce((a,x)=>a+Number(x.paymentShare||0),0)}
+function costUserIdsV048L(cost){return Array.isArray(cost.userIds)?cost.userIds.map(String):[]}
 function eligibleOwnersForCost(cost){
- const ids=Array.isArray(cost.personIds)?cost.personIds.map(Number):[];
- const active=activeOwnersList().map((x,index)=>({...x,personNumber:index+1}));
- if(ids.length)return active.filter(owner=>ids.includes(Number(owner.id)));
+ const active=accountUsersV048L();
+ const ids=costUserIdsV048L(cost);
+ if(ids.length)return active.filter(user=>ids.includes(String(user.id)));
  const count=Math.min(Math.max(1,Number(cost.splitCount)||active.length||1),active.length);
  return active.slice(0,count);
 }
+function costUserWeightV048L(user,people){
+ const total=people.reduce((s,p)=>s+Math.max(0,Number(p.paymentShare||0)),0);
+ if(total>0)return Math.max(0,Number(user.paymentShare||0))/total;
+ return 1/Math.max(people.length,1);
+}
+function costUserShareAmountV048L(cost,user){
+ const people=eligibleOwnersForCost(cost);
+ if(!people.some(p=>String(p.id)===String(user.id)))return 0;
+ return costMonthly(cost)*costUserWeightV048L(user,people);
+}
+function costUserSharePercentV048L(cost,user){
+ const people=eligibleOwnersForCost(cost);
+ if(!people.some(p=>String(p.id)===String(user.id)))return 0;
+ return costUserWeightV048L(user,people)*100;
+}
 function ownerMonthlyCostShare(x){
  if(x.active===false)return 0;
- let amount=0;
- state.costPlans.forEach(cost=>{
-  const people=eligibleOwnersForCost(cost);
-  if(people.some(person=>Number(person.id)===Number(x.id)))amount+=costMonthly(cost)/Math.max(people.length,1);
- });
- return amount;
+ return (state.costPlans||[]).reduce((amount,cost)=>amount+costUserShareAmountV048L(cost,x),0);
 }
 function ownerMonthlyContribution(x){
  if(x.active===false)return 0;
- let amount=0;
- state.costPlans.forEach(cost=>{const people=eligibleOwnersForCost(cost);if(people.some(p=>p.id===x.id))amount+=costMonthly(cost)/Math.max(people.length,1)});
+ let amount=(state.costPlans||[]).reduce((sum,cost)=>sum+costUserShareAmountV048L(cost,x),0);
  const total=activePaymentShareTotal();
  if(total>0)amount+=Number(state.settings.monthlyReserve||0)*Number(x.paymentShare||0)/total;
  return amount;
 }
-function plannedMonthlyIncome(){return state.owners.reduce((a,x)=>a+ownerMonthlyContribution(x),0)}
+function plannedMonthlyIncome(){return accountUsersV048L().reduce((a,x)=>a+ownerMonthlyContribution(x),0)}
 function projectedMonthlyBalance(){return plannedMonthlyIncome()-plannedMonthly()}
 function projectedAccountBalance(){return Number(state.settings.startBalance||0)+projectedMonthlyBalance()}
 function monthsElapsed(start){if(!start)return 0;const d=new Date(start+'T12:00:00'),n=new Date();let m=(n.getFullYear()-d.getFullYear())*12+(n.getMonth()-d.getMonth());if(n.getDate()<d.getDate())m--;return Math.max(0,m)}
@@ -629,8 +958,9 @@ function applyThemeV38(){document.body.classList.toggle('dark-mode',state.settin
 
 function render(){
  const removedOneTimeMaintenance=cleanupCompletedOneTimeMaintenanceV041L();
+ const removedCompletedTasks=cleanupCompletedTasksV044L();
  const activatedMaintenance=activateDueMaintenanceV042L();
- if(removedOneTimeMaintenance||activatedMaintenance){
+ if(removedOneTimeMaintenance||removedCompletedTasks||activatedMaintenance){
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Wartungsstatus lokal speichern fehlgeschlagen',e)}
   setTimeout(()=>{try{persistState(false)}catch(e){console.warn('Wartungsstatus speichern fehlgeschlagen',e)}},0);
  }
@@ -644,8 +974,7 @@ function render(){
  runModule('Fahrzeugübersicht',renderDashboardVehicles);
  runModule('Kostenplan',renderCosts);
  runModule('Objekte',renderProperties);
- runModule('Personen',renderOwners);
- runModule('Planung',renderTasks);
+runModule('Planung',renderTasks);
  runModule('Einstellungen',renderSettings);
  runModule('Müllkalender',renderWasteCalendar);
  runModule('Wichtig',renderImportantV38);
@@ -834,9 +1163,9 @@ function renderDashboard(){
  $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
  const l=state.loan, original=Number(l.original)||0,projection=loanProjection(),remaining=Math.min(projection.remaining,original||projection.remaining),paid=projection.paid,pct=original?Math.min(100,Math.max(0,paid/original*100)):0;$('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';$('#loanDonut').style.setProperty('--p',pct);$('#loanOriginal').textContent=eur(original);$('#loanPaid').textContent=eur(paid);$('#loanRemaining').textContent=eur(remaining);$('#loanPayment').textContent=eur(l.monthlyPayment);const monthInterest=remaining*(Number(l.interest)||0)/100/12,monthPrincipal=Math.max(0,Math.min(remaining,Number(l.monthlyPayment)-monthInterest));$('#loanDetails').innerHTML=`<div><span>Bank</span><strong>${esc(l.bank||'nicht eingetragen')}</strong></div><div><span>Sollzins</span><strong>${Number(l.interest||0).toLocaleString('de-DE')} %</strong></div><div><span>Zinsanteil nächster Monat</span><strong>${eur(monthInterest)}</strong></div><div><span>Tilgungsanteil nächster Monat</span><strong>${eur(monthPrincipal)}</strong></div><div><span>Zinsbindung bis</span><strong>${dateDE(l.fixedUntil)}</strong></div><div><span>Berechnung</span><strong>${l.autoCalculate?'Automatisch ab '+dateDE(l.balanceDate)+' · '+projection.months+' Monate':'Manuelle Restschuld'}</strong></div>`;
  const propCosts=state.properties.map(property=>{
- const persons=state.owners.filter(owner=>owner.active!==false&&(owner.propertyIds||[]).map(String).includes(String(property.id)));
- const value=persons.reduce((sum,person)=>sum+ownerMonthlyCostShare(person),0);
- return {name:property.name,value,persons:persons.length};
+  const persons=accountUsersV048L().filter(user=>(user.propertyIds||[]).map(String).includes(String(property.id)));
+  const value=(state.costPlans||[]).filter(cost=>String(cost.propertyId)===String(property.id)).reduce((sum,cost)=>sum+costMonthly(cost),0);
+  return {name:property.name,value,persons:persons.length};
 
 
  renderDashboardProperties();
@@ -845,10 +1174,10 @@ function renderDashboard(){
 });
 const combined=plannedCostMonthly();
 $('#dashboardObjectCosts').innerHTML=[
- ...propCosts.map(item=>({name:item.name,value:item.value,note:`${item.persons} zugeordnete Person${item.persons===1?'':'en'}`})),
+ ...propCosts.map(item=>({name:item.name,value:item.value,note:`${item.persons} zugeordnete Benutzer`})),
  {name:'Beide Objekte zusammen',value:combined,note:'Gesamte Kostenpositionen'}
 ].map((item,index)=>`<div class="${index===propCosts.length?'total-row':''}"><span>${esc(item.name)}<small>${esc(item.note)}</small></span><strong>${eur(item.value)} / Monat · ${eur(item.value*12)} / Jahr</strong></div>`).join('');
- $('#ownerIncomeSummary').innerHTML=state.owners.filter(x=>x.active!==false).map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Personen</div>';
+ $('#ownerIncomeSummary').innerHTML=accountUsersV048L().map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Benutzer</div>';
  const upcoming=[...state.tasks].sort((a,b)=>{
   const ad=a.status==='Erledigt'?1:0,bd=b.status==='Erledigt'?1:0;
   if(ad!==bd)return ad-bd;
@@ -986,52 +1315,289 @@ function dashboardTaskCardV33(task){
 
 function transactionRow(x){return `<div class="list-item"><div class="list-main"><strong>${esc(x.description)}</strong><span>${esc(x.category)} · ${esc(propertyName(x.propertyId))} · ${dateDE(x.date)}</span></div><div class="amount ${x.type==='Einnahme'?'income':'expense'}">${x.type==='Einnahme'?'+':'−'} ${eur(x.amount)}</div></div>`}
 function renderTransactions(){return}
+
+function ownerCostBreakdownV045L(owner){
+ const rows=[];
+ (state.costPlans||[]).forEach(cost=>{
+  if(costIsPaid(cost))return;
+  const people=eligibleOwnersForCost(cost);
+  const user=people.find(p=>String(p.id)===String(owner.id));if(!user)return;
+  const totalMonthly=costMonthly(cost),sharePercent=costUserSharePercentV048L(cost,user),personMonthly=totalMonthly*(sharePercent/100);
+  rows.push({id:cost.id,category:cost.category||'Sonstiges',name:cost.name||'Kostenposition',object:propertyName(cost.propertyId),totalMonthly,sharePercent,personMonthly});
+ });
+ return rows;
+}
+function ownerInitialsV045L(name){
+ const parts=String(name||'?').trim().split(/\s+/).filter(Boolean);
+ return (parts.slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'?');
+}
+function userDetailTokenV049L(id){
+ return encodeURIComponent(String(id||''));
+}
+function toggleOwnerCostDetailsV045L(ownerId){
+ const token=userDetailTokenV049L(ownerId);
+ const row=document.querySelector(`[data-user-details="${token}"]`);
+ const btn=document.querySelector(`[data-user-toggle="${token}"]`);
+ if(!row)return;
+
+ const opening=row.classList.contains('hidden');
+ if(opening)row.classList.remove('hidden');
+ else row.classList.add('hidden');
+
+ if(btn){
+  btn.classList.toggle('open',opening);
+  btn.setAttribute('aria-expanded',opening?'true':'false');
+  const label=btn.querySelector('span');
+  if(label)label.textContent=opening?'Weniger Informationen':'Weitere Informationen';
+ }
+}
+function renderAccountPersonsV045L(){
+ const box=$('#accountPersonContributions');if(!box)return;
+ const owners=accountUsersV048L();
+ const total=owners.reduce((s,o)=>s+ownerMonthlyContribution(o),0);
+
+ if($('#accountContributionTotal'))$('#accountContributionTotal').textContent=eur(total);
+ if($('#accountOwnerCount'))$('#accountOwnerCount').textContent=`${owners.length} Benutzer`;
+
+ if(!owners.length){
+  box.innerHTML='<div class="empty">Keine aktiven Benutzer vorhanden</div>';
+  return;
+ }
+
+ box.innerHTML=owners.map((owner,index)=>{
+  const token=userDetailTokenV049L(owner.id);
+  const monthly=ownerMonthlyContribution(owner);
+  const percent=total>0?(monthly/total*100):0;
+  const breakdown=ownerCostBreakdownV045L(owner);
+  const breakdownTotal=breakdown.reduce((s,r)=>s+r.personMonthly,0);
+
+  return `<article class="account-person-v045l">
+   <div class="account-person-summary-v045l">
+    <div class="account-avatar-v045l">${esc(ownerInitialsV045L(owner.name))}</div>
+    <div class="account-person-name-v045l">
+     <strong>${esc(owner.name)}</strong>
+     <span>${breakdown.length} Kostenposition${breakdown.length===1?'':'en'}</span>
+    </div>
+    <div class="account-person-value-v045l">
+     <span>Monatliche Einzahlung</span>
+     <strong>${eur(monthly)} / Monat</strong>
+    </div>
+    <div class="account-person-value-v045l">
+     <span>Anteil an Einzahlungen</span>
+     <strong>${percent.toLocaleString('de-DE',{maximumFractionDigits:1})} %</strong>
+    </div>
+    <button type="button"
+      class="account-person-toggle-v045l"
+      data-user-toggle="${token}"
+      aria-expanded="false"
+      >
+      <span>Weitere Informationen</span><b>⌄</b>
+    </button>
+   </div>
+
+   <div class="account-person-details-v045l hidden" data-user-details="${token}">
+    <div class="account-person-details-title-v045l">
+     <div>
+      <strong>Kostenübersicht – ${esc(owner.name)}</strong>
+      <span>Alle laufenden Kosten, die diesem Benutzer zugeordnet sind</span>
+     </div>
+     <strong>${eur(breakdownTotal)} / Monat</strong>
+    </div>
+
+    ${breakdown.length?`<div class="account-person-cost-table-v045l">
+      <div class="account-person-cost-head-v045l">
+       <span>Kostenposition</span>
+       <span>Objekt</span>
+       <span>Kosten gesamt</span>
+       <span>Anteil</span>
+       <span>Benutzer / Monat</span>
+      </div>
+      ${breakdown.map(r=>`<div class="account-person-cost-row-v045l">
+       <span><b>${esc(r.category)}</b><small>${esc(r.name)}</small></span>
+       <span>${esc(r.object)}</span>
+       <strong>${eur(r.totalMonthly)}</strong>
+       <strong>${r.sharePercent.toLocaleString('de-DE',{maximumFractionDigits:1})} %</strong>
+       <strong>${eur(r.personMonthly)}</strong>
+      </div>`).join('')}
+      <div class="account-person-cost-total-v045l">
+       <span>Gesamt für ${esc(owner.name)}</span>
+       <strong>${eur(breakdownTotal)} / Monat</strong>
+      </div>
+     </div>`:'<div class="empty">Diesem Benutzer sind aktuell keine laufenden Kostenpositionen zugeordnet.</div>'}
+   </div>
+  </article>`;
+ }).join('');
+}function renderAccountObjectStatsV045L(){
+ const properties=state.properties||[];
+ const items=properties.map(p=>{
+  const own=(state.costPlans||[]).filter(c=>String(c.propertyId)===String(p.id)).reduce((s,c)=>s+costMonthly(c),0);
+  return {name:p.name,value:own};
+ });
+ const shared=(state.costPlans||[]).filter(c=>c.propertyId==='all'||c.propertyId===''||c.propertyId==null).reduce((s,c)=>s+costMonthly(c),0);
+ if(shared>0)items.push({name:'Gemeinsame Kosten',value:shared});
+
+ const monthly=plannedCostMonthly();
+ const yearly=(state.costPlans||[]).reduce((s,c)=>s+costYearly(c),0);
+ if($('#accountObjectStatTotal'))$('#accountObjectStatTotal').textContent=eur(yearly);
+ if($('#accountObjectCount'))$('#accountObjectCount').textContent=`${properties.length} Objekt${properties.length===1?'':'e'}`;
+ if($('#accountObjectDonutTotal'))$('#accountObjectDonutTotal').textContent=eur(yearly);
+
+ const colors=['#2563eb','#22c55e','#f59e0b','#7c3aed','#06b6d4','#ef4444'];
+ const total=Math.max(monthly,0);
+ let cursor=0;
+ const stops=[];
+ items.forEach((item,i)=>{
+  if(total<=0)return;
+  const pct=item.value/total*100;
+  const start=cursor,end=cursor+pct;
+  stops.push(`${colors[i%colors.length]} ${start}% ${end}%`);
+  cursor=end;
+ });
+ const donut=$('#accountObjectDonut');
+ if(donut)donut.style.background=stops.length?`conic-gradient(${stops.join(',')})`:'#e2e8f0';
+
+ const box=$('#costObjectSummary');
+ if(!box)return;
+ box.innerHTML=items.length?items.map((item,i)=>{
+  const pct=total>0?item.value/total*100:0;
+  return `<div class="account-object-row-v045l">
+   <i style="background:${colors[i%colors.length]}"></i>
+   <span><strong>${esc(item.name)}</strong><small>${pct.toLocaleString('de-DE',{maximumFractionDigits:1})} % der monatlichen Kosten</small></span>
+   <strong>${eur(item.value)} / Monat</strong>
+   <strong>${eur(item.value*12)} / Jahr</strong>
+  </div>`;
+ }).join(''):'<div class="empty">Noch keine Kostenpositionen vorhanden</div>';
+}
+
+function costIconV046L(category,name){
+ const t=`${category||''} ${name||''}`.toLowerCase();
+ if(t.includes('kredit')||t.includes('finanz'))return '🏦';
+ if(t.includes('versicherung'))return '🛡️';
+ if(t.includes('strom'))return '⚡';
+ if(t.includes('wasser'))return '💧';
+ if(t.includes('gas')||t.includes('heizung'))return '🔥';
+ if(t.includes('internet')||t.includes('telefon'))return '🌐';
+ if(t.includes('müll')||t.includes('abfall'))return '🗑️';
+ if(t.includes('steuer'))return '🏛️';
+ if(t.includes('wartung'))return '🔧';
+ return '€';
+}
+
+function costDueTimingLabelV047L(value){
+ return {start:'Anfang des Monats',middle:'Mitte des Monats',end:'Ende des Monats'}[value]||'';
+}
+function inferCostDueTimingV047L(cost){
+ if(cost?.dueTiming)return cost.dueTiming;
+ const old=String(cost?.note||'').toLowerCase();
+ if(old.includes('anfang'))return 'start';
+ if(old.includes('mitte'))return 'middle';
+ if(old.includes('ende'))return 'end';
+ return 'end';
+}
+function costIntervalShortV046L(interval){
+ const label=intervalLabel(interval);
+ return label||'Laufende Kosten';
+}
+function toggleCostPeopleV046L(id){
+ const el=document.querySelector(`[data-cost-people="${id}"]`);
+ const btn=document.querySelector(`[data-cost-people-toggle="${id}"]`);
+ if(!el)return;
+ const open=!el.classList.contains('hidden');
+ el.classList.toggle('hidden',open);
+ if(btn){
+  btn.classList.toggle('open',!open);
+  btn.setAttribute('aria-expanded',String(!open));
+ }
+}
 function renderCosts(){
- const monthly=plannedCostMonthly(),yearly=state.costPlans.reduce((a,x)=>a+costYearly(x),0);
+ const monthly=plannedCostMonthly();
+ const yearly=(state.costPlans||[]).reduce((a,x)=>a+costYearly(x),0);
+
  $('#costMonthlyTotal').textContent=eur(monthly);
  $('#costYearlyTotal').textContent=eur(yearly);
 
- const rows=state.properties.map(p=>{
-  const m=state.costPlans.filter(x=>String(x.propertyId)===String(p.id)).reduce((a,x)=>a+costMonthly(x),0);
-  return `<div><span>${esc(p.name)}</span><strong>${eur(m)} / Monat · ${eur(m*12)} / Jahr</strong></div>`;
- });
- const shared=state.costPlans.filter(x=>x.propertyId==='all'||x.propertyId===''||x.propertyId==null).reduce((a,x)=>a+costMonthly(x),0);
- rows.push(
-  `<div><span>Gemeinsame Kosten</span><strong>${eur(shared)} / Monat · ${eur(shared*12)} / Jahr</strong></div>`,
-  `<div class="total-row"><span>Gesamt</span><strong>${eur(monthly)} / Monat · ${eur(yearly)} / Jahr</strong></div>`
- );
- $('#costObjectSummary').innerHTML=rows.join('');
+ renderAccountObjectStatsV045L();
+ renderAccountPersonsV045L();
 
  $('#costPlanList').innerHTML=state.costPlans.length?state.costPlans.map(x=>{
   const people=eligibleOwnersForCost(x);
   const paid=costIsPaid(x);
   const originalMonthly=costMonthlyOriginal(x);
   const originalYearly=costYearlyOriginal(x);
-  const perPayment=people.length?` <span class="per-person-note">(${eur(Number(x.amount||0)/people.length)} je Anteil)</span>`:'';
-  const personBreakdown=people.length
-   ?`<div class="cost-person-breakdown">${people.map((person,index)=>`<span><b>P${person.personNumber||index+1}</b> ${esc(person.name)}: ${paid?`<s>${eur(originalMonthly/people.length)} / Monat</s> <em>nicht mehr angerechnet</em>`:`${eur(originalMonthly/people.length)} / Monat`}</span>`).join('')}</div>`
-   :'<div class="warning-text">Keine Person ausgewählt</div>';
+  const perPerson=people.length?originalMonthly/people.length:0;
+  const icon=costIconV046L(x.category,x.name);
 
-  return `<article class="entity-card cost-card ${paid?'cost-card-paid':''}">
-   <div class="card-top">
-    <div class="cost-tags">
-     <span class="tag">${esc(x.category)}</span>
-     ${paid?'<span class="tag paid-tag">✓ Vollständig bezahlt</span>':'<span class="tag active-cost-tag">Laufend</span>'}
+  return `<article class="cost-modern-v046l ${paid?'is-paid':''}">
+   <div class="cost-modern-main-v046l">
+    <div class="cost-modern-icon-v046l">${icon}</div>
+
+    <div class="cost-modern-title-v046l">
+     <span>${esc(x.category||'Kosten')}</span>
+     <h3>${esc(x.name)}</h3>
+     <p>${esc(costIntervalShortV046L(x.interval))} · ${esc(costDueTimingLabelV047L(inferCostDueTimingV047L(x)))}${x.note?` · ${esc(x.note)}`:''}</p>
     </div>
-    <span class="tag subtle">${esc(propertyName(x.propertyId))}</span>
+
+    <div class="cost-modern-object-v046l">
+     <span>Objekt</span>
+     <strong>${esc(propertyName(x.propertyId))}</strong>
+    </div>
+
+    <div class="cost-modern-status-v046l ${paid?'paid':'active'}">
+     <i></i><span>${paid?'Bezahlt':'Aktiv'}</span>
+    </div>
    </div>
-   <h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3>
-   <p>${intervalLabel(x.interval)} · ${esc(x.note||'kein Hinweis')}</p>
-   <div class="meta cost-meta">
-    <span>${eur(x.amount)} je Zahlung${perPayment}</span>
-    <strong>${paid?`<s>${eur(originalMonthly)} / Monat · ${eur(originalYearly)} / Jahr</s>`:`${eur(originalMonthly)} / Monat · ${eur(originalYearly)} / Jahr`}</strong>
+
+   <div class="cost-modern-stats-v046l">
+    <div>
+     <span>Je Zahlung</span>
+     <strong>${eur(x.amount)}</strong>
+    </div>
+    <div>
+     <span>Monatlich</span>
+     <strong>${paid?`<s>${eur(originalMonthly)}</s>`:eur(originalMonthly)}</strong>
+    </div>
+    <div>
+     <span>Jährlich</span>
+     <strong>${paid?`<s>${eur(originalYearly)}</s>`:eur(originalYearly)}</strong>
+    </div>
+    <div>
+     <span>Benutzer</span>
+     <strong>${people.length}</strong>
+    </div>
    </div>
-   ${paid?`<div class="paid-cost-info">✓ Bezahlt${x.paidAt?` · markiert am ${new Date(x.paidAt).toLocaleDateString('de-DE')}`:''} · wird nicht mehr in Summen eingerechnet</div>`:''}
-   ${personBreakdown}
-   <div class="card-actions">
-    <button class="secondary small" onclick="editCost(${x.id})">Bearbeiten</button>
-    <button class="${paid?'secondary':'success'} small" onclick="toggleCostPaid(${x.id})">${paid?'Wieder aktivieren':'Komplett bezahlt'}</button>
-    <button class="danger small" onclick="deleteCost(${x.id})">Löschen</button>
+
+   ${paid?`<div class="cost-modern-paidinfo-v046l">
+    <span>✓ Diese Kostenposition ist vollständig bezahlt und wird nicht mehr in den laufenden Summen berücksichtigt.</span>
+    ${x.paidAt?`<small>Markiert am ${new Date(x.paidAt).toLocaleDateString('de-DE')}</small>`:''}
+   </div>`:''}
+
+   <div class="cost-modern-allocation-v046l">
+    <div class="cost-modern-allocation-summary-v046l">
+     <div>
+      <span>Kostenaufteilung</span>
+      <strong>${people.length?(people.some(p=>Number(p.paymentShare)>0)?'Nach Kostenanteilen verteilt':'Gleichmäßig verteilt'):'Kein Benutzer zugeordnet'}</strong>
+     </div>
+     ${people.length?`<button type="button" class="cost-modern-toggle-v046l" data-cost-people-toggle="${x.id}" aria-expanded="false" onclick="toggleCostPeopleV046L(${x.id})">
+      <span>Aufteilung anzeigen</span><b>⌄</b>
+     </button>`:''}
+    </div>
+
+    ${people.length?`<div class="cost-modern-people-v046l hidden" data-cost-people="${x.id}">
+      ${people.map((person,index)=>{
+       const share=costUserSharePercentV048L(x,person),amount=costMonthlyOriginal(x)*(share/100);
+       return `<div class="cost-modern-person-v046l">
+        <div class="cost-person-avatar-v046l">${esc(ownerInitialsV045L(person.name))}</div>
+        <span><strong>${esc(person.name)}</strong><small>Benutzer ${index+1} · ${share.toLocaleString('de-DE',{maximumFractionDigits:1})} % dieser Position</small></span>
+        <strong>${paid?`<s>${eur(amount)}</s>`:eur(amount)} / Monat</strong>
+       </div>`;
+      }).join('')}
+     </div>`:''}
+   </div>
+
+   <div class="cost-modern-actions-v046l">
+    <button class="secondary small" onclick="editCost(${x.id})">✏️ Bearbeiten</button>
+    <button class="${paid?'secondary':'success'} small" onclick="toggleCostPaid(${x.id})">${paid?'↩ Wieder aktivieren':'✓ Komplett bezahlt'}</button>
+    <button class="danger small" onclick="deleteCost(${x.id})">🗑 Löschen</button>
    </div>
   </article>`;
  }).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
@@ -1132,10 +1698,6 @@ function renderProperties(){
   <div class="card-actions"><button class="secondary small" onclick="editProperty(${x.id})">Bearbeiten</button><button class="danger small" onclick="deleteProperty(${x.id})">Löschen</button></div>
  </article>`).join(''):'<div class="empty">Noch keine Objekte</div>'
 }
-function renderOwners(){const total=state.owners.filter(x=>x.active!==false).reduce((a,b)=>a+Number(b.ownershipShare),0);$('#shareCheck').textContent=total.toLocaleString('de-DE',{maximumFractionDigits:2})+' %';$('#shareCheck').classList.toggle('warning',Math.abs(total-100)>0.01);$('#ownerList').innerHTML=state.owners.length?state.owners.map(x=>`<article class="entity-card"><div class="card-top"><span class="tag">${x.active===false?'Inaktiv':'Aktiv'}</span><span class="tag subtle">${esc(x.personType||'Eigentümer')}</span></div><h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3><p>${esc(x.role||'Keine Aufgabe eingetragen')}</p><p class="owner-objects">Objekte: ${esc((x.propertyIds||[]).map(propertyName).join(', ')||'keine Zuordnung')}</p><div class="meta"><span>Eigentum: <strong>${Number(x.ownershipShare||0).toLocaleString('de-DE')}%</strong></span><span>Zahlung: <strong>${Number(x.paymentShare||0).toLocaleString('de-DE')}%</strong></span></div><div class="card-actions"><button class="secondary small" onclick="editOwner(${x.id})">Bearbeiten</button><button class="secondary small" onclick="toggleOwner(${x.id})">${x.active===false?'Aktivieren':'Deaktivieren'}</button><button class="danger small" onclick="deleteOwner(${x.id})">Entfernen</button></div></article>`).join(''):'<div class="empty">Noch keine Personen</div>'}
-
-let planningFilterV40='all';
-
 function planningPriorityClassV40(priority){
  const p=String(priority||'Mittel').toLowerCase();
  return p==='sofort'?'urgent':p==='hoch'?'high':p==='niedrig'?'low':'medium';
@@ -1204,6 +1766,35 @@ function addMonthsToMonthValueV041L(monthValue,months){
  base.setMonth(base.getMonth()+Number(months||0));
  return `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}`;
 }
+
+function addPlanningHistoryV044L(item,type,completedBy,completedAt){
+ state.planningHistory=Array.isArray(state.planningHistory)?state.planningHistory:[];
+ state.planningHistory.push({
+  id:Date.now()+Math.floor(Math.random()*1000),
+  sourceId:item.id,
+  type,
+  title:item.title||'',
+  propertyId:item.propertyId??'all',
+  priority:item.priority||'Mittel',
+  intervalMonths:type==='maintenance'?Number(item.intervalMonths||0):null,
+  completedAt:completedAt||new Date().toISOString(),
+  completedMonth:currentMonthValueV041L(),
+  completedByName:completedBy||'Lokaler Benutzer',
+  note:item.note||'',
+  cost:type==='maintenance'?Number(item.cost||0):0
+ });
+}
+function cleanupCompletedTasksV044L(){
+ const now=Date.now(),sevenDays=7*24*60*60*1000;
+ const before=(state.tasks||[]).length;
+ state.tasks=(state.tasks||[]).filter(x=>{
+  if(x.status!=='Erledigt')return true;
+  const completed=Date.parse(x.completedAt||'');
+  if(!Number.isFinite(completed))return true;
+  return (now-completed)<sevenDays;
+ });
+ return before!==state.tasks.length;
+}
 function cleanupCompletedOneTimeMaintenanceV041L(){
  const now=Date.now();
  const sevenDays=7*24*60*60*1000;
@@ -1237,10 +1828,75 @@ function activateDueMaintenanceV042L(){
  });
  return changed;
 }
-function planningFilteredV40(items){
- if(planningFilterV40==='done')return items.filter(x=>x.status==='Erledigt');
- if(planningFilterV40==='open')return items.filter(x=>x.status==='Offen');
- return items;
+
+function planningPriorityWeightV043L(priority){
+ const p=String(priority||'Mittel');
+ if(p==='Sofort')return 4;
+ if(p==='Hoch')return 3;
+ if(p==='Mittel')return 2;
+ if(p==='Niedrig')return 1;
+ return 2;
+}
+function planningDueTimestampV043L(x,isTask){
+ if(!x?.due)return Number.MAX_SAFE_INTEGER;
+ const d=isTask?taskDueMonthDateV34(x.due):maintenanceMonthDueDateV040L(x.due);
+ return d && !Number.isNaN(d.getTime()) ? d.getTime() : Number.MAX_SAFE_INTEGER;
+}
+function planningCompletedTimestampV043L(x){
+ const t=Date.parse(x.completedAt||x.lastCompletedAt||'');
+ return Number.isFinite(t)?t:0;
+}
+function planningSortV043L(items,type){
+ const isTask=type==='task';
+ return [...(items||[])].sort((a,b)=>{
+  const aDone=a.status==='Erledigt',bDone=b.status==='Erledigt';
+  const aPlanned=!isTask&&a.status==='Geplant',bPlanned=!isTask&&b.status==='Geplant';
+
+  // 1. Erledigte immer ganz nach unten.
+  if(aDone!==bDone)return aDone?1:-1;
+
+  // 2. Geplante Wartungen stehen unter den aktuell offenen/fälligen,
+  //    aber noch über erledigten Einträgen.
+  if(!aDone&&!bDone&&aPlanned!==bPlanned)return aPlanned?1:-1;
+
+  // 3. Erledigte: zuletzt erledigte zuerst innerhalb des unteren Blocks.
+  if(aDone&&bDone)return planningCompletedTimestampV043L(b)-planningCompletedTimestampV043L(a);
+
+  // 4. Geplante: streng nach nächstem Termin.
+  if(aPlanned&&bPlanned){
+   const dueDiff=planningDueTimestampV043L(a,false)-planningDueTimestampV043L(b,false);
+   if(dueDiff!==0)return dueDiff;
+   return planningPriorityWeightV043L(b.priority)-planningPriorityWeightV043L(a.priority);
+  }
+
+  // 5. Offene/fällige: Mix aus Datum und Priorität.
+  //    Zuerst deutlich überfällig/fällig nach Datum; bei ähnlicher Fälligkeit
+  //    entscheidet die höhere Priorität.
+  const now=Date.now();
+  const aDue=planningDueTimestampV043L(a,isTask);
+  const bDue=planningDueTimestampV043L(b,isTask);
+  const day=86400000;
+  const aDays=aDue===Number.MAX_SAFE_INTEGER?99999:Math.floor((aDue-now)/day);
+  const bDays=bDue===Number.MAX_SAFE_INTEGER?99999:Math.floor((bDue-now)/day);
+
+  function urgencyBucket(days){
+   if(days<0)return 0;       // überfällig
+   if(days<=30)return 1;     // sehr bald
+   if(days<=90)return 2;     // bald
+   if(days<=180)return 3;    // mittelfristig
+   return 4;                 // später / ohne Termin
+  }
+
+  const aBucket=urgencyBucket(aDays),bBucket=urgencyBucket(bDays);
+  if(aBucket!==bBucket)return aBucket-bBucket;
+
+  // Innerhalb desselben Zeitfensters zuerst die höhere Priorität.
+  const priorityDiff=planningPriorityWeightV043L(b.priority)-planningPriorityWeightV043L(a.priority);
+  if(priorityDiff!==0)return priorityDiff;
+
+  // Danach das frühere Datum.
+  return aDue-bDue;
+ });
 }
 function updatePlanningHeaderV40(){
  const tasks=state.tasks||[],maintenance=state.maintenance||[];
@@ -1249,15 +1905,75 @@ function updatePlanningHeaderV40(){
  if($('#planningTaskCount'))$('#planningTaskCount').textContent=tasks.length;
  if($('#planningMaintenanceCount'))$('#planningMaintenanceCount').textContent=maintenance.length;
  if($('#taskOpenTabCount'))$('#taskOpenTabCount').textContent=`${openTasks} offen`;
- if($('#maintenanceTabCount'))$('#maintenanceTabCount').textContent=`${openMaint} offen`;
+ const plannedMaint=maintenance.filter(x=>x.status==='Geplant').length;
+ if($('#maintenanceTabCount'))$('#maintenanceTabCount').textContent=`${openMaint} offen · ${plannedMaint} geplant`;
 }
 
+function planningGroupHtmlV043L(items,type){
+ const isTask=type==='task';
+ const open=items.filter(x=>x.status==='Offen');
+ const planned=isTask?[]:items.filter(x=>x.status==='Geplant');
+ const done=items.filter(x=>x.status==='Erledigt');
+
+ const parts=[];
+ if(open.length){
+  parts.push(`<div class="planning-section-label-v043l current"><span>Jetzt wichtig</span><small>${open.length} ${open.length===1?'Eintrag':'Einträge'}</small></div>`);
+  parts.push(open.map(x=>planningCard(x,type)).join(''));
+ }
+ if(planned.length){
+  parts.push(`<div class="planning-section-label-v043l planned"><span>Als Nächstes geplant</span><small>${planned.length} ${planned.length===1?'Wartung':'Wartungen'}</small></div>`);
+  parts.push(planned.map(x=>planningCard(x,type)).join(''));
+ }
+ if(done.length){
+  parts.push(`<div class="planning-section-label-v043l done"><span>Erledigt</span><small>${done.length} ${done.length===1?'Eintrag':'Einträge'}</small></div>`);
+  parts.push(done.map(x=>planningCard(x,type)).join(''));
+ }
+ return parts.join('');
+}
+
+function renderPlanningHistoryV044L(){
+ const box=$('#planningHistoryList');if(!box)return;
+ const rows=[...(state.planningHistory||[])].sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||'')));
+ if($('#historyTabCount'))$('#historyTabCount').textContent=`${rows.length} Einträge`;
+ if(!rows.length){
+  box.innerHTML='<div class="planning-empty-v40"><span>🕘</span><strong>Noch kein Verlauf vorhanden</strong><small>Erledigte Aufgaben und Wartungen erscheinen hier dauerhaft.</small></div>';
+  return;
+ }
+ box.innerHTML=`<div class="history-intro-v044l"><strong>Erledigungsverlauf</strong><span>Nur Information · wird nicht automatisch gelöscht</span></div>`+
+ rows.map(r=>{
+  const isMaintenance=r.type==='maintenance';
+  const date=r.completedAt?new Date(r.completedAt).toLocaleDateString('de-DE'):'–';
+  const time=r.completedAt?new Date(r.completedAt).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'';
+  return `<article class="history-card-v044l">
+   <div class="history-icon-v044l ${isMaintenance?'maintenance':'task'}">${isMaintenance?'🔧':'☑'}</div>
+   <div class="history-main-v044l">
+    <div class="history-title-v044l"><strong>${esc(r.title)}</strong><span>${isMaintenance?'Wartung':'Aufgabe'}</span></div>
+    <div class="history-meta-v044l">
+     <span>🏠 ${esc(propertyName(r.propertyId))}</span>
+     <span>✅ ${date}${time?' · '+time:''}</span>
+     <span>👤 ${esc(r.completedByName||'Lokaler Benutzer')}</span>
+     ${isMaintenance&&Number(r.intervalMonths)>0?`<span>🔁 ${esc(maintenanceIntervalLabelV041L(r.intervalMonths))}</span>`:''}
+     ${r.cost?`<span>💶 ${eur(r.cost)}</span>`:''}
+    </div>
+    ${r.note?`<div class="history-note-v044l">${esc(r.note)}</div>`:''}
+   </div>
+  </article>`;
+ }).join('');
+}
 function renderTasks(){
  updatePlanningHeaderV40();
- const tasks=planningFilteredV40(state.tasks||[]);
- const maintenance=planningFilteredV40(state.maintenance||[]);
- $('#taskList').innerHTML=tasks.length?tasks.map(x=>planningCard(x,'task')).join(''):'<div class="planning-empty-v40"><span>☑</span><strong>Keine Aufgaben in dieser Ansicht</strong><small>Neue Aufgaben kannst du oben hinzufügen.</small></div>';
- $('#maintenanceList').innerHTML=maintenance.length?maintenance.map(x=>planningCard(x,'maintenance')).join(''):'<div class="planning-empty-v40"><span>🔧</span><strong>Keine Wartungen in dieser Ansicht</strong><small>Lege regelmäßige Wartungen für deine Häuser an.</small></div>';
+
+ const tasks=planningSortV043L(state.tasks||[],'task');
+ const maintenance=planningSortV043L(state.maintenance||[],'maintenance');
+
+ $('#taskList').innerHTML=tasks.length
+  ?planningGroupHtmlV043L(tasks,'task')
+  :'<div class="planning-empty-v40"><span>☑</span><strong>Noch keine Aufgaben</strong><small>Neue Aufgaben kannst du oben hinzufügen.</small></div>';
+
+ $('#maintenanceList').innerHTML=maintenance.length
+  ?planningGroupHtmlV043L(maintenance,'maintenance')
+  :'<div class="planning-empty-v40"><span>🔧</span><strong>Noch keine Wartungen</strong><small>Lege regelmäßige Wartungen für deine Häuser an.</small></div>';
+ renderPlanningHistoryV044L();
 }
 function planningCard(x,type){
  const isTask=type==='task',done=x.status==='Erledigt',planned=!isTask&&x.status==='Geplant';
@@ -1315,22 +2031,33 @@ function populateSelects(){
   transactionCategory.innerHTML=categories.map(x=>`<option>${esc(x)}</option>`).join('');
  }
 }
-function renderOwnerPropertyChoices(selected=[]){
- const box=$('#ownerPropertyChoices');if(!box)return;const set=new Set((selected||[]).map(String));
- box.innerHTML=state.properties.map(p=>`<label class="check-row"><input type="checkbox" name="propertyIds" value="${p.id}" ${set.has(String(p.id))?'checked':''}> ${esc(p.name)}</label>`).join('')||'<span class="empty">Zuerst ein Objekt anlegen</span>';
-}
-function openOwnerModal(owner=null){const f=$('#ownerForm');f.reset();$('#ownerModalTitle').textContent=owner?'Person bearbeiten':'Person hinzufügen';f.elements.id.value=owner?.id||'';f.elements.name.value=owner?.name||'';f.elements.personType.value=owner?.personType||'Eigentümer';f.elements.ownershipShare.value=owner?.ownershipShare??0;f.elements.paymentShare.value=owner?.paymentShare??0;f.elements.role.value=owner?.role||'';f.elements.active.checked=owner?.active!==false;renderOwnerPropertyChoices(owner?.propertyIds||[]);$('#ownerModal').showModal()}
-function editOwner(id){const x=state.owners.find(x=>x.id===id);if(x)openOwnerModal(x)} function toggleOwner(id){const x=state.owners.find(x=>x.id===id);if(x){x.active=x.active===false;save()}} function deleteOwner(id){const x=state.owners.find(x=>x.id===id);if(x&&confirm(`Person „${x.name}“ wirklich entfernen?`)){state.owners=state.owners.filter(y=>y.id!==id);save()}}
 function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';if(f.elements.estimatedValue)f.elements.estimatedValue.value=x?.estimatedValue??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
 function showPhotoPreview(){const p=$('#propertyPhotoPreview');p.classList.toggle('hidden',!propertyPhotoData);p.innerHTML=propertyPhotoData?`<img src="${propertyPhotoData}" alt="Vorschau">`:''}
 function editProperty(id){const x=state.properties.find(x=>x.id===id);if(x)openPropertyModal(x)}
 function deleteProperty(id){const x=state.properties.find(x=>x.id===id);if(!x||!confirm(`Objekt „${x.name}“ löschen? Zugeordnete Planungen bleiben erhalten und werden dann als unbekannt angezeigt.`))return;state.properties=state.properties.filter(y=>y.id!==id);save()}
 function renderCostPersonChoices(selectedIds=[]){
- const selected=new Set((selectedIds||[]).map(Number));
+ const selected=new Set((selectedIds||[]).map(String));
  const box=$('#costPersonChoices');if(!box)return;
- box.innerHTML=state.owners.slice(0,5).map((owner,index)=>`<label class="person-choice ${owner.active===false?'choice-inactive':''}"><input type="checkbox" name="personIds" value="${owner.id}" ${selected.has(Number(owner.id))?'checked':''} ${owner.active===false?'disabled':''}><span><strong>Person ${owner.personNumber||index+1}</strong><small>${esc(owner.name||'Ohne Namen')}${owner.active===false?' · inaktiv':''}</small></span></label>`).join('');
+ const users=accountUsersV048L();
+ box.innerHTML=users.length?users.map((user,index)=>`<label class="person-choice">
+  <input type="checkbox" name="userIds" value="${esc(user.id)}" ${selected.has(String(user.id))?'checked':''}>
+  <span><strong>Benutzer ${index+1}</strong><small>${esc(user.name)} · Kostenanteil ${Number(user.paymentShare||0).toLocaleString('de-DE',{maximumFractionDigits:2})} %</small></span>
+ </label>`).join(''):'<div class="empty">Noch keine Benutzer im Konto vorhanden.</div>';
 }
-function openCostModal(x=null){const f=$('#costForm');f.reset();$('#costModalTitle').textContent=x?'Kostenposition bearbeiten':'Kostenposition hinzufügen';f.elements.id.value=x?.id||'';f.elements.category.value=x?.category||'';f.elements.name.value=x?.name||'';renderCostPersonChoices(x?.personIds||[]);f.elements.propertyId.value=String(x?.propertyId??'all');f.elements.amount.value=x?.amount??'';f.elements.interval.value=x?.interval||'monthly';f.elements.note.value=x?.note||'';$('#costModal').showModal()}
+function openCostModal(x=null){
+ const f=$('#costForm');f.reset();
+ $('#costModalTitle').textContent=x?'Kostenposition bearbeiten':'Kostenposition hinzufügen';
+ f.elements.id.value=x?.id||'';
+ f.elements.category.value=x?.category||'';
+ f.elements.name.value=x?.name||'';
+ renderCostPersonChoices(x?.userIds||[]);
+ f.elements.propertyId.value=String(x?.propertyId??'all');
+ f.elements.amount.value=x?.amount??'';
+ f.elements.interval.value=x?.interval||'monthly';
+ f.elements.dueTiming.value=inferCostDueTimingV047L(x);
+ f.elements.note.value=x?.note||'';
+ $('#costModal').showModal()
+}
 function editCost(id){const x=state.costPlans.find(x=>x.id===id);if(x)openCostModal(x)}
 function toggleCostPaid(id){
  const x=state.costPlans.find(x=>x.id===id);if(!x)return;
@@ -1355,6 +2082,9 @@ function completeItem(type,id){
  if(type==='maintenance'){
   const interval=Number(x.intervalMonths)||0;
 
+  // Jeder Abschluss einer Wartung wird dauerhaft im Verlauf protokolliert.
+  addPlanningHistoryV044L(x,'maintenance',completedBy,nowIso);
+
   if(interval>0){
    const completedMonth=currentMonthValueV041L();
    x.lastCompletedAt=nowIso;
@@ -1364,19 +2094,14 @@ function completeItem(type,id){
    x.completedByUsername=user?.username||'';
    x.completedByAccountId=tenant?.id||'';
 
-   // Regelmäßige Wartung: Der Rhythmus wird vom bisherigen Solltermin
-   // aus fortgeschrieben. Falls keiner vorhanden ist, ab dem Erledigungsmonat.
    const baseMonth=/^\d{4}-\d{2}/.test(String(x.due||''))?String(x.due).slice(0,7):completedMonth;
    x.due=addMonthsToMonthValueV041L(baseMonth,interval);
-
-   // Bis zum neuen Fälligkeitsmonat liegt sie nur als geplant vor.
    x.status='Geplant';
    x.activatedAt='';
    save();
    return;
   }
 
-  // Einmalige Wartung bleibt 7 Tage sichtbar und wird dann entfernt.
   x.status='Erledigt';
   x.completedAt=nowIso;
   x.completedMonth=currentMonthValueV041L();
@@ -1388,8 +2113,11 @@ function completeItem(type,id){
   return;
  }
 
+ // Aufgaben: Verlauf dauerhaft speichern, aktive Aufgabe 7 Tage sichtbar.
+ addPlanningHistoryV044L(x,'task',completedBy,nowIso);
  x.status='Erledigt';
  x.completedAt=nowIso;
+ x.completedMonth=currentMonthValueV041L();
  x.completedByName=completedBy;
  x.completedByUserId=user?.id||'';
  x.completedByUsername=user?.username||'';
@@ -1398,24 +2126,64 @@ function completeItem(type,id){
 }
 function deletePlanning(type,id){if(!confirm('Eintrag wirklich löschen?'))return;const key=type==='task'?'tasks':type==='maintenance'?'maintenance':'reserves';state[key]=state[key].filter(x=>x.id!==id);save()}
 function openLoan(){const f=$('#loanForm'),l=state.loan;Object.keys(l).forEach(k=>{if(!f.elements[k])return;if(f.elements[k].type==='checkbox')f.elements[k].checked=Boolean(l[k]);else f.elements[k].value=l[k]??''});$('#loanModal').showModal()}
-function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',owners:'Personen',tasks:'Planung',settings:'Einstellungen'};$('#pageTitle').textContent=titles[name]||'Hausverwaltung';window.scrollTo({top:0,behavior:'smooth'})}
+function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',tasks:'Planung',settings:'Einstellungen'};$('#pageTitle').textContent=titles[name]||'Hausverwaltung';window.scrollTo({top:0,behavior:'smooth'})}
 $$('.bottom-nav .nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.target)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.go)));$$('[data-modal]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.modal;if(m==='ownerModal')openOwnerModal();else if(m==='propertyModal'){if((state.properties||[]).length>=5){alert('Es können maximal 5 Objekte angelegt werden.');return}openPropertyModal();}else if(m==='costModal')openCostModal();else if(m==='loanModal')openLoan();else document.getElementById(m).showModal()}));
 $$('[data-task-tab]').forEach(b=>b.addEventListener('click',()=>{
  activePlanningTab=b.dataset.taskTab;
  $$('[data-task-tab]').forEach(x=>x.classList.toggle('active',x===b));
  $('#taskList').classList.toggle('hidden',activePlanningTab!=='tasks');
  $('#maintenanceList').classList.toggle('hidden',activePlanningTab!=='maintenance');
- $('#planningAddBtn').innerHTML=activePlanningTab==='tasks'?'<span>+ Aufgabe hinzufügen</span>':'<span>+ Wartung hinzufügen</span>';
+ $('#planningHistoryList').classList.toggle('hidden',activePlanningTab!=='history');
+
+ const addBtn=$('#planningAddBtn');
+ if(activePlanningTab==='history'){
+  addBtn.classList.add('hidden');
+ }else{
+  addBtn.classList.remove('hidden');
+  addBtn.innerHTML=activePlanningTab==='tasks'?'<span>+ Aufgabe hinzufügen</span>':'<span>+ Wartung hinzufügen</span>';
+ }
  renderTasks();
 }));
+
+
+
+document.addEventListener('click',e=>{
+ const btn=e.target.closest?.('[data-user-toggle]');
+ if(!btn)return;
+ e.preventDefault();
+ e.stopPropagation();
+ const token=btn.getAttribute('data-user-toggle');
+ if(!token)return;
+ toggleOwnerCostDetailsV045L(decodeURIComponent(token));
+});
+
 $('#planningAddBtn').addEventListener('click',()=>{
+ if(activePlanningTab==='history')return;
  const modal=document.getElementById(activePlanningTab==='tasks'?'taskModal':'maintenanceModal');
  if(modal)modal.showModal();
 });
 $('#wastePrev').addEventListener('click',()=>changeWasteMonth(-1));
 $('#wasteNext').addEventListener('click',()=>changeWasteMonth(1));
 $('#wasteDateSave').addEventListener('click',saveWasteDateSelections);
-$('#costForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),personIds=f.getAll('personIds').map(Number);if(!personIds.length){alert('Bitte mindestens eine aktive Person auswählen.');return}const data={category:f.get('category'),name:f.get('name'),personIds,splitCount:personIds.length,propertyId:f.get('propertyId'),amount:Number(f.get('amount')),interval:f.get('interval'),note:f.get('note')};if(id)Object.assign(state.costPlans.find(x=>x.id===id),data);else state.costPlans.push({id:Date.now(),paid:false,paidAt:'',...data});e.target.reset();$('#costModal').close();save()});
+$('#costForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const f=new FormData(e.target),id=Number(f.get('id')),userIds=f.getAll('userIds').map(String);
+ if(!userIds.length){alert('Bitte mindestens einen Benutzer auswählen.');return}
+ const data={
+  category:String(f.get('category')||'').trim(),
+  name:String(f.get('name')||'').trim(),
+  userIds,
+  splitCount:userIds.length,
+  propertyId:f.get('propertyId'),
+  amount:Number(f.get('amount')),
+  interval:f.get('interval'),
+  dueTiming:f.get('dueTiming')||'end',
+  note:String(f.get('note')||'').trim()
+ };
+ if(id)Object.assign(state.costPlans.find(x=>x.id===id),data);
+ else state.costPlans.push({id:Date.now(),paid:false,paidAt:'',...data});
+ e.target.reset();$('#costModal').close();save()
+});
 $('#loanForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.loan={bank:f.get('bank'),original:Number(f.get('original')),remaining:Number(f.get('remaining')),balanceDate:f.get('balanceDate'),interest:Number(f.get('interest')),monthlyPayment:Number(f.get('monthlyPayment')),startDate:f.get('startDate'),fixedUntil:f.get('fixedUntil'),extraPayment:Number(f.get('extraPayment')),autoCalculate:f.get('autoCalculate')==='on'};$('#loanModal').close();save()});
 
 $('#addVehicleBtn').addEventListener('click',()=>{if((state.vehicles||[]).length>=6){alert('Es können maximal 6 Fahrzeuge angelegt werden.');return}openVehicleModal(null)});
@@ -1532,7 +2300,6 @@ $('#propertyForm').addEventListener('submit',e=>{
  form.reset();propertyPhotoData='';$('#propertyModal').close();save();
 });
 $('#propertyForm').elements.photo.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>2_500_000){alert('Das Foto ist zu groß. Bitte ein Foto unter etwa 2,5 MB verwenden.');e.target.value='';return}const r=new FileReader();r.onload=()=>{propertyPhotoData=r.result;showPhotoPreview()};r.readAsDataURL(file)});
-$('#ownerForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id'));if(!id&&state.owners.length>=5){alert('Maximal fünf Personen.');return}const data={name:f.get('name').trim(),personType:f.get('personType'),ownershipShare:Number(f.get('ownershipShare')),paymentShare:Number(f.get('paymentShare')),role:f.get('role').trim(),propertyIds:f.getAll('propertyIds').map(String),active:f.get('active')==='on'};if(id)Object.assign(state.owners.find(x=>x.id===id),data);else state.owners.push({id:Date.now(),...data});state.owners=state.owners.slice(0,5).map((owner,index)=>({...owner,personNumber:index+1}));e.target.reset();$('#ownerModal').close();save()});
 $('#taskForm')?.elements.photoFile?.addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  try{updateTaskPhotoPreviewV35(await imageFileToDataUrlV31(file,850,650,.76))}catch{}
@@ -1554,11 +2321,6 @@ $('#taskForm').addEventListener('submit',async e=>{
  state.tasks.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),priority:f.get('priority'),status:'Offen',completedAt:'',completedByUserId:'',completedByName:'',photo});
  form.reset();updateTaskPhotoPreviewV35('');$('#taskModal').close();save();
 });
-$$('[data-planning-filter]').forEach(b=>b.addEventListener('click',()=>{
- planningFilterV40=b.dataset.planningFilter;
- $$('[data-planning-filter]').forEach(x=>x.classList.toggle('active',x===b));
- renderTasks();
-}));
 $('#maintenanceTypeSelect')?.addEventListener('change',e=>{
  const custom=e.target.value==='__custom__';
  $('#customMaintenanceWrap')?.classList.toggle('hidden',!custom);
@@ -1583,14 +2345,61 @@ $('#maintenanceForm').addEventListener('submit',e=>{
  save();
 });
 $('#saveSettings').addEventListener('click',()=>{state.settings={name:$('#settingName').value,startBalance:Number($('#settingStartBalance').value),minimumReserve:Number($('#settingMinimumReserve').value),monthlyReserve:Number($('#settingMonthlyReserve').value)};save();alert('Gespeichert')});
-$('#exportBtn').addEventListener('click',()=>{
- const payload={...state,_backupInfo:{version:22,exportedAt:new Date().toISOString(),storage:'IndexedDB'}};
+
+async function saveEverythingLocalV060L(){
+ const stateOk=await persistState(false);
+ const registryOk=await saveRegistryV27();
+ const tid=currentTenantIdV27();
+ const userOk=tid?saveTenantUsersLocalV060L(tid):true;
+ return !!(stateOk && registryOk && userOk);
+}
+function fullBackupPayloadV060L(){
+ const tid=currentTenantIdV27();
+ const tenant=(authRegistryV27.tenants||[]).find(t=>t.id===tid)||null;
+ const users=(authRegistryV27.users||[]).filter(u=>u.tenantId===tid);
+ return {
+  backupFormat:'hausverwaltung-full-backup-v1',
+  appVersion:'0.60l',
+  exportedAt:new Date().toISOString(),
+  tenantId:tid,
+  tenant,
+  users,
+  state,
+  sync:{mode:'local',nasReady:true,nasConnected:false}
+ };
+}
+function downloadJsonV060L(payload,filename){
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
  const a=document.createElement('a');
- a.href=URL.createObjectURL(blob);
- a.download='hausverwaltung-sicherung-v22.json';
- a.click();
- setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ const url=URL.createObjectURL(blob);
+ a.href=url;a.download=filename;
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+async function saveAndExportV060L(){
+ const btn=$('#saveAndExportBtn');
+ const original=btn?.innerHTML||'💾 Speichern & JSON exportieren';
+ if(btn){btn.disabled=true;btn.textContent='Speichere …'}
+ try{
+  const ok=await saveEverythingLocalV060L();
+  if(!ok)throw Error('Lokale Speicherung konnte nicht vollständig bestätigt werden.');
+  const payload=fullBackupPayloadV060L();
+  const code=payload.tenant?.code||'konto';
+  const date=new Date().toISOString().slice(0,10);
+  downloadJsonV060L(payload,`hausverwaltung-${code}-${date}.json`);
+  if(btn)btn.textContent='✓ Gespeichert & exportiert';
+  setTimeout(()=>{if(btn){btn.disabled=false;btn.innerHTML=original}},1800);
+ }catch(error){
+  console.error(error);
+  if(btn){btn.disabled=false;btn.innerHTML=original}
+  alert(error.message||'Speichern/Exportieren fehlgeschlagen.');
+ }
+}
+
+$('#saveAndExportBtn')?.addEventListener('click',saveAndExportV060L);
+$('#exportBtn').addEventListener('click',async()=>{
+ await saveEverythingLocalV060L();
+ downloadJsonV060L(fullBackupPayloadV060L(),'hausverwaltung-v060-vollsicherung.json');
 });
 $('#importInput').addEventListener('change',async e=>{
  const input=e.target,file=input.files?.[0];
@@ -1599,6 +2408,27 @@ $('#importInput').addEventListener('change',async e=>{
   const text=(await file.text()).replace(/^\uFEFF/,'').trim();
   const parsed=JSON.parse(text);
   if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('Ungültige Sicherungsdatei');
+
+  if(parsed.backupFormat==='hausverwaltung-full-backup-v1' && parsed.state){
+   const bt=parsed.tenant;
+   const bu=Array.isArray(parsed.users)?parsed.users:[];
+   if(bt){
+    const ti=authRegistryV27.tenants.findIndex(t=>t.id===bt.id);
+    if(ti>=0)authRegistryV27.tenants[ti]=bt; else authRegistryV27.tenants.push(bt);
+    authRegistryV27.users=authRegistryV27.users.filter(u=>u.tenantId!==bt.id);
+    authRegistryV27.users.push(...bu);
+    await saveRegistryV27();
+    saveTenantUsersLocalV060L(bt.id);
+   }
+   state=migrate(parsed.state);
+   const fullOk=await persistState(false);
+   if(!fullOk)throw new Error('App-Daten konnten nicht gespeichert werden.');
+   render();applyUiLanguage();renderTenantAdminV27();
+   alert('Vollsicherung inklusive Benutzer erfolgreich importiert.');
+   input.value='';
+   return;
+  }
+
   const imported=migrate(parsed);
   const oldState=state;
   state=imported;
@@ -1643,6 +2473,8 @@ document.getElementById('logoutBtn')?.addEventListener('click',logoutV27);
 document.getElementById('addTenantUserBtn')?.addEventListener('click',()=>openTenantUserModalV27());
 document.getElementById('tenantUserForm')?.addEventListener('submit',async e=>{e.preventDefault();try{await saveTenantUserV27(e.target);$('#tenantUserModal').close()}catch(x){alert(x.message)}});
 
+window.toggleOwnerCostDetailsV045L=toggleOwnerCostDetailsV045L;
+window.toggleCostPeopleV046L=toggleCostPeopleV046L;
 window.openPropertyDocumentV38=openPropertyDocumentV38;window.deletePropertyDocumentV38=deletePropertyDocumentV38;
 $('#propertyDocumentForm')?.addEventListener('submit',async e=>{
  e.preventDefault();const f=new FormData(e.target),p=state.properties.find(x=>Number(x.id)===Number(f.get('propertyId')));if(!p)return;const file=f.get('file');if(!file||!file.size)return;if(file.size>3000000){alert('Datei ist größer als 3 MB.');return}
@@ -1652,4 +2484,4 @@ $('#propertyDocumentForm')?.addEventListener('submit',async e=>{
 $('#dashboardWidgetChoices')?.addEventListener('change',e=>{const k=e.target?.dataset?.widgetChoice;if(!k)return;state.settings.dashboardWidgets={...(state.settings.dashboardWidgets||{}),[k]:e.target.checked};save()});
 $('#darkModeToggle')?.addEventListener('change',e=>{state.settings.darkMode=e.target.checked;save()});
 
-Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24,editTenantUserV27,deleteTenantUserV27,toggleCostPaid,openRenovationModalV35,deleteRenovationV35});render();applyUiLanguage();bootstrapAuthV27();
+Object.assign(window,{editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24,editTenantUserV27,deleteTenantUserV27,toggleCostPaid,openRenovationModalV35,deleteRenovationV35});render();applyUiLanguage();bootstrapAuthV27();

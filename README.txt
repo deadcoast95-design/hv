@@ -1,29 +1,44 @@
-APP-VERSION 0.42l – WARTUNGSAUTOMATIK FIX
+APP-VERSION 0.60l – STABILE BENUTZER + VOLLSICHERUNG
 
-FEHLER BEHOBEN
-- Der „Erledigen“-Button bei Wartungen funktioniert wieder.
-- Ursache war ein falscher Aufruf der lokalen Benutzer-Sitzung.
+BENUTZER
+Jeder Kontobenutzer wird jetzt mehrfach lokal gespeichert:
+- IndexedDB
+- zentrale LocalStorage-Registry
+- zusätzlicher lokaler Benutzer-Speicher pro Konto
 
-WIEDERKEHRENDE WARTUNGEN
-Beispiel:
-Wärmepumpenwartung – jährlich – fällig 08/2026
+Nach dem Erstellen/Bearbeiten wird automatisch geprüft,
+ob der Benutzer wirklich in IndexedDB UND im Kontospeicher vorhanden ist.
+Erst dann gilt das Speichern als erfolgreich.
 
-Nach „Erledigen“:
-- letzter Abschluss wird gespeichert,
-- Benutzer wird gespeichert,
-- nächster Termin wird automatisch auf 08/2027 gesetzt,
-- Wartung bekommt den Status „Geplant“,
-- der Erledigen-Button verschwindet zunächst.
+Beim Start kann die App Benutzer aus dem konto-spezifischen Fallback
+wiederherstellen, falls die zentrale Registry fehlen sollte.
 
-Sobald der neue Fälligkeitsmonat erreicht wird:
-- Status wechselt automatisch von „Geplant“ zu „Offen“,
-- der Erledigen-Button ist wieder verfügbar,
-- die Wartung erscheint als Hinweis unter „Demnächst wichtig“ auf der Übersicht.
+NEUER BUTTON
+Mehr → App-Einstellungen:
+„Speichern & JSON exportieren“
 
-Die Übersicht warnt außerdem bis zu ca. 45 Tage vor einer Wartung.
+Der Button:
+1. speichert sämtliche App-Daten lokal
+2. speichert die Benutzer-Registry
+3. schreibt den konto-spezifischen Benutzer-Backup
+4. erzeugt eine vollständige JSON-Datei
 
-EINMALIGE WARTUNGEN
-- nach Erledigung 7 Tage sichtbar,
-- danach automatische Entfernung.
+VOLLSICHERUNG
+Enthält:
+- Konto / Kontocode
+- Benutzer inkl. Login-Hash/Salt
+- Rollen und Rechte
+- Eigentumsanteile
+- Kostenanteile
+- Objektzuordnungen
+- sämtliche App-Daten des aktuellen Kontos
+- NAS-ready Kennzeichnung
 
-Alles bleibt vollständig lokal ohne NAS.
+IMPORT
+0.60l kann die neue Vollsicherung inklusive Benutzern wieder importieren.
+Alte reine App-JSON-Dateien bleiben weiterhin kompatibel.
+
+NAS
+Noch nicht verbunden.
+Die Benutzer-IDs und die Vollsicherung sind so vorbereitet,
+dass später die NAS-Synchronisierung darauf aufbauen kann.
