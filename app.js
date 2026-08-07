@@ -1,5 +1,5 @@
-const KEY='hausverwaltung_pwa_v9';
-const OLD_KEYS=['hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
+const KEY='hausverwaltung_pwa_v10';
+const OLD_KEYS=['hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 const categories=['Einzahlung Eigentümer','Kredit','Strom','Wasser','Internet','Versicherung','Grundsteuer','Müll','Wartung','Reparatur','Rücklage','Sanierung','Sonstiges'];
 const seed={
  settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600},
@@ -23,7 +23,16 @@ function migrate(data){
  if(d.loan.autoCalculate===undefined)d.loan.autoCalculate=true;
  if(!d.loan.balanceDate&&Number(d.loan.remaining)>0)d.loan.balanceDate=new Date().toISOString().slice(0,10);
  d.owners=(Array.isArray(data.owners)?data.owners:clone(seed.owners)).slice(0,5).map((x,index)=>({...x,personNumber:index+1,propertyIds:Array.isArray(x.propertyIds)?x.propertyIds.map(String):statePropertyFallback(x)}));
- d.properties=(Array.isArray(data.properties)?data.properties:clone(seed.properties)).map(x=>({...x,photo:x.photo||''}));
+ d.properties=(Array.isArray(data.properties)?data.properties:clone(seed.properties)).map(x=>({
+ ...x,
+ photo:x.photo||'',
+ constructionYear:x.constructionYear||'',
+ electricityMeter:x.electricityMeter??'',
+ waterMeter:x.waterMeter??'',
+ meterReadingDate:x.meterReadingDate||'',
+ energyClass:x.energyClass||'',
+ heatingType:x.heatingType||''
+}));
  d.transactions=Array.isArray(data.transactions)?data.transactions:[];
  d.tasks=(data.tasks||[]).map(x=>({...x,propertyId:x.propertyId??'all'}));
  d.maintenance=(data.maintenance||[]).map(x=>({...x,propertyId:x.propertyId??'all',intervalMonths:x.intervalMonths||12,cost:Number(x.cost)||0}));
@@ -75,6 +84,15 @@ function eligibleOwnersForCost(cost){
  const count=Math.min(Math.max(1,Number(cost.splitCount)||active.length||1),active.length);
  return active.slice(0,count);
 }
+function ownerMonthlyCostShare(x){
+ if(x.active===false)return 0;
+ let amount=0;
+ state.costPlans.forEach(cost=>{
+  const people=eligibleOwnersForCost(cost);
+  if(people.some(person=>Number(person.id)===Number(x.id)))amount+=costMonthly(cost)/Math.max(people.length,1);
+ });
+ return amount;
+}
 function ownerMonthlyContribution(x){
  if(x.active===false)return 0;
  let amount=0;
@@ -125,16 +143,27 @@ function render(){
 }
 function renderDashboard(){
  const monthlyCosts=plannedMonthly(),monthlyIncome=plannedMonthlyIncome(),monthNet=projectedMonthlyBalance();
- $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);$('#activeOwners').textContent=state.owners.filter(x=>x.active!==false).length;$('#openTasks').textContent=state.tasks.filter(x=>x.status!=='Erledigt').length;$('#reserveTarget').textContent=eur(state.reserves.reduce((a,x)=>a+Math.max(0,Number(x.target)-Number(x.saved)),0));
+ $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
  const l=state.loan, original=Number(l.original)||0,projection=loanProjection(),remaining=Math.min(projection.remaining,original||projection.remaining),paid=projection.paid,pct=original?Math.min(100,Math.max(0,paid/original*100)):0;$('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';$('#loanDonut').style.setProperty('--p',pct);$('#loanOriginal').textContent=eur(original);$('#loanPaid').textContent=eur(paid);$('#loanRemaining').textContent=eur(remaining);$('#loanPayment').textContent=eur(l.monthlyPayment);const monthInterest=remaining*(Number(l.interest)||0)/100/12,monthPrincipal=Math.max(0,Math.min(remaining,Number(l.monthlyPayment)-monthInterest));$('#loanDetails').innerHTML=`<div><span>Bank</span><strong>${esc(l.bank||'nicht eingetragen')}</strong></div><div><span>Sollzins</span><strong>${Number(l.interest||0).toLocaleString('de-DE')} %</strong></div><div><span>Zinsanteil nächster Monat</span><strong>${eur(monthInterest)}</strong></div><div><span>Tilgungsanteil nächster Monat</span><strong>${eur(monthPrincipal)}</strong></div><div><span>Zinsbindung bis</span><strong>${dateDE(l.fixedUntil)}</strong></div><div><span>Berechnung</span><strong>${l.autoCalculate?'Automatisch ab '+dateDE(l.balanceDate)+' · '+projection.months+' Monate':'Manuelle Restschuld'}</strong></div>`;
- const propCosts=state.properties.map(p=>({name:p.name,value:state.costPlans.filter(x=>String(x.propertyId)===String(p.id)).reduce((a,x)=>a+costMonthly(x),0)}));const shared=state.costPlans.filter(x=>x.propertyId==='all'||x.propertyId===''||x.propertyId==null).reduce((a,x)=>a+costMonthly(x),0);$('#dashboardObjectCosts').innerHTML=[...propCosts,{name:'Gemeinsame Kosten',value:shared},{name:'Gesamt',value:plannedCostMonthly()}].map((x,i)=>`<div class="${i===propCosts.length+1?'total-row':''}"><span>${esc(x.name)}</span><strong>${eur(x.value)} / Monat · ${eur(x.value*12)} / Jahr</strong></div>`).join('');
- $('#ownerIncomeSummary').innerHTML=state.owners.filter(x=>x.active!==false).map((x,index)=>`<div><span><b class="person-number">P${x.personNumber||index+1}</b> ${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Personen</div>';
- const tx=[...state.transactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5);$('#recentTransactions').innerHTML=tx.length?tx.map(transactionRow).join(''):'<div class="empty">Noch keine Buchungen</div>';const upcoming=[...state.tasks.filter(x=>x.status!=='Erledigt'),...state.maintenance.filter(x=>x.status!=='Erledigt')].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')).slice(0,5);$('#upcomingItems').innerHTML=upcoming.length?upcoming.map(x=>`<div class="list-item"><div class="list-main"><strong>${esc(x.title)}</strong><span>${dateDE(x.due)} · ${esc(propertyName(x.propertyId))}</span></div><span class="tag">${esc(x.status||'Offen')}</span></div>`).join(''):'<div class="empty">Keine offenen Termine</div>'
+ const propCosts=state.properties.map(property=>{
+ const persons=state.owners.filter(owner=>owner.active!==false&&(owner.propertyIds||[]).map(String).includes(String(property.id)));
+ const value=persons.reduce((sum,person)=>sum+ownerMonthlyCostShare(person),0);
+ return {name:property.name,value,persons:persons.length};
+});
+const combined=plannedCostMonthly();
+$('#dashboardObjectCosts').innerHTML=[
+ ...propCosts.map(item=>({name:item.name,value:item.value,note:`${item.persons} zugeordnete Person${item.persons===1?'':'en'}`})),
+ {name:'Beide Objekte zusammen',value:combined,note:'Gesamte Kostenpositionen'}
+].map((item,index)=>`<div class="${index===propCosts.length?'total-row':''}"><span>${esc(item.name)}<small>${esc(item.note)}</small></span><strong>${eur(item.value)} / Monat · ${eur(item.value*12)} / Jahr</strong></div>`).join('');
+ $('#ownerIncomeSummary').innerHTML=state.owners.filter(x=>x.active!==false).map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Personen</div>';
+ const tx=[...state.transactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5);$('#recentTransactions').innerHTML=tx.length?tx.map(transactionRow).join(''):'<div class="empty">Noch keine Buchungen</div>';const upcoming=[...state.tasks].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));$('#upcomingItems').innerHTML=upcoming.length?upcoming.map(x=>`<div class="list-item"><div class="list-main"><strong>${esc(x.title)}</strong><span>${dateDE(x.due)} · ${esc(propertyName(x.propertyId))}${x.owner?' · '+esc(x.owner):''}</span></div><span class="tag">${esc(x.status||'Offen')}</span></div>`).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>'
 
  const dashboardCostBox=$('#dashboardCostPositions');
  if(dashboardCostBox){
-  dashboardCostBox.innerHTML=(state.costPlans||[]).length?state.costPlans.map(cost=>`
-   <div class="cost-info-row"><span>${esc(cost.category)}</span><span>${esc(propertyName(cost.propertyId))}</span><strong>${eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${eur(costYearly(cost))}</strong></div>`).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
+  dashboardCostBox.innerHTML=(state.costPlans||[]).length?[
+  ...state.costPlans.map(cost=>`<div class="cost-info-row"><span>${esc(cost.category)}</span><span>${esc(propertyName(cost.propertyId))}</span><strong>${eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${eur(costYearly(cost))}</strong></div>`),
+  `<div class="cost-info-row cost-info-total"><strong>Gesamt</strong><span>Alle Objekte</span><strong>${eur(plannedCostMonthly())}</strong><span>Monatsdurchschnitt</span><strong>${eur(state.costPlans.reduce((sum,cost)=>sum+costYearly(cost),0))}</strong></div>`
+ ].join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
  }
 }
 
@@ -199,7 +228,23 @@ function renderCosts(){
  }).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
 }
 function intervalLabel(i){return {monthly:'monatlich',fiveyearly:'5× jährlich',quarterly:'vierteljährlich',semiannual:'halbjährlich',yearly:'jährlich'}[i]||i}
-function renderProperties(){$('#propertyList').innerHTML=state.properties.length?state.properties.map(x=>`<article class="entity-card property-card">${x.photo?`<img class="property-image" src="${x.photo}" alt="${esc(x.name)}">`:`<div class="property-placeholder">🏠</div>`}<div class="card-top"><span class="tag">${esc(x.usage)}</span><span>${Number(x.area)||0} m²</span></div><h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3><p>${esc(x.address||'Adresse noch nicht eingetragen')}</p><div class="card-actions"><button class="secondary small" onclick="editProperty(${x.id})">Bearbeiten</button><button class="danger small" onclick="deleteProperty(${x.id})">Löschen</button></div></article>`).join(''):'<div class="empty">Noch keine Objekte</div>'}
+function renderProperties(){
+ $('#propertyList').innerHTML=state.properties.length?state.properties.map(x=>`<article class="entity-card property-card">
+  ${x.photo?`<img class="property-image" src="${x.photo}" alt="${esc(x.name)}">`:`<div class="property-placeholder">🏠</div>`}
+  <div class="card-top"><span class="tag">${esc(x.usage)}</span><span>${Number(x.area)||0} m²</span></div>
+  <h3>${esc(x.name)}</h3>
+  <p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
+  <div class="property-info-grid">
+   <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div>
+   <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
+   <div><span>Stromzähler</span><strong>${x.electricityMeter!==''?Number(x.electricityMeter).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
+   <div><span>Wasserzähler</span><strong>${x.waterMeter!==''?Number(x.waterMeter).toLocaleString('de-DE')+' m³':'–'}</strong></div>
+   <div><span>Ablesedatum</span><strong>${dateDE(x.meterReadingDate)}</strong></div>
+   <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
+  </div>
+  <div class="card-actions"><button class="secondary small" onclick="editProperty(${x.id})">Bearbeiten</button><button class="danger small" onclick="deleteProperty(${x.id})">Löschen</button></div>
+ </article>`).join(''):'<div class="empty">Noch keine Objekte</div>'
+}
 function renderOwners(){const total=state.owners.filter(x=>x.active!==false).reduce((a,b)=>a+Number(b.ownershipShare),0);$('#shareCheck').textContent=total.toLocaleString('de-DE',{maximumFractionDigits:2})+' %';$('#shareCheck').classList.toggle('warning',Math.abs(total-100)>0.01);$('#ownerList').innerHTML=state.owners.length?state.owners.map(x=>`<article class="entity-card"><div class="card-top"><span class="tag">${x.active===false?'Inaktiv':'Aktiv'}</span><span class="tag subtle">${esc(x.personType||'Eigentümer')}</span></div><h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3><p>${esc(x.role||'Keine Aufgabe eingetragen')}</p><p class="owner-objects">Objekte: ${esc((x.propertyIds||[]).map(propertyName).join(', ')||'keine Zuordnung')}</p><div class="meta"><span>Eigentum: <strong>${Number(x.ownershipShare||0).toLocaleString('de-DE')}%</strong></span><span>Zahlung: <strong>${Number(x.paymentShare||0).toLocaleString('de-DE')}%</strong></span></div><div class="card-actions"><button class="secondary small" onclick="editOwner(${x.id})">Bearbeiten</button><button class="secondary small" onclick="toggleOwner(${x.id})">${x.active===false?'Aktivieren':'Deaktivieren'}</button><button class="danger small" onclick="deleteOwner(${x.id})">Entfernen</button></div></article>`).join(''):'<div class="empty">Noch keine Personen</div>'}
 function renderTasks(){
  $('#taskList').innerHTML=state.tasks.length?state.tasks.map(x=>planningCard(x,'task')).join(''):'<div class="empty">Keine Aufgaben</div>';
@@ -215,7 +260,7 @@ function renderOwnerPropertyChoices(selected=[]){
 }
 function openOwnerModal(owner=null){const f=$('#ownerForm');f.reset();$('#ownerModalTitle').textContent=owner?'Person bearbeiten':'Person hinzufügen';f.elements.id.value=owner?.id||'';f.elements.name.value=owner?.name||'';f.elements.personType.value=owner?.personType||'Eigentümer';f.elements.ownershipShare.value=owner?.ownershipShare??0;f.elements.paymentShare.value=owner?.paymentShare??0;f.elements.role.value=owner?.role||'';f.elements.active.checked=owner?.active!==false;renderOwnerPropertyChoices(owner?.propertyIds||[]);$('#ownerModal').showModal()}
 function editOwner(id){const x=state.owners.find(x=>x.id===id);if(x)openOwnerModal(x)} function toggleOwner(id){const x=state.owners.find(x=>x.id===id);if(x){x.active=x.active===false;save()}} function deleteOwner(id){const x=state.owners.find(x=>x.id===id);if(x&&confirm(`Person „${x.name}“ wirklich entfernen?`)){state.owners=state.owners.filter(y=>y.id!==id);save()}}
-function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';f.elements.usage.value=x?.usage||'Eigennutzung';showPhotoPreview();$('#propertyModal').showModal()}
+function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';showPhotoPreview();$('#propertyModal').showModal()}
 function showPhotoPreview(){const p=$('#propertyPhotoPreview');p.classList.toggle('hidden',!propertyPhotoData);p.innerHTML=propertyPhotoData?`<img src="${propertyPhotoData}" alt="Vorschau">`:''}
 function editProperty(id){const x=state.properties.find(x=>x.id===id);if(x)openPropertyModal(x)}
 function deleteProperty(id){const x=state.properties.find(x=>x.id===id);if(!x||!confirm(`Objekt „${x.name}“ löschen? Zugeordnete Planungen bleiben erhalten und werden dann als unbekannt angezeigt.`))return;state.properties=state.properties.filter(y=>y.id!==id);save()}
@@ -242,7 +287,7 @@ $('#wasteDateSave').addEventListener('click',saveWasteDateSelections);
 $('#transactionForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.transactions.push({id:Date.now(),type:f.get('type'),category:f.get('category'),propertyId:f.get('propertyId'),description:f.get('description'),amount:Number(f.get('amount')),date:f.get('date')});e.target.reset();$('#transactionModal').close();save()});
 $('#costForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),personIds=f.getAll('personIds').map(Number);if(!personIds.length){alert('Bitte mindestens eine aktive Person auswählen.');return}const data={category:f.get('category'),name:f.get('name'),personIds,splitCount:personIds.length,propertyId:f.get('propertyId'),amount:Number(f.get('amount')),interval:f.get('interval'),note:f.get('note')};if(id)Object.assign(state.costPlans.find(x=>x.id===id),data);else state.costPlans.push({id:Date.now(),...data});e.target.reset();$('#costModal').close();save()});
 $('#loanForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.loan={bank:f.get('bank'),original:Number(f.get('original')),remaining:Number(f.get('remaining')),balanceDate:f.get('balanceDate'),interest:Number(f.get('interest')),monthlyPayment:Number(f.get('monthlyPayment')),startDate:f.get('startDate'),fixedUntil:f.get('fixedUntil'),extraPayment:Number(f.get('extraPayment')),autoCalculate:f.get('autoCalculate')==='on'};$('#loanModal').close();save()});
-$('#propertyForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),data={name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),usage:f.get('usage'),photo:propertyPhotoData};if(id)Object.assign(state.properties.find(x=>x.id===id),data);else state.properties.push({id:Date.now(),...data});e.target.reset();propertyPhotoData='';$('#propertyModal').close();save()});
+$('#propertyForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),data={name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),constructionYear:f.get('constructionYear'),usage:f.get('usage'),energyClass:f.get('energyClass'),heatingType:f.get('heatingType'),electricityMeter:f.get('electricityMeter')===''?'':Number(f.get('electricityMeter')),waterMeter:f.get('waterMeter')===''?'':Number(f.get('waterMeter')),meterReadingDate:f.get('meterReadingDate'),photo:propertyPhotoData};if(id)Object.assign(state.properties.find(x=>x.id===id),data);else state.properties.push({id:Date.now(),...data});e.target.reset();propertyPhotoData='';$('#propertyModal').close();save()});
 $('#propertyForm').elements.photo.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>2_500_000){alert('Das Foto ist zu groß. Bitte ein Foto unter etwa 2,5 MB verwenden.');e.target.value='';return}const r=new FileReader();r.onload=()=>{propertyPhotoData=r.result;showPhotoPreview()};r.readAsDataURL(file)});
 $('#ownerForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id'));if(!id&&state.owners.length>=5){alert('Maximal fünf Personen.');return}const data={name:f.get('name').trim(),personType:f.get('personType'),ownershipShare:Number(f.get('ownershipShare')),paymentShare:Number(f.get('paymentShare')),role:f.get('role').trim(),propertyIds:f.getAll('propertyIds').map(String),active:f.get('active')==='on'};if(id)Object.assign(state.owners.find(x=>x.id===id),data);else state.owners.push({id:Date.now(),...data});state.owners=state.owners.slice(0,5).map((owner,index)=>({...owner,personNumber:index+1}));e.target.reset();$('#ownerModal').close();save()});
 $('#taskForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.tasks.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),owner:f.get('owner'),priority:f.get('priority'),status:'Offen'});e.target.reset();$('#taskModal').close();save()});

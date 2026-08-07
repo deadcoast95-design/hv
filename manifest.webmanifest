@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – Kalender & Kosten",
+  "name": "Private Immobilienverwaltung – Objektinformationen",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit konkreter Kostenzuordnung je Person",
+  "description": "Lokale Immobilienverwaltung mit Kosten-, Aufgaben- und Gebäudeübersicht",
   "icons": [
     {
       "src": "icon.svg",

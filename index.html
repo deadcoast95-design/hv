@@ -18,12 +18,7 @@
       <div><span>Monatliche Einnahmen</span><strong id="monthlyIncome">0,00 €</strong></div>
       <div><span>Monatlicher Saldo</span><strong id="monthlyNet">0,00 €</strong></div>
     </div>
-    <div class="metric-grid dashboard-small-metrics">
-      <article class="metric"><span>Aktive Personen</span><strong id="activeOwners">0</strong></article>
-      <article class="metric"><span>Offene Aufgaben</span><strong id="openTasks">0</strong></article>
-      <article class="metric"><span>Rücklagen offen</span><strong id="reserveTarget">0,00 €</strong></article>
-    </div>
-    <section class="panel">
+<section class="panel">
       <div class="panel-head"><h2>Kreditübersicht</h2></div>
       <div class="loan-layout">
         <div class="donut" id="loanDonut"><div><strong id="loanPercent">0 %</strong><span>getilgt</span></div></div>
@@ -45,7 +40,7 @@
       <div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div>
     </section>
     <section class="panel"><div class="panel-head"><h2>Kostenpositionen</h2><span class="tag">Nur Information</span></div><div class="cost-info-table"><div class="cost-info-head"><span>Kategorie</span><span>Objekt</span><span>Monatlich</span><span>Intervall</span><span>Jahr gesamt</span></div><div id="dashboardCostPositions"></div></div></section>
-    <section class="panel"><div class="panel-head"><h2>Nächste Termine</h2><button class="link-btn" data-go="tasks">Planung</button></div><div id="upcomingItems" class="list"></div></section>
+    <section class="panel"><div class="panel-head"><h2>Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="list"></div></section>
   </section>
 
   <section class="view" data-view="transactions">
@@ -78,7 +73,7 @@
     <section class="panel"><h2>Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary">Exportieren</button><label class="secondary file-label">Importieren<input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full">Alle lokalen Daten löschen</button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2>Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>9 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>10 Lokal</strong></div></div></section>
 <section class="panel note"><strong>Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -88,7 +83,24 @@
 <dialog id="costModal"><form method="dialog" id="costForm"><h2 id="costModalTitle">Kostenposition</h2><input name="id" type="hidden"/><label>Kategorie<input name="category" list="categoryList" required /></label><label>Bezeichnung<input name="name" required /></label><fieldset class="person-fieldset"><legend>Beteiligte Personen</legend><div id="costPersonChoices" class="person-choice-grid"></div><small>Nur ausgewählte Personen tragen diese Kostenposition. Der Betrag wird gleichmäßig verteilt.</small></fieldset><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Betrag je Zahlung<input name="amount" type="number" min="0" step="0.01" required /></label><label>Intervall<select name="interval"><option value="monthly">Monatlich</option><option value="fiveyearly">5× im Jahr</option><option value="quarterly">Vierteljährlich</option><option value="semiannual">Halbjährlich</option><option value="yearly">Jährlich</option></select></label><label>Fälligkeit / Hinweis<input name="note" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <datalist id="categoryList"><option>Kredit</option><option>Strom</option><option>Wasser</option><option>Internet</option><option>Versicherung</option><option>Grundsteuer</option><option>Müll</option><option>Wartung</option><option>Reparatur</option><option>Sonstiges</option></datalist>
 <dialog id="loanModal"><form method="dialog" id="loanForm"><h2>Kredit bearbeiten</h2><label>Bank<input name="bank" /></label><label>Darlehenssumme<input name="original" type="number" min="0" step="0.01" /></label><label>Restschuld laut Bank am Stichtag<input name="remaining" type="number" min="0" step="0.01" /></label><label>Stichtag der Restschuld<input name="balanceDate" type="date" /></label><label>Sollzins p.a. %<input name="interest" type="number" min="0" step="0.001" /></label><label>Monatsrate<input name="monthlyPayment" type="number" min="0" step="0.01" /></label><label>Beginn<input name="startDate" type="date" /></label><label>Zinsbindung bis<input name="fixedUntil" type="date" /></label><label>Sondertilgung p.a.<input name="extraPayment" type="number" min="0" step="0.01" /></label><label class="check-row"><input name="autoCalculate" type="checkbox" checked /> Restschuld jeden Monat automatisch berechnen</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
-<dialog id="propertyModal"><form method="dialog" id="propertyForm"><h2 id="propertyModalTitle">Objekt hinzufügen</h2><input name="id" type="hidden"/><label>Foto<input name="photo" type="file" accept="image/*" /></label><div id="propertyPhotoPreview" class="photo-preview hidden"></div><label>Bezeichnung<input name="name" required /></label><label>Adresse<input name="address" /></label><label>Wohnfläche m²<input name="area" type="number" step="0.1" /></label><label>Nutzung<select name="usage"><option>Eigennutzung</option><option>Mietfreie Überlassung</option><option>Vermietung</option><option>Leerstand</option></select></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
+<dialog id="propertyModal"><form method="dialog" id="propertyForm">
+<h2 id="propertyModalTitle">Objekt hinzufügen</h2><input name="id" type="hidden"/>
+<label>Foto<input name="photo" type="file" accept="image/*" /></label><div id="propertyPhotoPreview" class="photo-preview hidden"></div>
+<fieldset class="dialog-section"><legend>Grunddaten</legend>
+<label>Bezeichnung<input name="name" required /></label>
+<label>Adresse<input name="address" /></label>
+<div class="form-two-columns"><label>Wohnfläche m²<input name="area" type="number" min="0" step="0.1" /></label><label>Baujahr<input name="constructionYear" type="number" min="1000" max="2100" step="1" /></label></div>
+<label>Nutzung<select name="usage"><option>Eigennutzung</option><option>Mietfreie Überlassung</option><option>Vermietung</option><option>Leerstand</option></select></label>
+</fieldset>
+<fieldset class="dialog-section"><legend>Energie und Technik</legend>
+<div class="form-two-columns"><label>Energieeffizienzklasse<select name="energyClass"><option value="">Nicht eingetragen</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></label><label>Heizungsart<input name="heatingType" placeholder="z. B. Wärmepumpe" /></label></div>
+</fieldset>
+<fieldset class="dialog-section"><legend>Zählerstände</legend>
+<div class="form-two-columns"><label>Stromzählerstand kWh<input name="electricityMeter" type="number" min="0" step="0.01" /></label><label>Wasserzählerstand m³<input name="waterMeter" type="number" min="0" step="0.001" /></label></div>
+<label>Datum der Ablesung<input name="meterReadingDate" type="date" /></label>
+</fieldset>
+<div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
+</form></dialog>
 <dialog id="ownerModal"><form method="dialog" id="ownerForm"><h2 id="ownerModalTitle">Person hinzufügen</h2><input name="id" type="hidden" /><label>Name<input name="name" required /></label><label>Rolle<select name="personType"><option>Eigentümer</option><option>Bewohner</option><option>Verwalter</option><option>Sonstige Person</option></select></label><label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" required /></label><label>Zahlanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" required /></label><label>Aufgabe<input name="role" /></label><fieldset class="object-picker"><legend>Person gehört zu diesen Objekten</legend><div id="ownerPropertyChoices" class="check-grid"></div></fieldset><label class="check-row"><input name="active" type="checkbox" checked /> Person ist aktiv</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="taskModal"><form method="dialog" id="taskForm"><h2>Aufgabe hinzufügen</h2><label>Aufgabe<input name="title" required /></label><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Fällig<input name="due" type="date" /></label><label>Verantwortlich<input name="owner" /></label><label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="maintenanceModal"><form method="dialog" id="maintenanceForm"><h2>Wartung hinzufügen</h2><label>Wartung<input name="title" required /></label><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Nächster Termin<input name="due" type="date" /></label><label>Intervall Monate<input name="intervalMonths" type="number" min="1" step="1" /></label><label>Verantwortlich<input name="owner" /></label><label>Geplante Kosten<input name="cost" type="number" min="0" step="0.01" /></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
