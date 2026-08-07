@@ -128,3 +128,12 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
  .bottom-nav{grid-template-columns:repeat(7,minmax(54px,1fr))!important;overflow-x:auto!important}
  .bottom-nav button{font-size:10px!important;padding-left:2px!important;padding-right:2px!important}
 }
+
+#uiLanguageSelect{max-width:280px}
+
+.storage-note{font-size:11px;color:var(--muted)}
+
+.permission-summary{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.permission-summary span{padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800}
+.perm-ok{background:#dcfce7;color:#166534}.perm-no{background:#f1f5f9;color:#64748b}
+.permission-disabled{opacity:.42!important;cursor:not-allowed!important}

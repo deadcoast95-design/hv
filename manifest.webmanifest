@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – Max 6 Fahrzeuge",
+  "name": "Private Immobilienverwaltung – V24 Pro Lokal",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit bis zu sechs Fahrzeugen",
+  "description": "Lokale Immobilien- und Fahrzeugverwaltung mit erweiterbarer Mehrsprachigkeit und lokalen Profilrechten",
   "icons": [
     {
       "src": "icon.svg",

@@ -1,5 +1,150 @@
-const KEY='hausverwaltung_pwa_v16';
-const OLD_KEYS=['hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
+const KEY='hausverwaltung_pwa_v24';
+const OLD_KEYS=['hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
+
+const LANG_KEY='hausverwaltung_ui_language_v1';
+const UI_TEXT={
+ de:{
+  overview:'Übersicht', account:'Konto', objects:'Objekte', planning:'Planung', vehicles:'Fahrzeuge', more:'Mehr',
+  private:'PRIVATE IMMOBILIENVERWALTUNG', local:'Lokal gespeichert',
+  loan:'Kreditübersicht', objectCosts:'Kosten je Objekt', contributions:'Monatliche Einzahlungen der Personen',
+  lastBookings:'Letzte Buchungen', waste:'Müllabfuhr-Kalender', costs:'Kostenpositionen',
+  objectOverview:'Objektübersicht', vehicleOverview:'Fahrzeugübersicht', taskOverview:'Aufgabenübersicht',
+  infoOnly:'Nur Information', dateTap:'Datum antippen',
+  bookings:'Buchungen', costPlan:'Kostenplan', addBooking:'+ Buchung', addCost:'+ Kostenposition',
+  monthlyPlan:'Monatlich geplant', yearlyPlan:'Jährlich geplant',
+  addObject:'+ Objekt', addPerson:'+ Person', shares:'Anteile',
+  tasks:'Aufgaben', maintenance:'Wartungen', reserves:'Rücklagen', addTask:'+ Aufgabe',
+  addVehicle:'+ Fahrzeug', vehicleFile:'Fahrzeugakte',
+  loanManagement:'Kreditverwaltung', editLoan:'Kredit bearbeiten', management:'Verwaltung',
+  language:'Sprache', basicSettings:'Grundeinstellungen', name:'Bezeichnung',
+  startBalance:'Startkontostand', minReserve:'Mindestreserve', monthlyReserve:'Monatliche Rücklage',
+  save:'Speichern', backup:'Datensicherung', export:'Exportieren', import:'Importieren',
+  deleteData:'Alle lokalen Daten löschen', localMode:'Lokaler App-Modus', privacy:'Datenschutz',
+  storage:'Speicherort', sync:'Synchronisierung', offline:'Offline', appVersion:'App-Version',
+  category:'Kategorie', object:'Objekt', monthly:'Monatlich', interval:'Intervall', yearTotal:'Jahr gesamt',vehicleHint:'Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.',vehiclesCount:'Fahrzeuge',noInterval:'Kein Intervall',inOrder:'In Ordnung',soonDue:'Bald fällig',oilDue:'Ölwechsel fällig',mileage:'Kilometerstand',lastOil:'Letzter Ölwechsel',nextOil:'Nächster Ölwechsel',tuvDue:'HU / TÜV bis',motorOil:'Motoröl',tires:'Reifen',brakesLast:'Bremsen zuletzt',batteryLast:'Batterie zuletzt',edit:'Bearbeiten',delete:'Löschen',addService:'+ Wartung',lastWorkshop:'Letzter Werkstatteintrag',makeModel:'Marke / Modell',plate:'Kennzeichen',nextMaintenance:'Nächste Wartungen / Informationen',noMaintenance:'Keine weiteren Wartungsinformationen',remaining:'km verbleibend',petrol:'Benzin',diesel:'Diesel',hybrid:'Hybrid',electric:'Elektro',gas:'Gas',other:'Sonstiges',serviceOil:'Ölwechsel',inspection:'Inspektion',brakes:'Bremsen',tireChange:'Reifenwechsel',battery:'Batterie',climate:'Klimaservice',sparkPlugs:'Zündkerzen',airFilter:'Luftfilter',cabinFilter:'Innenraumfilter',gearOil:'Getriebeöl',repair:'Reparatur',vehicleAddTitle:'Fahrzeug hinzufügen',vehicleEditTitle:'Fahrzeug bearbeiten',vehicleData:'Fahrzeugdaten',manufacturer:'Hersteller',model:'Modell',year:'Baujahr',fuel:'Antrieb',currentMileage:'Aktueller Kilometerstand',oilSection:'Ölwechsel',lastOilDate:'Letzter Ölwechsel',atMileage:'bei Kilometerstand',nextOilDate:'Nächster Ölwechsel Datum',nextOilKm:'Nächster Ölwechsel bei km',oilSpec:'Motoröl / Spezifikation',otherMaintenance:'Weitere Wartung',notes:'Notizen',cancel:'Abbrechen',serviceAdd:'Wartung eintragen',date:'Datum',work:'Arbeit / Wartung',cost:'Kosten €',note:'Notiz',noVehicles:'Noch keine Fahrzeuge angelegt',noPlate:'Kein Kennzeichen',unknownYear:'Baujahr unbekannt',unknownFuel:'Antrieb unbekannt',checkAsNeeded:'Kontrolle nach Bedarf',
+ },
+ ru:{
+  overview:'Обзор', account:'Счёт', objects:'Объекты', planning:'Планирование', vehicles:'Автомобили', more:'Ещё',
+  private:'ЧАСТНОЕ УПРАВЛЕНИЕ НЕДВИЖИМОСТЬЮ', local:'Сохранено локально',
+  loan:'Обзор кредита', objectCosts:'Расходы по объектам', contributions:'Ежемесячные взносы',
+  lastBookings:'Последние операции', waste:'Календарь вывоза мусора', costs:'Статьи расходов',
+  objectOverview:'Обзор объектов', vehicleOverview:'Обзор автомобилей', taskOverview:'Обзор задач',
+  infoOnly:'Только информация', dateTap:'Нажмите дату',
+  bookings:'Операции', costPlan:'План расходов', addBooking:'+ Операция', addCost:'+ Статья расходов',
+  monthlyPlan:'План в месяц', yearlyPlan:'План за год',
+  addObject:'+ Объект', addPerson:'+ Человек', shares:'Доли',
+  tasks:'Задачи', maintenance:'Обслуживание', reserves:'Резервы', addTask:'+ Задача',
+  addVehicle:'+ Автомобиль', vehicleFile:'Карточка автомобиля',
+  loanManagement:'Управление кредитом', editLoan:'Редактировать кредит', management:'Управление',
+  language:'Язык', basicSettings:'Основные настройки', name:'Название',
+  startBalance:'Начальный баланс', minReserve:'Минимальный резерв', monthlyReserve:'Ежемесячный резерв',
+  save:'Сохранить', backup:'Резервная копия', export:'Экспорт', import:'Импорт',
+  deleteData:'Удалить локальные данные', localMode:'Локальный режим', privacy:'Конфиденциальность',
+  storage:'Место хранения', sync:'Синхронизация', offline:'Офлайн', appVersion:'Версия приложения',
+  category:'Категория', object:'Объект', monthly:'В месяц', interval:'Интервал', yearTotal:'За год',vehicleHint:'Следите за заменой масла, пробегом, техосмотром и важным обслуживанием.',vehiclesCount:'Автомобилей',noInterval:'Интервал не задан',inOrder:'В порядке',soonDue:'Скоро требуется',oilDue:'Пора менять масло',mileage:'Пробег',lastOil:'Последняя замена масла',nextOil:'Следующая замена масла',tuvDue:'Техосмотр до',motorOil:'Моторное масло',tires:'Шины',brakesLast:'Тормоза: последнее обслуживание',batteryLast:'Аккумулятор: последнее обслуживание',edit:'Изменить',delete:'Удалить',addService:'+ Обслуживание',lastWorkshop:'Последняя запись сервиса',makeModel:'Марка / модель',plate:'Госномер',nextMaintenance:'Следующие обслуживания / информация',noMaintenance:'Других записей обслуживания нет',remaining:'км осталось',petrol:'Бензин',diesel:'Дизель',hybrid:'Гибрид',electric:'Электро',gas:'Газ',other:'Другое',serviceOil:'Замена масла',inspection:'Инспекция',brakes:'Тормоза',tireChange:'Смена шин',battery:'Аккумулятор',climate:'Обслуживание кондиционера',sparkPlugs:'Свечи зажигания',airFilter:'Воздушный фильтр',cabinFilter:'Салонный фильтр',gearOil:'Масло КПП',repair:'Ремонт',vehicleAddTitle:'Добавить автомобиль',vehicleEditTitle:'Редактировать автомобиль',vehicleData:'Данные автомобиля',manufacturer:'Марка',model:'Модель',year:'Год выпуска',fuel:'Тип топлива',currentMileage:'Текущий пробег',oilSection:'Замена масла',lastOilDate:'Последняя замена масла',atMileage:'при пробеге',nextOilDate:'Дата следующей замены масла',nextOilKm:'Следующая замена масла при км',oilSpec:'Масло / спецификация',otherMaintenance:'Другое обслуживание',notes:'Заметки',cancel:'Отмена',serviceAdd:'Добавить обслуживание',date:'Дата',work:'Работа / обслуживание',cost:'Стоимость €',note:'Заметка',noVehicles:'Автомобили ещё не добавлены',noPlate:'Нет госномера',unknownYear:'Год неизвестен',unknownFuel:'Тип топлива неизвестен',checkAsNeeded:'Проверка по необходимости',
+ }
+};
+function uiLanguage(){try{const c=localStorage.getItem(LANG_KEY)||'de';return LANGUAGE_REGISTRY_V24.languages.some(x=>x.code===c)?c:'de'}catch{return 'de'}}
+function uiText(key){return UI_TEXT[uiLanguage()]?.[key]||UI_TEXT.de[key]||key}
+function applyUiLanguage(){
+ const current=uiLanguage();
+ document.documentElement.lang=current==='ru'?'ru':'de';
+ document.querySelectorAll('[data-i18n]').forEach(el=>{
+  const value=uiText(el.dataset.i18n);
+  if(value)el.textContent=value;
+ });
+ translateVehicleOptions();
+ const select=document.getElementById('uiLanguageSelect');
+ if(select)select.value=current;
+ const active=document.querySelector('.view.active')?.dataset.view||'dashboard';
+ const titles={dashboard:'overview',transactions:'account',properties:'objects',tasks:'planning',vehicles:'vehicles',settings:'more'};
+ const title=document.getElementById('pageTitle');
+ if(title)title.textContent=uiText(titles[active]||'overview');
+ try{renderVehicles()}catch{}
+ try{renderDashboardVehicles()}catch{}
+ try{renderDashboard()}catch{}
+ try{renderProperties()}catch{}
+ try{renderDashboardProperties()}catch{}
+ try{renderOwners()}catch{}
+ try{renderCosts()}catch{}
+ try{renderTasks()}catch{}
+ populateLanguagesV24();
+ translateDomV24(document.body);
+ applyLocalPermissionsV24();
+}
+async function setUiLanguage(value){
+ const code=LANGUAGE_REGISTRY_V24.languages.some(x=>x.code===value)?value:'de';
+ try{localStorage.setItem(LANG_KEY,code)}catch{}
+ await loadLanguagePackV24(code);
+ applyUiLanguage();
+ populateLanguagesV24();
+ translateDomV24(document.body);
+}
+function fuelLabel(value){
+ const map={'Benzin':'petrol','Diesel':'diesel','Hybrid':'hybrid','Elektro':'electric','Gas':'gas','Sonstiges':'other'};
+ return uiText(map[value]||'other');
+}
+function serviceTypeLabel(value){
+ const map={'Ölwechsel':'serviceOil','Inspektion':'inspection','Bremsen':'brakes','Reifenwechsel':'tireChange','Batterie':'battery','HU / TÜV':'tuvDue','Klimaservice':'climate','Zündkerzen':'sparkPlugs','Luftfilter':'airFilter','Innenraumfilter':'cabinFilter','Getriebeöl':'gearOil','Reparatur':'repair','Sonstiges':'other'};
+ return uiText(map[value]||'other');
+}
+function translateVehicleOptions(){
+ const fuelMap={'Benzin':'petrol','Diesel':'diesel','Hybrid':'hybrid','Elektro':'electric','Gas':'gas','Sonstiges':'other'};
+ const fuelSelect=document.querySelector('#vehicleForm select[name="fuel"]');
+ if(fuelSelect)[...fuelSelect.options].forEach(o=>{if(fuelMap[o.value])o.textContent=uiText(fuelMap[o.value])});
+ const serviceMap={'Ölwechsel':'serviceOil','Inspektion':'inspection','Bremsen':'brakes','Reifenwechsel':'tireChange','Batterie':'battery','HU / TÜV':'tuvDue','Klimaservice':'climate','Zündkerzen':'sparkPlugs','Luftfilter':'airFilter','Innenraumfilter':'cabinFilter','Getriebeöl':'gearOil','Reparatur':'repair','Sonstiges':'other'};
+ const serviceSelect=document.querySelector('#vehicleServiceForm select[name="type"]');
+ if(serviceSelect)[...serviceSelect.options].forEach(o=>{if(serviceMap[o.value])o.textContent=uiText(serviceMap[o.value])});
+}
+
+
+
+const LANGUAGE_REGISTRY_V24={"default": "de", "languages": [{"code": "de", "label": "Deutsch", "file": "lang/de.json"}, {"code": "ru", "label": "Русский", "file": "lang/ru.json"}]};
+const LANGUAGE_FALLBACK_V24={de:{"meta": {"code": "de", "label": "Deutsch", "version": 1}, "phrases": {"Übersicht": "Übersicht", "Konto": "Konto", "Objekte": "Objekte", "Planung": "Planung", "Fahrzeuge": "Fahrzeuge", "Mehr": "Mehr", "PRIVATE IMMOBILIENVERWALTUNG": "PRIVATE IMMOBILIENVERWALTUNG", "Lokal gespeichert": "Lokal gespeichert", "Gespeichert": "Gespeichert", "Speichern": "Speichern", "Monatliche Ausgaben": "Monatliche Ausgaben", "Monatliche Einnahmen": "Monatliche Einnahmen", "Monatlicher Saldo": "Monatlicher Saldo", "Kreditübersicht": "Kreditübersicht", "Darlehenssumme": "Darlehenssumme", "Bereits getilgt": "Bereits getilgt", "Restschuld": "Restschuld", "Monatsrate": "Monatsrate", "Bank": "Bank", "Sollzins": "Sollzins", "Zinsanteil nächster Monat": "Zinsanteil nächster Monat", "Tilgungsanteil nächster Monat": "Tilgungsanteil nächster Monat", "Zinsbindung bis": "Zinsbindung bis", "Berechnung": "Berechnung", "Kosten je Objekt": "Kosten je Objekt", "Nur Information": "Nur Information", "Beide Objekte zusammen": "Beide Objekte zusammen", "Gesamte Kostenpositionen": "Gesamte Kostenpositionen", "Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.": "Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.", "Monatliche Einzahlungen der Personen": "Monatliche Einzahlungen der Personen", "Letzte Buchungen": "Letzte Buchungen", "Alle": "Alle", "Müllabfuhr-Kalender": "Müllabfuhr-Kalender", "Datum antippen": "Datum antippen", "Restmüll": "Restmüll", "Bio": "Bio", "Papier": "Papier", "Plastik": "Plastik", "Kostenpositionen": "Kostenpositionen", "Kategorie": "Kategorie", "Objekt": "Objekt", "Monatlich": "Monatlich", "Intervall": "Intervall", "Jahr gesamt": "Jahr gesamt", "Gesamt": "Gesamt", "Monatsdurchschnitt": "Monatsdurchschnitt", "Objektübersicht": "Objektübersicht", "Fahrzeugübersicht": "Fahrzeugübersicht", "Aufgabenübersicht": "Aufgabenübersicht", "Buchungen": "Buchungen", "Kostenplan": "Kostenplan", "+ Buchung": "+ Buchung", "+ Kostenposition": "+ Kostenposition", "Monatlich geplant": "Monatlich geplant", "Jährlich geplant": "Jährlich geplant", "+ Objekt": "+ Objekt", "+ Person": "+ Person", "Anteile": "Anteile", "Personen und Objekte verwalten.": "Personen und Objekte verwalten.", "Aufgaben": "Aufgaben", "Wartungen": "Wartungen", "Rücklagen": "Rücklagen", "+ Aufgabe": "+ Aufgabe", "+ Wartung": "+ Wartung", "+ Rücklage": "+ Rücklage", "Kreditverwaltung": "Kreditverwaltung", "Kredit bearbeiten": "Kredit bearbeiten", "Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.": "Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.", "Verwaltung": "Verwaltung", "Grundeinstellungen": "Grundeinstellungen", "Bezeichnung": "Bezeichnung", "Startkontostand": "Startkontostand", "Mindestreserve": "Mindestreserve", "Monatliche Rücklage": "Monatliche Rücklage", "Datensicherung": "Datensicherung", "Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.": "Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.", "Exportieren": "Exportieren", "Importieren": "Importieren", "Alle lokalen Daten löschen": "Alle lokalen Daten löschen", "Lokaler App-Modus": "Lokaler App-Modus", "Aktiv": "Aktiv", "Speicherort": "Speicherort", "Dieses Gerät": "Dieses Gerät", "Synchronisierung": "Synchronisierung", "Aus": "Aus", "Offline": "Offline", "Verfügbar": "Verfügbar", "App-Version": "App-Version", "Datenschutz": "Datenschutz", "Sprache": "Sprache", "Fahrzeugakte": "Fahrzeugakte", "Werkstattübersicht": "Werkstattübersicht", "Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.": "Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.", "Kein Intervall": "Kein Intervall", "In Ordnung": "In Ordnung", "Bald fällig": "Bald fällig", "Ölwechsel fällig": "Ölwechsel fällig", "Kilometerstand": "Kilometerstand", "Letzter Ölwechsel": "Letzter Ölwechsel", "Nächster Ölwechsel": "Nächster Ölwechsel", "HU / TÜV bis": "HU / TÜV bis", "Motoröl": "Motoröl", "Reifen": "Reifen", "Bremsen zuletzt": "Bremsen zuletzt", "Batterie zuletzt": "Batterie zuletzt", "Bearbeiten": "Bearbeiten", "Löschen": "Löschen", "Letzter Werkstatteintrag": "Letzter Werkstatteintrag", "Marke / Modell": "Marke / Modell", "Kennzeichen": "Kennzeichen", "Nächste Wartungen / Informationen": "Nächste Wartungen / Informationen", "Keine weiteren Wartungsinformationen": "Keine weiteren Wartungsinformationen", "Benzin": "Benzin", "Diesel": "Diesel", "Hybrid": "Hybrid", "Elektro": "Elektro", "Gas": "Gas", "Sonstiges": "Sonstiges", "Ölwechsel": "Ölwechsel", "Inspektion": "Inspektion", "Bremsen": "Bremsen", "Reifenwechsel": "Reifenwechsel", "Batterie": "Batterie", "HU / TÜV": "HU / TÜV", "Klimaservice": "Klimaservice", "Zündkerzen": "Zündkerzen", "Luftfilter": "Luftfilter", "Innenraumfilter": "Innenraumfilter", "Getriebeöl": "Getriebeöl", "Reparatur": "Reparatur", "Fahrzeug hinzufügen": "Fahrzeug hinzufügen", "Fahrzeug bearbeiten": "Fahrzeug bearbeiten", "Fahrzeugdaten": "Fahrzeugdaten", "Hersteller": "Hersteller", "Modell": "Modell", "Baujahr": "Baujahr", "Antrieb": "Antrieb", "Aktueller Kilometerstand": "Aktueller Kilometerstand", "bei Kilometerstand": "bei Kilometerstand", "Nächster Ölwechsel Datum": "Nächster Ölwechsel Datum", "Nächster Ölwechsel bei km": "Nächster Ölwechsel bei km", "Motoröl / Spezifikation": "Motoröl / Spezifikation", "Weitere Wartung": "Weitere Wartung", "Notizen": "Notizen", "Abbrechen": "Abbrechen", "Wartung eintragen": "Wartung eintragen", "Datum": "Datum", "Arbeit / Wartung": "Arbeit / Wartung", "Kosten €": "Kosten €", "Notiz": "Notiz", "Foto": "Foto", "Adresse": "Adresse", "Wohnfläche m²": "Wohnfläche m²", "Grundstücksgröße m²": "Grundstücksgröße m²", "Zimmer": "Zimmer", "Badezimmer": "Badezimmer", "WC": "WC", "Nutzung": "Nutzung", "Eigennutzung": "Eigennutzung", "Mietfreie Überlassung": "Mietfreie Überlassung", "Vermietung": "Vermietung", "Leerstand": "Leerstand", "Energie und Technik": "Energie und Technik", "Energieeffizienzklasse": "Energieeffizienzklasse", "Energieklasse": "Energieklasse", "Heizungsart": "Heizungsart", "Zählerstände": "Zählerstände", "Stromzählerstand kWh": "Stromzählerstand kWh", "Wasserzählerstand m³": "Wasserzählerstand m³", "Datum der Ablesung": "Datum der Ablesung", "Notiz zum Objekt": "Notiz zum Objekt", "Grundstück": "Grundstück", "Bäder / WC": "Bäder / WC", "Bäder": "Bäder", "Stromzähler": "Stromzähler", "Wasserzähler": "Wasserzähler", "Ablesedatum": "Ablesedatum", "Heizung": "Heizung", "ohne Termin": "ohne Termin", "Person": "Person", "Eigentümer": "Eigentümer", "Bewohner": "Bewohner", "Administrator": "Administrator", "Gast": "Gast", "Inaktiv": "Inaktiv", "Eigentum": "Eigentum", "Zahlung": "Zahlung", "Aktivieren": "Aktivieren", "Deaktivieren": "Deaktivieren", "Entfernen": "Entfernen", "Keine Aufgabe eingetragen": "Keine Aufgabe eingetragen", "keine Zuordnung": "keine Zuordnung", "Gemeinsam": "Gemeinsam", "Keine Aufgaben": "Keine Aufgaben", "Keine Wartungen": "Keine Wartungen", "Keine Rücklagenziele": "Keine Rücklagenziele", "Erledigen": "Erledigen", "Erledigt": "Erledigt", "Offen": "Offen", "Ziel": "Ziel", "gespart": "gespart", "offen": "offen", "Monate": "Monate", "Gemeinsame Kosten": "Gemeinsame Kosten", "Keine Person ausgewählt": "Keine Person ausgewählt", "kein Hinweis": "kein Hinweis", "je Zahlung": "je Zahlung", "je Anteil": "je Anteil", "Alle Objekte / gemeinsam": "Alle Objekte / gemeinsam", "Alle Objekte": "Alle Objekte", "monatlich": "monatlich", "5× jährlich": "5× jährlich", "vierteljährlich": "vierteljährlich", "halbjährlich": "halbjährlich", "jährlich": "jährlich", "Objekt hinzufügen": "Objekt hinzufügen", "Objekt bearbeiten": "Objekt bearbeiten", "Person hinzufügen": "Person hinzufügen", "Person bearbeiten": "Person bearbeiten", "Aufgabe hinzufügen": "Aufgabe hinzufügen", "Aufgabe bearbeiten": "Aufgabe bearbeiten", "Titel": "Titel", "Fälligkeit": "Fälligkeit", "Verantwortlich": "Verantwortlich", "Kostenposition hinzufügen": "Kostenposition hinzufügen", "Kostenposition bearbeiten": "Kostenposition bearbeiten", "Beteiligte Personen": "Beteiligte Personen", "Betrag je Zahlung": "Betrag je Zahlung", "Fälligkeit / Hinweis": "Fälligkeit / Hinweis", "Rolle": "Rolle", "Status": "Status", "Priorität": "Priorität", "Niedrig": "Niedrig", "Mittel": "Mittel", "Hoch": "Hoch", "Keine offenen Termine": "Keine offenen Termine", "Noch keine Personen": "Noch keine Personen", "Noch keine Objekte": "Noch keine Objekte", "Noch keine Kostenpositionen": "Noch keine Kostenpositionen", "Noch keine Buchungen": "Noch keine Buchungen", "Lokales Profil & Rechte": "Lokales Profil & Rechte", "Nur lokal": "Nur lokal", "Bleibt vollständig lokal auf diesem Gerät. Später kann dieselbe Struktur an NAS-Benutzerkonten angebunden werden.": "Bleibt vollständig lokal auf diesem Gerät. Später kann dieselbe Struktur an NAS-Benutzerkonten angebunden werden.", "Aktives Profil": "Aktives Profil", "NAS später möglich": "NAS später möglich", "Finanzen": "Finanzen"}},ru:{"meta": {"code": "ru", "label": "Русский", "version": 1}, "phrases": {"Übersicht": "Обзор", "Konto": "Счёт", "Objekte": "Объекты", "Planung": "Планирование", "Fahrzeuge": "Автомобили", "Mehr": "Ещё", "PRIVATE IMMOBILIENVERWALTUNG": "ЧАСТНОЕ УПРАВЛЕНИЕ НЕДВИЖИМОСТЬЮ", "Lokal gespeichert": "Сохранено локально", "Gespeichert": "Сохранено", "Speichern": "Сохранить", "Monatliche Ausgaben": "Расходы в месяц", "Monatliche Einnahmen": "Доходы в месяц", "Monatlicher Saldo": "Баланс за месяц", "Kreditübersicht": "Обзор кредита", "Darlehenssumme": "Сумма кредита", "Bereits getilgt": "Уже погашено", "Restschuld": "Остаток долга", "Monatsrate": "Ежемесячный платёж", "Bank": "Банк", "Sollzins": "Процентная ставка", "Zinsanteil nächster Monat": "Проценты в следующем месяце", "Tilgungsanteil nächster Monat": "Погашение тела кредита в следующем месяце", "Zinsbindung bis": "Фиксированная ставка до", "Berechnung": "Расчёт", "Kosten je Objekt": "Расходы по объектам", "Nur Information": "Только информация", "Beide Objekte zusammen": "Все объекты вместе", "Gesamte Kostenpositionen": "Все статьи расходов", "Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.": "Расчётные расходы по объектам. Редактирование выполняется в плане расходов.", "Monatliche Einzahlungen der Personen": "Ежемесячные взносы", "Letzte Buchungen": "Последние операции", "Alle": "Все", "Müllabfuhr-Kalender": "Календарь вывоза мусора", "Datum antippen": "Нажмите дату", "Restmüll": "Остаточный мусор", "Bio": "Био", "Papier": "Бумага", "Plastik": "Пластик", "Kostenpositionen": "Статьи расходов", "Kategorie": "Категория", "Objekt": "Объект", "Monatlich": "В месяц", "Intervall": "Интервал", "Jahr gesamt": "За год", "Gesamt": "Итого", "Monatsdurchschnitt": "Среднее за месяц", "Objektübersicht": "Обзор объектов", "Fahrzeugübersicht": "Обзор автомобилей", "Aufgabenübersicht": "Обзор задач", "Buchungen": "Операции", "Kostenplan": "План расходов", "+ Buchung": "+ Операция", "+ Kostenposition": "+ Статья расходов", "Monatlich geplant": "План в месяц", "Jährlich geplant": "План за год", "+ Objekt": "+ Объект", "+ Person": "+ Человек", "Anteile": "Доли", "Personen und Objekte verwalten.": "Управление людьми и объектами.", "Aufgaben": "Задачи", "Wartungen": "Обслуживание", "Rücklagen": "Резервы", "+ Aufgabe": "+ Задача", "+ Wartung": "+ Обслуживание", "+ Rücklage": "+ Резерв", "Kreditverwaltung": "Управление кредитом", "Kredit bearbeiten": "Редактировать кредит", "Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.": "На обзоре показаны текущие значения. Данные банка, дата и автоматический расчёт настраиваются здесь.", "Verwaltung": "Управление", "Grundeinstellungen": "Основные настройки", "Bezeichnung": "Название", "Startkontostand": "Начальный баланс", "Mindestreserve": "Минимальный резерв", "Monatliche Rücklage": "Ежемесячный резерв", "Datensicherung": "Резервная копия", "Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.": "Экспортируйте все данные в JSON-файл или импортируйте ранее сохранённую копию.", "Exportieren": "Экспорт", "Importieren": "Импорт", "Alle lokalen Daten löschen": "Удалить все локальные данные", "Lokaler App-Modus": "Локальный режим приложения", "Aktiv": "Активно", "Speicherort": "Место хранения", "Dieses Gerät": "Это устройство", "Synchronisierung": "Синхронизация", "Aus": "Выкл.", "Offline": "Офлайн", "Verfügbar": "Доступно", "App-Version": "Версия приложения", "Datenschutz": "Конфиденциальность", "Sprache": "Язык", "Fahrzeugakte": "Карточка автомобиля", "Werkstattübersicht": "Сервисная история", "Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.": "Следите за заменой масла, пробегом, техосмотром и важным обслуживанием.", "Kein Intervall": "Интервал не задан", "In Ordnung": "В порядке", "Bald fällig": "Скоро требуется", "Ölwechsel fällig": "Пора менять масло", "Kilometerstand": "Пробег", "Letzter Ölwechsel": "Последняя замена масла", "Nächster Ölwechsel": "Следующая замена масла", "HU / TÜV bis": "Техосмотр до", "Motoröl": "Моторное масло", "Reifen": "Шины", "Bremsen zuletzt": "Тормоза: последнее обслуживание", "Batterie zuletzt": "Аккумулятор: последнее обслуживание", "Bearbeiten": "Изменить", "Löschen": "Удалить", "Letzter Werkstatteintrag": "Последняя запись сервиса", "Marke / Modell": "Марка / модель", "Kennzeichen": "Госномер", "Nächste Wartungen / Informationen": "Следующие обслуживания / информация", "Keine weiteren Wartungsinformationen": "Других записей обслуживания нет", "Benzin": "Бензин", "Diesel": "Дизель", "Hybrid": "Гибрид", "Elektro": "Электро", "Gas": "Газ", "Sonstiges": "Другое", "Ölwechsel": "Замена масла", "Inspektion": "Инспекция", "Bremsen": "Тормоза", "Reifenwechsel": "Смена шин", "Batterie": "Аккумулятор", "HU / TÜV": "Техосмотр", "Klimaservice": "Обслуживание кондиционера", "Zündkerzen": "Свечи зажигания", "Luftfilter": "Воздушный фильтр", "Innenraumfilter": "Салонный фильтр", "Getriebeöl": "Масло КПП", "Reparatur": "Ремонт", "Fahrzeug hinzufügen": "Добавить автомобиль", "Fahrzeug bearbeiten": "Редактировать автомобиль", "Fahrzeugdaten": "Данные автомобиля", "Hersteller": "Марка", "Modell": "Модель", "Baujahr": "Год постройки", "Antrieb": "Тип топлива", "Aktueller Kilometerstand": "Текущий пробег", "bei Kilometerstand": "при пробеге", "Nächster Ölwechsel Datum": "Дата следующей замены масла", "Nächster Ölwechsel bei km": "Следующая замена масла при км", "Motoröl / Spezifikation": "Масло / спецификация", "Weitere Wartung": "Другое обслуживание", "Notizen": "Заметки", "Abbrechen": "Отмена", "Wartung eintragen": "Добавить обслуживание", "Datum": "Дата", "Arbeit / Wartung": "Работа / обслуживание", "Kosten €": "Стоимость €", "Notiz": "Заметка", "Foto": "Фото", "Adresse": "Адрес", "Wohnfläche m²": "Жилая площадь м²", "Grundstücksgröße m²": "Площадь участка м²", "Zimmer": "Комнаты", "Badezimmer": "Ванные", "WC": "Туалеты", "Nutzung": "Использование", "Eigennutzung": "Собственное проживание", "Mietfreie Überlassung": "Бесплатное проживание", "Vermietung": "Аренда", "Leerstand": "Пустует", "Energie und Technik": "Энергия и техника", "Energieeffizienzklasse": "Класс энергоэффективности", "Energieklasse": "Класс энергоэффективности", "Heizungsart": "Тип отопления", "Zählerstände": "Показания счётчиков", "Stromzählerstand kWh": "Электросчётчик кВт⋅ч", "Wasserzählerstand m³": "Счётчик воды м³", "Datum der Ablesung": "Дата показаний", "Notiz zum Objekt": "Заметка об объекте", "Grundstück": "Участок", "Bäder / WC": "Ванные / туалеты", "Bäder": "Ванные", "Stromzähler": "Электросчётчик", "Wasserzähler": "Счётчик воды", "Ablesedatum": "Дата показаний", "Heizung": "Отопление", "ohne Termin": "без даты", "Person": "Человек", "Eigentümer": "Собственник", "Bewohner": "Житель", "Administrator": "Администратор", "Gast": "Гость", "Inaktiv": "Неактивен", "Eigentum": "Собственность", "Zahlung": "Оплата", "Aktivieren": "Активировать", "Deaktivieren": "Деактивировать", "Entfernen": "Удалить", "Keine Aufgabe eingetragen": "Задача не указана", "keine Zuordnung": "нет привязки", "Gemeinsam": "Совместно", "Keine Aufgaben": "Нет задач", "Keine Wartungen": "Нет обслуживаний", "Keine Rücklagenziele": "Нет целей резерва", "Erledigen": "Выполнить", "Erledigt": "Выполнено", "Offen": "Открыто", "Ziel": "Цель", "gespart": "накоплено", "offen": "открыто", "Monate": "месяцев", "Gemeinsame Kosten": "Общие расходы", "Keine Person ausgewählt": "Не выбран человек", "kein Hinweis": "без примечания", "je Zahlung": "за платёж", "je Anteil": "за долю", "Alle Objekte / gemeinsam": "Все объекты / общие", "Alle Objekte": "Все объекты", "monatlich": "ежемесячно", "5× jährlich": "5× в год", "vierteljährlich": "ежеквартально", "halbjährlich": "раз в полгода", "jährlich": "ежегодно", "Objekt hinzufügen": "Добавить объект", "Objekt bearbeiten": "Редактировать объект", "Person hinzufügen": "Добавить человека", "Person bearbeiten": "Редактировать человека", "Aufgabe hinzufügen": "Добавить задачу", "Aufgabe bearbeiten": "Редактировать задачу", "Titel": "Название", "Fälligkeit": "Срок", "Verantwortlich": "Ответственный", "Kostenposition hinzufügen": "Добавить статью расходов", "Kostenposition bearbeiten": "Редактировать статью расходов", "Beteiligte Personen": "Участники", "Betrag je Zahlung": "Сумма за платёж", "Fälligkeit / Hinweis": "Срок / примечание", "Rolle": "Роль", "Status": "Статус", "Priorität": "Приоритет", "Niedrig": "Низкий", "Mittel": "Средний", "Hoch": "Высокий", "Keine offenen Termine": "Нет открытых сроков", "Noch keine Personen": "Люди ещё не добавлены", "Noch keine Objekte": "Объекты ещё не добавлены", "Noch keine Kostenpositionen": "Статьи расходов ещё не добавлены", "Noch keine Buchungen": "Операций ещё нет", "Lokales Profil & Rechte": "Локальный профиль и права", "Nur lokal": "Только локально", "Bleibt vollständig lokal auf diesem Gerät. Später kann dieselbe Struktur an NAS-Benutzerkonten angebunden werden.": "Всё остаётся локально на этом устройстве. Позже эту же структуру можно подключить к учётным записям NAS.", "Aktives Profil": "Активный профиль", "NAS später möglich": "Позже можно подключить NAS", "Finanzen": "Финансы"}}};
+let LANGUAGE_PACKS_V24={...LANGUAGE_FALLBACK_V24};
+async function loadLanguagePackV24(code){
+ const item=LANGUAGE_REGISTRY_V24.languages.find(x=>x.code===code);
+ if(!item)return false;
+ try{const r=await fetch(item.file,{cache:'no-store'});if(!r.ok)throw new Error('lang');LANGUAGE_PACKS_V24[code]=await r.json();return true}
+ catch(error){console.warn('Sprachdatei Fallback',error);return false}
+}
+function translatePhraseV24(value){
+ const text=String(value??'').trim();if(!text||uiLanguage()==='de')return text;
+ const exact=LANGUAGE_PACKS_V24[uiLanguage()]?.phrases?.[text];if(exact)return exact;
+ let m;
+ if((m=text.match(/^(\d+) zugeordnete Personen$/)))return `${m[1]} привязанных человека`;
+ if((m=text.match(/^(\d+) zugeordnete Person$/)))return `${m[1]} привязанный человек`;
+ if((m=text.match(/^Person (\d+)$/)))return `Человек ${m[1]}`;
+ if((m=text.match(/^Objekte:\s*(.*)$/)))return `Объекты: ${m[1]}`;
+ if((m=text.match(/^Ziel\s+(.+)$/)))return `Цель ${m[1]}`;
+ return text;
+}
+function translateDomV24(root=document.body){
+ if(!root)return;
+ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+ while(walker.nextNode())nodes.push(walker.currentNode);
+ nodes.forEach(n=>{
+  const p=n.parentElement;if(!p||['SCRIPT','STYLE','TEXTAREA','INPUT'].includes(p.tagName))return;
+  const raw=n.nodeValue,trim=raw.trim();if(!trim)return;
+  const src=n._sourceDe||trim;n._sourceDe=src;
+  const out=uiLanguage()==='de'?src:translatePhraseV24(src);
+  n.nodeValue=raw.replace(trim,out);
+ });
+ document.querySelectorAll('option').forEach(o=>{
+  const src=o.dataset.sourceDe||o.textContent.trim();o.dataset.sourceDe=src;
+  o.textContent=uiLanguage()==='de'?src:translatePhraseV24(src);
+ });
+ document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+  const src=el.dataset.sourcePlaceholderDe||el.placeholder||'';el.dataset.sourcePlaceholderDe=src;
+  el.placeholder=uiLanguage()==='de'?src:translatePhraseV24(src);
+ });
+}
+function populateLanguagesV24(){
+ const s=document.getElementById('uiLanguageSelect');if(!s)return;
+ s.innerHTML=LANGUAGE_REGISTRY_V24.languages.map(x=>`<option value="${x.code}">${x.label}</option>`).join('');
+ s.value=uiLanguage();
+}
+
 const categories=['Einzahlung Eigentümer','Kredit','Strom','Wasser','Internet','Versicherung','Grundsteuer','Müll','Wartung','Reparatur','Rücklage','Sanierung','Sonstiges'];
 const seed={
  settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600},
@@ -54,19 +199,150 @@ function migrate(data){
  return d
 }
 function statePropertyFallback(){return ['1','2']}
-function load(){try{let raw=localStorage.getItem(KEY);if(!raw){for(const k of OLD_KEYS){raw=localStorage.getItem(k);if(raw)break}}return migrate(raw?JSON.parse(raw):clone(seed))}catch{return clone(seed)}}
-function save(){
- try{
-  localStorage.setItem(KEY,JSON.stringify(state));
-  lastSaveTime=new Date();
-  updateLocalStatus('Gespeichert');
-  render();
- }catch(error){
-  console.error('Lokales Speichern fehlgeschlagen',error);
-  updateLocalStatus('Speichern fehlgeschlagen',true);
-  alert('Die Daten konnten nicht lokal gespeichert werden. Bitte zuerst eine Datensicherung exportieren.');
+
+
+const LOCAL_PROFILE_KEY_V24='hausverwaltung_local_profile_v1';
+const LOCAL_PROFILES_V24={
+ admin:{rights:{finance:true,objects:true,planning:true,vehicles:true,remove:true}},
+ owner:{rights:{finance:true,objects:true,planning:true,vehicles:true,remove:false}},
+ resident:{rights:{finance:false,objects:false,planning:true,vehicles:false,remove:false}},
+ guest:{rights:{finance:false,objects:false,planning:false,vehicles:false,remove:false}}
+};
+function localProfileKeyV24(){try{return localStorage.getItem(LOCAL_PROFILE_KEY_V24)||'admin'}catch{return 'admin'}}
+function setLocalProfileV24(key){if(!LOCAL_PROFILES_V24[key])key='admin';try{localStorage.setItem(LOCAL_PROFILE_KEY_V24,key)}catch{}applyLocalPermissionsV24()}
+function requiredRightV24(btn){
+ const s=(btn.getAttribute('onclick')||'')+' '+(btn.id||'')+' '+(btn.dataset.modal||'');
+ if(/Vehicle|vehicle/.test(s))return 'vehicles';
+ if(/Property|property|Owner|owner/.test(s))return 'objects';
+ if(/Task|task|Planning|planning|Reserve|reserve|completeItem/.test(s))return 'planning';
+ if(/Transaction|transaction|Cost|cost|Loan|loan/.test(s))return 'finance';
+ return '';
+}
+function applyLocalPermissionsV24(){
+ const profile=LOCAL_PROFILES_V24[localProfileKeyV24()]||LOCAL_PROFILES_V24.admin;
+ const sel=document.getElementById('localProfileSelectV24');if(sel)sel.value=localProfileKeyV24();
+ document.querySelectorAll('button').forEach(btn=>{
+  const right=requiredRightV24(btn);if(!right)return;
+  const deleteAction=btn.classList.contains('danger')||/delete|Löschen|Entfernen/.test(btn.getAttribute('onclick')||'');
+  const disabled=!profile.rights[right]||(deleteAction&&!profile.rights.remove);
+  btn.disabled=disabled;btn.classList.toggle('permission-disabled',disabled);
+ });
+ const box=document.getElementById('permissionSummaryV24');
+ if(box){
+  const names={finance:'Finanzen',objects:'Objekte',planning:'Planung',vehicles:'Fahrzeuge',remove:'Löschen'};
+  box.innerHTML=Object.entries(names).map(([k,n])=>`<span class="${profile.rights[k]?'perm-ok':'perm-no'}">${profile.rights[k]?'✓':'–'} ${uiLanguage()==='ru'?translatePhraseV24(n):n}</span>`).join('');
  }
 }
+
+const DB_NAME='hausverwaltung_local_db';
+const DB_VERSION=1;
+const DB_STORE='appdata';
+const DB_STATE_KEY='state';
+
+function openLocalDb(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){reject(new Error('IndexedDB nicht verfügbar'));return}
+  const request=indexedDB.open(DB_NAME,DB_VERSION);
+  request.onupgradeneeded=()=>{
+   const db=request.result;
+   if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE);
+  };
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error||new Error('Datenbank konnte nicht geöffnet werden'));
+ });
+}
+async function dbGetState(){
+ const db=await openLocalDb();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(DB_STORE,'readonly');
+  const store=tx.objectStore(DB_STORE);
+  const req=store.get(DB_STATE_KEY);
+  req.onsuccess=()=>resolve(req.result||null);
+  req.onerror=()=>reject(req.error);
+  tx.oncomplete=()=>db.close();
+ });
+}
+async function dbSetState(value){
+ const db=await openLocalDb();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(DB_STORE,'readwrite');
+  tx.objectStore(DB_STORE).put(value,DB_STATE_KEY);
+  tx.oncomplete=()=>{db.close();resolve(true)};
+  tx.onerror=()=>{const err=tx.error;db.close();reject(err)};
+  tx.onabort=()=>{const err=tx.error;db.close();reject(err)};
+ });
+}
+async function dbClearState(){
+ try{
+  const db=await openLocalDb();
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction(DB_STORE,'readwrite');
+   tx.objectStore(DB_STORE).delete(DB_STATE_KEY);
+   tx.oncomplete=()=>resolve();
+   tx.onerror=()=>reject(tx.error);
+  });
+  db.close();
+ }catch(error){console.warn('IndexedDB konnte nicht geleert werden',error)}
+}
+function load(){
+ try{
+  let raw=localStorage.getItem(KEY);
+  if(!raw){
+   for(const k of OLD_KEYS){
+    raw=localStorage.getItem(k);
+    if(raw)break;
+   }
+  }
+  return migrate(raw?JSON.parse(raw):clone(seed));
+ }catch(error){
+  console.warn('Fallback-Startdaten konnten nicht gelesen werden',error);
+  return clone(seed);
+ }
+}
+async function persistState(showAlert=true){
+ try{
+  await dbSetState(state);
+  lastSaveTime=new Date();
+  updateLocalStatus('Gespeichert');
+  // Small compatibility copy without large photos if localStorage has room.
+  try{
+   const compact=JSON.parse(JSON.stringify(state));
+   (compact.properties||[]).forEach(p=>{if(p.photo&&String(p.photo).length>200000)p.photo=''});
+   localStorage.setItem(KEY,JSON.stringify(compact));
+  }catch(e){
+   console.warn('Kompatibilitätskopie in localStorage übersprungen',e);
+  }
+  return true;
+ }catch(error){
+  console.error('Lokales Speichern in IndexedDB fehlgeschlagen',error);
+  updateLocalStatus('Speichern fehlgeschlagen',true);
+  if(showAlert)alert('Die Daten konnten nicht lokal gespeichert werden. Bitte exportiere vorsichtshalber eine Sicherung.');
+  return false;
+ }
+}
+function save(){
+ render();
+ persistState(true);
+}
+async function restoreIndexedDbState(){
+ try{
+  const stored=await dbGetState();
+  if(stored&&typeof stored==='object'){
+   state=migrate(stored);
+   render();
+   applyUiLanguage();
+   updateLocalStatus('Lokal gespeichert');
+   return true;
+  }
+  // First migration: move current localStorage state into IndexedDB.
+  await dbSetState(state);
+  return true;
+ }catch(error){
+  console.warn('IndexedDB Start nicht möglich, App nutzt Fallback',error);
+  return false;
+ }
+}
+
 function updateLocalStatus(text='Lokal gespeichert',isError=false){
  const el=$('#localStatus');if(!el)return;
  el.textContent=text+(lastSaveTime&&!isError?' · '+lastSaveTime.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'');
@@ -187,32 +463,32 @@ function vehicleName(v){return [v.make,v.model].filter(Boolean).join(' ')||'Fahr
 function km(v){return Number(v||0).toLocaleString('de-DE')+' km'}
 function serviceDueStatus(v){
  const current=Number(v.currentKm)||0,next=Number(v.nextOilKm)||0;
- if(!next)return {text:'Kein Intervall',cls:'service-neutral'};
- if(current>=next)return {text:'Ölwechsel fällig',cls:'service-due'};
- if(next-current<=1000)return {text:'Bald fällig',cls:'service-soon'};
- return {text:'In Ordnung',cls:'service-ok'};
+ if(!next)return {text:uiText('noInterval'),cls:'service-neutral'};
+ if(current>=next)return {text:uiText('oilDue'),cls:'service-due'};
+ if(next-current<=1000)return {text:uiText('soonDue'),cls:'service-soon'};
+ return {text:uiText('inOrder'),cls:'service-ok'};
 }
 function renderVehicles(){
  const list=$('#vehicleList');if(!list)return;
- const vehicleCountTag=$('#vehicleCountTag');if(vehicleCountTag)vehicleCountTag.textContent=`${(state.vehicles||[]).length} / 6 Fahrzeuge`;
+ const vehicleCountTag=$('#vehicleCountTag');if(vehicleCountTag)vehicleCountTag.textContent=`${(state.vehicles||[]).length} / 6 ${uiText('vehiclesCount')}`;
  list.innerHTML=(state.vehicles||[]).length?state.vehicles.map(v=>{
   const status=serviceDueStatus(v);
   const services=(state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const last=services[0];
   return `<article class="vehicle-card"><div class="vehicle-placeholder">🚗</div><div class="vehicle-body">
-   <div class="card-top"><span class="tag">${esc(v.plate||'Kein Kennzeichen')}</span><span class="vehicle-status ${status.cls}">${status.text}</span></div>
-   <h3>${esc(vehicleName(v))}</h3><p>${esc(v.year||'Baujahr unbekannt')} · ${esc(v.fuel||'Antrieb unbekannt')}</p>
-   <div class="vehicle-kpis"><div><span>Kilometerstand</span><strong>${km(v.currentKm)}</strong></div><div><span>Letzter Ölwechsel</span><strong>${v.lastOilDate?dateDE(v.lastOilDate):'–'}</strong><small>${v.lastOilKm?km(v.lastOilKm):''}</small></div><div><span>Nächster Ölwechsel</span><strong>${v.nextOilKm?km(v.nextOilKm):'–'}</strong><small>${v.nextOilDate?dateDE(v.nextOilDate):''}</small></div><div><span>HU / TÜV bis</span><strong>${v.tuvDate?dateDE(v.tuvDate):'–'}</strong></div></div>
-   <div class="vehicle-info-grid"><div><span>Motoröl</span><strong>${esc(v.oilSpec||'–')}</strong></div><div><span>Reifen</span><strong>${esc(v.tires||'–')}</strong></div><div><span>Bremsen zuletzt</span><strong>${v.brakesDate?dateDE(v.brakesDate):'–'}</strong></div><div><span>Batterie zuletzt</span><strong>${v.batteryDate?dateDE(v.batteryDate):'–'}</strong></div></div>
-   ${last?`<div class="last-service"><span>Letzter Werkstatteintrag</span><strong>${dateDE(last.date)} · ${esc(last.type)}</strong><small>${last.km?km(last.km):''}${last.cost?` · ${eur(last.cost)}`:''}</small></div>`:''}
-   <div class="card-actions"><button class="secondary small" onclick="editVehicle(${v.id})">Bearbeiten</button><button class="secondary small" onclick="openServiceModal(${v.id})">+ Wartung</button><button class="danger small" onclick="deleteVehicle(${v.id})">Löschen</button></div>
+   <div class="card-top"><span class="tag">${esc(v.plate||uiText('noPlate'))}</span><span class="vehicle-status ${status.cls}">${status.text}</span></div>
+   <h3>${esc(vehicleName(v))}</h3><p>${esc(v.year||uiText('unknownYear'))} · ${esc(v.fuel?fuelLabel(v.fuel):uiText('unknownFuel'))}</p>
+   <div class="vehicle-kpis"><div><span>${uiText('mileage')}</span><strong>${km(v.currentKm)}</strong></div><div><span>${uiText('lastOil')}</span><strong>${v.lastOilDate?dateDE(v.lastOilDate):'–'}</strong><small>${v.lastOilKm?km(v.lastOilKm):''}</small></div><div><span>${uiText('nextOil')}</span><strong>${v.nextOilKm?km(v.nextOilKm):'–'}</strong><small>${v.nextOilDate?dateDE(v.nextOilDate):''}</small></div><div><span>${uiText('tuvDue')}</span><strong>${v.tuvDate?dateDE(v.tuvDate):'–'}</strong></div></div>
+   <div class="vehicle-info-grid"><div><span>${uiText('motorOil')}</span><strong>${esc(v.oilSpec||'–')}</strong></div><div><span>${uiText('tires')}</span><strong>${esc(v.tires||'–')}</strong></div><div><span>${uiText('brakesLast')}</span><strong>${v.brakesDate?dateDE(v.brakesDate):'–'}</strong></div><div><span>${uiText('batteryLast')}</span><strong>${v.batteryDate?dateDE(v.batteryDate):'–'}</strong></div></div>
+   ${last?`<div class="last-service"><span>${uiText('lastWorkshop')}</span><strong>${dateDE(last.date)} · ${esc(serviceTypeLabel(last.type))}</strong><small>${last.km?km(last.km):''}${last.cost?` · ${eur(last.cost)}`:''}</small></div>`:''}
+   <div class="card-actions"><button class="secondary small" onclick="editVehicle(${v.id})">${uiText('edit')}</button><button class="secondary small" onclick="openServiceModal(${v.id})">${uiText('addService')}</button><button class="danger small" onclick="deleteVehicle(${v.id})">${uiText('delete')}</button></div>
   </div></article>`;
- }).join(''):'<div class="empty">Noch keine Fahrzeuge angelegt</div>';
+ }).join(''):`<div class="empty">${uiText('noVehicles')}</div>`;
 }
-function openVehicleModal(v=null){const f=$('#vehicleForm');f.reset();f.dataset.mode=v?'edit':'new';$('#vehicleModalTitle').textContent=v?'Fahrzeug bearbeiten':'Fahrzeug hinzufügen';f.elements.id.value=v?String(v.id):'';['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','tuvDate','oilSpec','tires','brakesDate','batteryDate','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});$('#vehicleModal').showModal()}
+function openVehicleModal(v=null){const f=$('#vehicleForm');f.reset();f.dataset.mode=v?'edit':'new';$('#vehicleModalTitle').textContent=v?uiText('vehicleEditTitle'):uiText('vehicleAddTitle');f.elements.id.value=v?String(v.id):'';['make','model','plate','year','fuel','currentKm','lastOilDate','lastOilKm','nextOilDate','nextOilKm','tuvDate','oilSpec','tires','brakesDate','batteryDate','notes'].forEach(k=>{if(f.elements[k])f.elements[k].value=v?.[k]??''});$('#vehicleModal').showModal()}
 function editVehicle(id){const v=state.vehicles.find(x=>Number(x.id)===Number(id));if(v)openVehicleModal(v)}
 function deleteVehicle(id){const v=state.vehicles.find(x=>Number(x.id)===Number(id));if(v&&confirm(`Fahrzeug „${vehicleName(v)}“ wirklich löschen?`)){state.vehicles=state.vehicles.filter(x=>Number(x.id)!==Number(id));state.vehicleServices=(state.vehicleServices||[]).filter(x=>Number(x.vehicleId)!==Number(id));save()}}
-function openServiceModal(vehicleId){const v=state.vehicles.find(x=>Number(x.id)===Number(vehicleId));if(!v)return;const f=$('#vehicleServiceForm');f.reset();f.elements.vehicleId.value=vehicleId;$('#vehicleServiceTitle').textContent='Wartung – '+vehicleName(v);$('#vehicleServiceModal').showModal()}
+function openServiceModal(vehicleId){const v=state.vehicles.find(x=>Number(x.id)===Number(vehicleId));if(!v)return;const f=$('#vehicleServiceForm');f.reset();f.elements.vehicleId.value=vehicleId;$('#vehicleServiceTitle').textContent=uiText('serviceAdd')+' – '+vehicleName(v);$('#vehicleServiceModal').showModal()}
 
 
 function nextVehicleServiceInfo(v){
@@ -222,38 +498,30 @@ function nextVehicleServiceInfo(v){
  const kmRemaining=nextOilKm?Math.max(0,nextOilKm-current):null;
  const nextItems=[];
  if(v.nextOilDate||nextOilKm){
-  nextItems.push({
-   type:'Ölwechsel',
-   text:[v.nextOilDate?dateDE(v.nextOilDate):'',nextOilKm?km(nextOilKm):''].filter(Boolean).join(' · '),
-   detail:kmRemaining!==null?`${kmRemaining.toLocaleString('de-DE')} km verbleibend`:''
-  });
+  nextItems.push({type:uiText('serviceOil'),text:[v.nextOilDate?dateDE(v.nextOilDate):'',nextOilKm?km(nextOilKm):''].filter(Boolean).join(' · '),detail:kmRemaining!==null?`${kmRemaining.toLocaleString('de-DE')} ${uiText('remaining')}`:''});
  }
- if(v.tuvDate)nextItems.push({type:'HU / TÜV',text:dateDE(v.tuvDate),detail:''});
- if(v.brakesDate)nextItems.push({type:'Bremsen zuletzt',text:dateDE(v.brakesDate),detail:'Kontrolle nach Bedarf'});
- if(v.batteryDate)nextItems.push({type:'Batterie zuletzt',text:dateDE(v.batteryDate),detail:'Kontrolle nach Bedarf'});
- const recentOther=services.filter(s=>s.type!=='Ölwechsel').slice(0,3).map(s=>({type:s.type,text:dateDE(s.date),detail:s.note||''}));
+ if(v.tuvDate)nextItems.push({type:uiText('tuvDue'),text:dateDE(v.tuvDate),detail:''});
+ if(v.brakesDate)nextItems.push({type:uiText('brakesLast'),text:dateDE(v.brakesDate),detail:uiText('checkAsNeeded')});
+ if(v.batteryDate)nextItems.push({type:uiText('batteryLast'),text:dateDE(v.batteryDate),detail:uiText('checkAsNeeded')});
+ const recentOther=services.filter(s=>s.type!=='Ölwechsel').slice(0,3).map(s=>({type:serviceTypeLabel(s.type),text:dateDE(s.date),detail:s.note||''}));
  return [...nextItems,...recentOther].slice(0,5);
 }
 function renderDashboardVehicles(){
  const box=$('#dashboardVehicleOverview');if(!box)return;
  const vehicles=Array.isArray(state.vehicles)?state.vehicles:[];
- if(!vehicles.length){box.innerHTML='<div class="empty">Noch keine Fahrzeuge angelegt</div>';return}
+ if(!vehicles.length){box.innerHTML=`<div class="empty">${uiText('noVehicles')}</div>`;return}
  box.innerHTML=vehicles.map(v=>{
   const items=nextVehicleServiceInfo(v);
   return `<article class="dashboard-vehicle-card">
-   <div class="dashboard-vehicle-head">
-    <div class="vehicle-icon">🚗</div>
-    <div><h3>${esc(vehicleName(v))}</h3><p>${esc(v.plate||'Kein Kennzeichen')}</p></div>
-   </div>
+   <div class="dashboard-vehicle-head"><div class="vehicle-icon">🚗</div><div><h3>${esc(vehicleName(v))}</h3><p>${esc(v.plate||uiText('noPlate'))}</p></div></div>
    <div class="dashboard-vehicle-details">
-    <div><span>Marke / Modell</span><strong>${esc(vehicleName(v))}</strong></div>
-    <div><span>Kennzeichen</span><strong>${esc(v.plate||'–')}</strong></div>
-    <div><span>Kilometerstand</span><strong>${km(v.currentKm)}</strong></div>
-    <div><span>Nächster Ölwechsel</span><strong>${v.nextOilDate?dateDE(v.nextOilDate):(v.nextOilKm?km(v.nextOilKm):'–')}</strong><small>${v.nextOilKm?km(v.nextOilKm):''}</small></div>
+    <div><span>${uiText('makeModel')}</span><strong>${esc(vehicleName(v))}</strong></div>
+    <div><span>${uiText('plate')}</span><strong>${esc(v.plate||'–')}</strong></div>
+    <div><span>${uiText('mileage')}</span><strong>${km(v.currentKm)}</strong></div>
+    <div><span>${uiText('nextOil')}</span><strong>${v.nextOilDate?dateDE(v.nextOilDate):(v.nextOilKm?km(v.nextOilKm):'–')}</strong><small>${v.nextOilKm?km(v.nextOilKm):''}</small></div>
    </div>
-   <div class="next-maintenance-list">
-    <strong>Nächste Wartungen / Informationen</strong>
-    ${items.length?items.map(item=>`<div class="maintenance-info-row"><span>${esc(item.type)}</span><strong>${esc(item.text||'–')}</strong>${item.detail?`<small>${esc(item.detail)}</small>`:''}</div>`).join(''):'<div class="empty small-empty">Keine weiteren Wartungsinformationen</div>'}
+   <div class="next-maintenance-list"><strong>${uiText('nextMaintenance')}</strong>
+    ${items.length?items.map(item=>`<div class="maintenance-info-row"><span>${esc(item.type)}</span><strong>${esc(item.text||'–')}</strong>${item.detail?`<small>${esc(item.detail)}</small>`:''}</div>`).join(''):`<div class="empty small-empty">${uiText('noMaintenance')}</div>`}
    </div>
   </article>`;
  }).join('');
@@ -422,10 +690,56 @@ $('#taskForm').addEventListener('submit',e=>{e.preventDefault();const f=new Form
 $('#maintenanceForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.maintenance.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),intervalMonths:Number(f.get('intervalMonths')),owner:f.get('owner'),cost:Number(f.get('cost')),status:'Offen'});e.target.reset();$('#maintenanceModal').close();save()});
 $('#reserveForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(e.target.dataset.editId),data={title:f.get('title'),propertyId:f.get('propertyId'),target:Number(f.get('target')),saved:Number(f.get('saved')),year:Number(f.get('year'))||''};if(id){Object.assign(state.reserves.find(x=>x.id===id),data);delete e.target.dataset.editId}else state.reserves.push({id:Date.now(),...data});e.target.reset();$('#reserveModal').close();save()});
 $('#saveSettings').addEventListener('click',()=>{state.settings={name:$('#settingName').value,startBalance:Number($('#settingStartBalance').value),minimumReserve:Number($('#settingMinimumReserve').value),monthlyReserve:Number($('#settingMonthlyReserve').value)};save();alert('Gespeichert')});
-$('#exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hausverwaltung-sicherung.json';a.click();URL.revokeObjectURL(a.href)});
-$('#importInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{state=migrate(JSON.parse(await file.text()));save();alert('Sicherung importiert')}catch{alert('Datei konnte nicht gelesen werden')}});
-$('#resetBtn').addEventListener('click',()=>{if(confirm('Wirklich alle lokalen Daten löschen?')){state=clone(seed);save()}});
+$('#exportBtn').addEventListener('click',()=>{
+ const payload={...state,_backupInfo:{version:22,exportedAt:new Date().toISOString(),storage:'IndexedDB'}};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download='hausverwaltung-sicherung-v22.json';
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+$('#importInput').addEventListener('change',async e=>{
+ const input=e.target,file=input.files?.[0];
+ if(!file)return;
+ try{
+  const text=(await file.text()).replace(/^\uFEFF/,'').trim();
+  const parsed=JSON.parse(text);
+  if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('Ungültige Sicherungsdatei');
+  const imported=migrate(parsed);
+  const oldState=state;
+  state=imported;
+  const ok=await persistState(false);
+  if(!ok){
+   state=oldState;
+   render();
+   alert('Die Sicherung wurde gelesen, konnte aber nicht gespeichert werden.');
+   return;
+  }
+  render();
+  applyUiLanguage();
+  alert('Sicherung erfolgreich importiert');
+ }catch(error){
+  console.error('Importfehler',error);
+  alert('Die JSON-Datei konnte nicht importiert werden. Bitte prüfe, ob es eine Sicherung dieser App ist.');
+ }finally{
+  input.value='';
+ }
+});
+$('#resetBtn').addEventListener('click',async()=>{
+ if(confirm('Wirklich alle lokalen Daten löschen?')){
+  state=clone(seed);
+  await dbClearState();
+  try{
+   localStorage.removeItem(KEY);
+   OLD_KEYS.forEach(k=>localStorage.removeItem(k));
+  }catch{}
+  await persistState(false);
+  render();
+  applyUiLanguage();
+ }
+});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('#installBtn').classList.remove('hidden')});$('#installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('#installBtn').classList.add('hidden')});
 $$('button[value="cancel"]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();b.closest('dialog').close()}));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
-Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal});render();
+Object.assign(window,{editOwner,toggleOwner,deleteOwner,editProperty,deleteProperty,editCost,deleteCost,completeItem,deletePlanning,editReserve,deleteWaste,editVehicle,deleteVehicle,openServiceModal,setUiLanguage,applyUiLanguage,setLocalProfileV24});render();applyUiLanguage();restoreIndexedDbState();
