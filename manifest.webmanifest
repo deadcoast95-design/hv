@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – V24 Pro Lokal",
+  "name": "Private Immobilienverwaltung – V25 Mobile",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilien- und Fahrzeugverwaltung mit erweiterbarer Mehrsprachigkeit und lokalen Profilrechten",
+  "description": "Lokale Immobilienverwaltung mit optimierter mobiler Navigation",
   "icons": [
     {
       "src": "icon.svg",
