@@ -21,27 +21,115 @@
 <header class="topbar"><div><p class="eyebrow" data-i18n="private">PRIVATE IMMOBILIENVERWALTUNG</p><h1 id="pageTitle" data-i18n="overview">Übersicht</h1><span id="localStatus" class="local-status" data-i18n="local">Lokal gespeichert</span></div><button id="installBtn" class="ghost hidden">Installieren</button></header>
 <div id="appNotice" class="app-notice hidden"></div>
 <main id="app">
-  <section class="view active dashboard-v070l" data-view="dashboard">
-<section class="dashboard-status-strip-v070l">
-<article><span class="dash-status-icon-v070l">✓</span><div><strong id="dashOpenTaskCountV070L">0</strong><small>offene Aufgaben</small></div></article>
-<article><span class="dash-status-icon-v070l">🏦</span><div><strong id="dashLoanCountV070L">0</strong><small>Kredite</small></div></article>
-<article><span class="dash-status-icon-v070l">🏠</span><div><strong id="dashPropertyCountV070L">0</strong><small>Objekte</small></div></article>
-<article><span class="dash-status-icon-v070l">🚗</span><div><strong id="dashVehicleCountV070L">0</strong><small>Fahrzeuge</small></div></article>
-</section>
-<section class="panel" data-widget="important"><div class="panel-head"><div><h2>⚠️ Demnächst wichtig</h2><p class="helper-text">Nur was bald Aufmerksamkeit braucht.</p></div><span id="importantCountTag" class="tag">0 Hinweise</span></div><div id="importantItems" class="dashboard-important-list-v070l"></div></section>
-<section class="panel" data-widget="tasks"><div class="panel-head"><div><h2>✅ Aufgaben</h2><p class="helper-text">Nach Priorität und Termin sortiert.</p></div><span class="tag">Planung</span></div><div id="upcomingItems" class="dashboard-task-list"></div></section>
-<section class="panel" data-widget="loan"><div class="panel-head"><div><h2>🏦 Kreditübersicht</h2><p class="helper-text">Tilgungsfortschritt auf einen Blick.</p></div><span id="dashboardLoanCountTagV070L" class="tag">0 Kredite</span></div><div class="dashboard-loan-visual-v070l"><div class="donut dashboard-loan-donut-v070l" id="loanDonut"><div><strong id="loanPercent">0 %</strong><span>getilgt</span></div></div><div class="dashboard-loan-kpis-v070l"><div><span>Darlehen</span><strong id="loanOriginal">0,00 €</strong></div><div><span>Restschuld</span><strong id="loanRemaining">0,00 €</strong></div><div><span>Getilgt</span><strong id="loanPaid">0,00 €</strong></div><div><span>Raten / Monat</span><strong id="loanPayment">0,00 €</strong></div></div></div><div id="loanDetails" class="dashboard-loan-list-v070l"></div></section>
-<section class="panel" data-widget="consumption"><div class="panel-head"><div><h2>⚡💧 Verbrauch</h2><p class="helper-text">Strom und Wasser aus der Zählerhistorie.</p></div><span class="tag">Zählerstände</span></div><div id="dashboardConsumption" class="consumption-overview-v070l"></div></section>
-<section class="panel" data-widget="contributions"><div class="panel-head"><div><h2>👥 Monatliche Einzahlungen</h2><p class="helper-text">Verteilung auf die Kontobenutzer.</p></div><span id="dashboardContributionTotalV070L" class="tag">0,00 €</span></div><div id="ownerIncomeSummary" class="dashboard-contribution-grid-v070l"></div></section>
-<div class="dashboard-two-column-v070l">
-<section class="panel waste-panel" data-widget="waste"><div class="panel-head"><div><h2>📅 Kalender</h2><p class="helper-text">Mülltermine auf einen Blick.</p></div><span class="tag">Datum antippen</span></div><div class="calendar-head"><button id="wastePrev" class="secondary tiny" type="button">‹</button><strong id="wasteMonthTitle"></strong><button id="wasteNext" class="secondary tiny" type="button">›</button></div><div id="wasteCalendar" class="waste-calendar"></div><div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div></section>
-<section class="panel" data-widget="costpositions"><div class="panel-head"><div><h2>💳 Kostenpositionen</h2><p class="helper-text">Größte laufende Monatskosten.</p></div><span id="dashboardCostCountV070L" class="tag">0 Positionen</span></div><div id="dashboardCostChartV070L" class="dashboard-cost-chart-v070l"></div><div id="dashboardCostPositions" class="dashboard-cost-cards-v070l"></div></section>
-</div>
-<section class="panel" data-widget="objects"><div class="panel-head"><div><h2>🏠 Objektübersicht</h2><p class="helper-text">Gebäudedaten und Energieklasse.</p></div><span class="tag">max. 5</span></div><div id="dashboardPropertyOverview" class="dashboard-property-grid"></div></section>
-<section class="panel" data-widget="vehicles"><div class="panel-head"><div><h2>🚗 Fahrzeugübersicht</h2><p class="helper-text">Kilometerstand und nächste Wartungen.</p></div><span class="tag">Fahrzeuge</span></div><div id="dashboardVehicleOverview" class="dashboard-vehicle-grid"></div></section>
+  <section class="view active dashboard-only-v071l" data-view="dashboard" aria-hidden="false">
+
+  <section class="dashboard-status-v071l">
+    <article><span>✅</span><div><strong id="dashTaskCountV071L">0</strong><small>offene Aufgaben</small></div></article>
+    <article><span>🏦</span><div><strong id="dashLoanCountV071L">0</strong><small>Kredite</small></div></article>
+    <article><span>🏠</span><div><strong id="dashObjectCountV071L">0</strong><small>Objekte</small></div></article>
+    <article><span>🚗</span><div><strong id="dashCarCountV071L">0</strong><small>Fahrzeuge</small></div></article>
+  </section>
+
+  <section class="panel" data-widget="important">
+    <div class="panel-head">
+      <div><h2>⚠️ Demnächst wichtig</h2><p class="helper-text">Was demnächst Aufmerksamkeit braucht.</p></div>
+      <span id="dashImportantCountV071L" class="tag">0 Hinweise</span>
+    </div>
+    <div id="dashImportantV071L" class="dash-important-grid-v071l"></div>
+  </section>
+
+  <section class="panel" data-widget="tasks">
+    <div class="panel-head">
+      <div><h2>✅ Aufgaben</h2><p class="helper-text">Offene Aufgaben zuerst – nach Priorität und Termin.</p></div>
+      <span class="tag">Planung</span>
+    </div>
+    <div id="dashTasksV071L" class="dashboard-task-list"></div>
+  </section>
+
+  <section class="panel" data-widget="loan">
+    <div class="panel-head">
+      <div><h2>🏦 Kreditübersicht</h2><p class="helper-text">Gesamtfortschritt und wichtigste Werte.</p></div>
+      <span id="dashLoanTagV071L" class="tag">0 Kredite</span>
+    </div>
+    <div class="dash-loan-summary-v071l">
+      <div class="dash-loan-donut-v071l" id="dashLoanDonutV071L">
+        <div><strong id="dashLoanPercentV071L">0 %</strong><span>getilgt</span></div>
+      </div>
+      <div class="dash-loan-kpis-v071l">
+        <div><span>Darlehen gesamt</span><strong id="dashLoanOriginalV071L">0,00 €</strong></div>
+        <div><span>Restschuld</span><strong id="dashLoanRemainingV071L">0,00 €</strong></div>
+        <div><span>Bereits getilgt</span><strong id="dashLoanPaidV071L">0,00 €</strong></div>
+        <div><span>Monatliche Raten</span><strong id="dashLoanRateV071L">0,00 €</strong></div>
+      </div>
+    </div>
+    <div id="dashLoanCardsV071L" class="dash-loan-cards-v071l"></div>
+  </section>
+
+  <section class="panel" data-widget="consumption">
+    <div class="panel-head">
+      <div><h2>⚡💧 Verbrauchsanalyse</h2><p class="helper-text">Strom und Wasser aus der vorhandenen Zählerhistorie.</p></div>
+      <span class="tag">Verlauf</span>
+    </div>
+    <div id="dashConsumptionV071L" class="dash-consumption-grid-v071l"></div>
+  </section>
+
+  <section class="panel" data-widget="contributions">
+    <div class="panel-head">
+      <div><h2>👥 Monatliche Einzahlungen</h2><p class="helper-text">Wer welchen Anteil der monatlichen Kosten trägt.</p></div>
+      <span id="dashContributionTotalV071L" class="tag">0,00 € / Monat</span>
+    </div>
+    <div id="dashContributionsV071L" class="dash-contribution-grid-v071l"></div>
+  </section>
+
+  <div class="dash-two-column-v071l">
+    <section class="panel waste-panel" data-widget="waste">
+      <div class="panel-head">
+        <div><h2>📅 Kalender</h2><p class="helper-text">Mülltermine bleiben im Kalender erhalten.</p></div>
+        <span class="tag">Datum antippen</span>
+      </div>
+      <div class="calendar-head">
+        <button id="wastePrev" class="secondary tiny" type="button">‹</button>
+        <strong id="wasteMonthTitle"></strong>
+        <button id="wasteNext" class="secondary tiny" type="button">›</button>
+      </div>
+      <div id="wasteCalendar" class="waste-calendar"></div>
+      <div class="waste-legend">
+        <span><i style="background:#111111"></i>Restmüll</span>
+        <span><i style="background:#8B5E3C"></i>Bio</span>
+        <span><i style="background:#2E8B57"></i>Papier</span>
+        <span><i style="background:#EAB308"></i>Plastik</span>
+      </div>
+    </section>
+
+    <section class="panel" data-widget="costpositions">
+      <div class="panel-head">
+        <div><h2>💳 Kostenpositionen</h2><p class="helper-text">Größte laufende Kosten als Diagramm.</p></div>
+        <span id="dashCostCountV071L" class="tag">0 Positionen</span>
+      </div>
+      <div id="dashCostBarsV071L" class="dash-cost-bars-v071l"></div>
+      <div id="dashCostListV071L" class="dash-cost-list-v071l"></div>
+    </section>
+  </div>
+
+  <section class="panel" data-widget="objects">
+    <div class="panel-head">
+      <div><h2>🏠 Objektübersicht</h2><p class="helper-text">Die wichtigsten Daten mit Energieklasse A–H.</p></div>
+      <span class="tag">Objekte</span>
+    </div>
+    <div id="dashObjectsV071L" class="dashboard-property-grid"></div>
+  </section>
+
+  <section class="panel" data-widget="vehicles">
+    <div class="panel-head">
+      <div><h2>🚗 Fahrzeugübersicht</h2><p class="helper-text">Bestehende Fahrzeugdaten – nur als Dashboard-Karten.</p></div>
+      <span class="tag">Fahrzeuge</span>
+    </div>
+    <div id="dashVehiclesV071L" class="dashboard-vehicle-grid"></div>
+  </section>
+
 </section>
 
-<section class="view account-view-v045l" data-view="transactions">
+<section class="view account-view-v045l" data-view="transactions" aria-hidden="true">
   <div class="account-hero-v045l">
     <div>
       <span class="account-kicker-v045l">KONTO</span>
@@ -112,10 +200,10 @@
     <div id="costPlanList" class="list card-list"></div>
   </section>
 
-  <section class="view" data-view="properties"><div class="toolbar"><button class="primary" data-modal="propertyModal"><span data-i18n="addObject">+ Objekt</span></button></div><div id="propertyList" class="card-grid"></div></section>
+  <section class="view" data-view="properties" aria-hidden="true"><div class="toolbar"><button class="primary" data-modal="propertyModal"><span data-i18n="addObject">+ Objekt</span></button></div><div id="propertyList" class="card-grid"></div></section>
   <div id="ownerList" class="card-grid"></div></section>
 
-  <section class="view planning-view-v40" data-view="tasks">
+  <section class="view planning-view-v40" data-view="tasks" aria-hidden="true">
   <div class="planning-hero-v40">
     <div>
       <span class="planning-kicker-v40">PLANUNG</span>
@@ -144,8 +232,8 @@
   <div id="planningHistoryList" class="planning-history-v044l hidden"></div>
 </section>
 
-  <section class="view" data-view="vehicles"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button"><span data-i18n="addVehicle">+ Fahrzeug</span></button></div><section class="panel compact"><div class="panel-head"><h2 data-i18n="vehicleFile">Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p data-i18n="vehicleHint">Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
-<section class="view" data-view="settings">
+  <section class="view" data-view="vehicles" aria-hidden="true"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button"><span data-i18n="addVehicle">+ Fahrzeug</span></button></div><section class="panel compact"><div class="panel-head"><h2 data-i18n="vehicleFile">Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p data-i18n="vehicleHint">Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
+<section class="view" data-view="settings" aria-hidden="true">
     <section class="panel loan-finance-v062l">
   <div class="loan-finance-head-v062l">
     <div>
@@ -383,7 +471,7 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere eine Vollsicherung mit App-Daten, Konto und Benutzern oder importiere eine vorhandene Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.70l</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.72l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>

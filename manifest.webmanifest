@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – 0.70l",
+  "name": "Private Immobilienverwaltung – 0.72l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Visuelles Dashboard mit Diagrammen und Energieklassen-Skala",
+  "description": "Dashboard-Seitenumschaltung repariert; andere Seiten bleiben getrennt",
   "icons": [
     {
       "src": "icon.svg",

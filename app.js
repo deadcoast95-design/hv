@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v070l';
+const KEY='hausverwaltung_pwa_v072l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -1114,25 +1114,38 @@ function monthEndDaysV38(month){
 }
 function renderImportantV38(){
  const box=$('#importantItems');if(!box)return;const items=[];
- (state.tasks||[]).filter(t=>t.status!=='Erledigt').forEach(t=>{const d=taskDueMonthDateV34(t.due);if(!d)return;const n=Math.ceil((d-new Date())/86400000);if(n<=45)items.push({level:n<0?'red':'orange',icon:'✓',title:t.title,text:`${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`,days:n})});
- (state.maintenance||[]).forEach(x=>{if(x.status==='Erledigt'||!x.due)return;const due=maintenanceMonthDueDateV040L(x.due);if(!due)return;const days=Math.ceil((due-new Date())/86400000);if(days<=45)items.push({level:days<=14?'red':'orange',icon:'🔧',title:x.title,text:`${maintenanceMonthLabelV040L(x.due)} · ${propertyName(x.propertyId)}`,days})});
- (state.vehicles||[]).forEach(v=>{const tuv=monthEndDaysV38(v.tuvDate);if(tuv!==null&&tuv<=90)items.push({level:tuv<0?'red':'orange',icon:'🚗',title:`HU / TÜV · ${vehicleName(v)}`,text:monthYearLabelV36(v.tuvDate),days:tuv})});
+ (state.tasks||[]).filter(t=>t.status!=='Erledigt').forEach(t=>{const d=taskDueMonthDateV34(t.due);if(d){const n=Math.ceil((d-new Date())/86400000);if(n<=45)items.push({level:n<0?'red':'orange',title:t.title,text:`Aufgabe · ${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`})}});
+ (state.maintenance||[]).forEach(x=>{
+  if(x.status==='Erledigt'||!x.due)return;
+  const due=maintenanceMonthDueDateV040L(x.due);
+  if(!due)return;
+  const days=Math.ceil((due-new Date())/86400000);
+  if(days<=45){
+   const level=days<0?'red':days<=14?'red':'orange';
+   const when=days<0?'überfällig':days===0?'diesen Monat fällig':days<=31?'bald fällig':`fällig ${maintenanceMonthLabelV040L(x.due)}`;
+   items.push({level,title:`Wartung: ${x.title}`,text:`${when} · ${propertyName(x.propertyId)}`});
+  }
+ });
+ (state.vehicles||[]).forEach(v=>{
+  const tuv=monthEndDaysV38(v.tuvDate);if(tuv!==null&&tuv<=90)items.push({level:tuv<0?'red':'orange',title:`HU / TÜV ${vehicleName(v)}`,text:`fällig ${monthYearLabelV36(v.tuvDate)}`});
+  if(v.nextOilKm&&Number(v.currentKm)>=Number(v.nextOilKm)-1000)items.push({level:Number(v.currentKm)>=Number(v.nextOilKm)?'red':'orange',title:`Ölwechsel ${vehicleName(v)}`,text:`${km(v.currentKm)} / Ziel ${km(v.nextOilKm)}`});
+ });
+ (state.properties||[]).forEach(p=>(p.renovationCosts||[]).filter(r=>!renovationPaidV37(r)).forEach(r=>items.push({level:'orange',title:`Offene Sanierung: ${r.title}`,text:`${p.name} · ${eur(r.amount)}`})));
  $('#importantCountTag').textContent=`${items.length} Hinweis${items.length===1?'':'e'}`;
- box.innerHTML=items.length?items.slice(0,8).map(i=>'<article class="dash-important-card-v070l '+i.level+'"><div class="dash-important-icon-v070l">'+i.icon+'</div><div><strong>'+esc(i.title)+'</strong><span>'+esc(i.text)+'</span></div><b>'+(i.days<0?'Überfällig':i.days===0?'Jetzt':i.days+' T.')+'</b></article>').join(''):'<div class="dash-all-good-v070l"><span>✓</span><strong>Alles im grünen Bereich</strong><small>Aktuell nichts Dringendes.</small></div>';
+ box.innerHTML=items.length?items.slice(0,12).map(i=>`<div class="important-item ${i.level}"><i></i><div><strong>${esc(i.title)}</strong><span>${esc(i.text)}</span></div></div>`).join(''):'<div class="empty">Aktuell nichts Dringendes 🎉</div>';
 }
 function meterConsumptionsV38(p,key){
  const rows=(p.meterHistory||[]).filter(r=>r[key]!==''&&r[key]!=null).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
  const out=[];for(let i=1;i<rows.length;i++){const val=Number(rows[i][key])-Number(rows[i-1][key]);if(val>=0)out.push({from:rows[i-1].date,to:rows[i].date,value:val})}return out;
 }
-function consumptionBarsHtmlV070L(rows,max,cls){
- if(!rows.length)return '<div class="consumption-no-data-v070l">Noch keine Historie</div>';
- let bars='';rows.forEach(r=>{bars+='<i style="height:'+Math.max(8,r.value/max*100)+'%" title="'+r.value.toLocaleString('de-DE')+'"></i>'});
- return '<div class="consumption-spark-v070l '+cls+'">'+bars+'</div>';
-}
 function renderConsumptionV38(){
- const box=$('#dashboardConsumption');if(!box)return;const props=state.properties||[];
- if(!props.length){box.innerHTML='<div class="empty">Noch keine Objekte</div>';return}
- box.innerHTML=props.map(p=>{const e=meterConsumptionsV38(p,'electricity'),w=meterConsumptionsV38(p,'water'),le=e[e.length-1],lw=w[w.length-1],re=e.slice(-6),rw=w.slice(-6),me=Math.max(1,...re.map(x=>x.value)),mw=Math.max(1,...rw.map(x=>x.value));return '<article class="consumption-card-v070l"><div class="consumption-card-head-v070l"><strong>'+esc(p.name)+'</strong><span>'+(p.meterReadingDate?dateDE(p.meterReadingDate):'–')+'</span></div><div class="consumption-split-v070l"><div class="consumption-metric-v070l"><div><span>⚡ Strom</span><strong>'+(le?le.value.toLocaleString('de-DE')+' kWh':'–')+'</strong></div>'+consumptionBarsHtmlV070L(re,me,'electricity')+'</div><div class="consumption-metric-v070l"><div><span>💧 Wasser</span><strong>'+(lw?lw.value.toLocaleString('de-DE')+' m³':'–')+'</strong></div>'+consumptionBarsHtmlV070L(rw,mw,'water')+'</div></div></article>'}).join('');
+ const box=$('#dashboardConsumption');if(!box)return;
+ box.innerHTML=(state.properties||[]).map(p=>{
+  const e=meterConsumptionsV38(p,'electricity'),w=meterConsumptionsV38(p,'water'),le=e[e.length-1],lw=w[w.length-1];
+  const max=Math.max(1,...e.map(x=>x.value),...w.map(x=>x.value));
+  const bars=[...e.slice(-4).map(x=>({label:`⚡ ${x.to.slice(0,7)}`,v:x.value,unit:'kWh'})),...w.slice(-4).map(x=>({label:`💧 ${x.to.slice(0,7)}`,v:x.value,unit:'m³'}))];
+  return `<article class="consumption-card"><h3>${esc(p.name)}</h3><div class="consumption-kpis"><div><span>Letzter Stromverbrauch</span><strong>${le?le.value.toLocaleString('de-DE')+' kWh':'–'}</strong></div><div><span>Letzter Wasserverbrauch</span><strong>${lw?lw.value.toLocaleString('de-DE')+' m³':'–'}</strong></div></div>${bars.length?`<div class="mini-bars">${bars.map(b=>`<div><span>${esc(b.label)}</span><i><b style="width:${Math.max(4,b.v/max*100)}%"></b></i><strong>${b.v.toLocaleString('de-DE')} ${b.unit}</strong></div>`).join('')}</div>`:'<p class="helper-text">Mindestens zwei Zählerstände werden für eine Verbrauchsberechnung benötigt.</p>'}</article>`;
+ }).join('')||'<div class="empty">Noch keine Objekte</div>';
 }
 function totalVehicleServiceCostV38(v){return (state.vehicleServices||[]).filter(s=>Number(s.vehicleId)===Number(v.id)).reduce((a,s)=>a+Number(s.cost||0),0)}
 function applyDashboardWidgetsV38(){
@@ -1155,8 +1168,9 @@ function render(){
 
  const notice=$('#appNotice');if(notice){notice.classList.add('hidden');notice.innerHTML=''}
  runModule('Auswahllisten',populateSelects);
- runModule('Übersicht',renderDashboard);
+ runModule('Übersicht',renderDashboardOnlyV071L);
  runModule('Objektübersicht',renderDashboardProperties);
+ runModule('Sanierungsübersicht',renderDashboardRenovationsV37);
  runModule('Fahrzeuge',renderVehicles);
  runModule('Fahrzeugübersicht',renderDashboardVehicles);
  runModule('Kostenplan',renderCosts);
@@ -1170,13 +1184,38 @@ runModule('Planung',renderTasks);
  updateLocalStatus(lastSaveTime?'Gespeichert':'Lokal gespeichert');
 }
 
-function energyClassIndexV070L(value){const c=String(value||'').trim().toUpperCase().replace('+','');return ({A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7})[c]??-1}
-function energyScaleHtmlV070L(value){const idx=energyClassIndexV070L(value),letters=['A','B','C','D','E','F','G','H'];return '<div class="energy-scale-v070l">'+letters.map((l,i)=>'<span class="energy-'+l.toLowerCase()+(i===idx?' active':'')+'">'+l+'</span>').join('')+'</div>'}
 function renderDashboardProperties(){
- const box=$('#dashboardPropertyOverview');if(!box)return;const props=state.properties||[];
- if(!props.length){box.innerHTML='<div class="empty">Noch keine Objekte angelegt</div>';return}
- box.innerHTML=props.map(x=>`<article class="dashboard-property-card">${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}<div class="dashboard-property-body"><div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m²</span></div><h3>${esc(x.name||'Ohne Namen')}</h3><p>${esc(x.address||'Adresse noch nicht eingetragen')}</p><div class="property-quickfacts-v070l"><div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div><div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms):'–'}</strong></div><div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div></div><div class="energy-block-v070l"><div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>${energyScaleHtmlV070L(x.energyClass)}</div></div></article>`).join('');
+ const box=$('#dashboardPropertyOverview');
+ if(!box)return;
+ const props=Array.isArray(state.properties)?state.properties:[];
+ if(!props.length){
+  box.innerHTML='<div class="empty">Noch keine Objekte angelegt</div>';
+  return;
+ }
+ box.innerHTML=props.map(x=>`<article class="dashboard-property-card">
+  ${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}
+  <div class="dashboard-property-body">
+   <div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m² Wohnfläche</span></div>
+   <h3>${esc(x.name||'Ohne Namen')}</h3>
+   <p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
+   <div class="dashboard-property-details">
+    <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div>
+    <div><span>Grundstück</span><strong>${x.plotArea!==''&&x.plotArea!=null?Number(x.plotArea).toLocaleString('de-DE')+' m²':'–'}</strong></div>
+    <div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>Bäder</span><strong>${x.bathrooms!==''&&x.bathrooms!=null?Number(x.bathrooms).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>WC</span><strong>${x.toilets!==''&&x.toilets!=null?Number(x.toilets).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
+    <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
+    <div><span>Stromzähler</span><strong>${x.electricityMeter!==''&&x.electricityMeter!=null?Number(x.electricityMeter).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
+    <div><span>Wasserzähler</span><strong>${x.waterMeter!==''&&x.waterMeter!=null?Number(x.waterMeter).toLocaleString('de-DE')+' m³':'–'}</strong></div>
+    <div><span>Ablesedatum</span><strong>${x.meterReadingDate?dateDE(x.meterReadingDate):'–'}</strong></div><div><span>Sanierung bezahlt</span><strong>${eur(renovationPaidTotalV37(x))}</strong></div>
+   </div>
+   ${x.notes?`<p class="property-notes"><strong>Notiz:</strong> ${esc(x.notes)}</p>`:''}
+  </div>
+ </article>`).join('');
 }
+
+
 async function imageFileToDataUrlV31(file,maxWidth=1400,maxHeight=1000,quality=.82){
  if(!file)return '';
  const raw=await new Promise((resolve,reject)=>{
@@ -1320,17 +1359,212 @@ function renderDashboardVehicles(){
  }).join('');
 }
 
-function renderDashboard(){
- const loans=currentLoansV061L(),lt=loanTotalsV061L(),original=lt.original,remaining=lt.remaining,paid=lt.paid,pct=original?Math.min(100,Math.max(0,paid/original*100)):0;
- const openTasks=(state.tasks||[]).filter(t=>String(t.status||'').toLowerCase()!=='erledigt').length;
- if($('#dashOpenTaskCountV070L'))$('#dashOpenTaskCountV070L').textContent=openTasks;if($('#dashLoanCountV070L'))$('#dashLoanCountV070L').textContent=loans.length;if($('#dashPropertyCountV070L'))$('#dashPropertyCountV070L').textContent=(state.properties||[]).length;if($('#dashVehicleCountV070L'))$('#dashVehicleCountV070L').textContent=(state.vehicles||[]).length;
- if($('#dashboardLoanCountTagV070L'))$('#dashboardLoanCountTagV070L').textContent=`${loans.length} Kredit${loans.length===1?'':'e'}`;if($('#loanPercent'))$('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';if($('#loanDonut'))$('#loanDonut').style.setProperty('--p',pct);if($('#loanOriginal'))$('#loanOriginal').textContent=eur(original);if($('#loanPaid'))$('#loanPaid').textContent=eur(paid);if($('#loanRemaining'))$('#loanRemaining').textContent=eur(remaining);if($('#loanPayment'))$('#loanPayment').textContent=eur(lt.monthlyPayment);
- const lb=$('#loanDetails');if(lb)lb.innerHTML=loans.length?loans.map((l,index)=>{const p=loanProjectionForV061L(l),interest=p.remaining*(Number(l.interest)||0)/100/12,principal=Math.max(0,Math.min(p.remaining,Number(l.monthlyPayment)-interest)),lp=Number(l.original)>0?Math.min(100,Math.max(0,(Number(l.original)-p.remaining)/Number(l.original)*100)):0;return `<article class="dash-loan-card-v070l"><div class="dash-loan-card-head-v070l"><span>🏦</span><div><strong>${esc(l.name||`Kredit ${index+1}`)}</strong><small>${esc(l.bank||'Keine Bank')}</small></div><b>${lp.toLocaleString('de-DE',{maximumFractionDigits:1})}%</b></div><div class="dash-loan-progress-v070l"><i style="width:${lp}%"></i></div><div class="dash-loan-stats-v070l"><div><span>Restschuld</span><strong>${eur(p.remaining)}</strong></div><div><span>Rate</span><strong>${eur(l.monthlyPayment)}</strong></div><div><span>Zins</span><strong>${eur(interest)}</strong></div><div><span>Tilgung</span><strong>${eur(principal)}</strong></div></div></article>`}).join(''):'<div class="empty">Noch keine Kredite eingetragen.</div>';
- const users=accountUsersV048L(),tc=users.reduce((s,u)=>s+ownerMonthlyContribution(u),0);if($('#dashboardContributionTotalV070L'))$('#dashboardContributionTotalV070L').textContent=eur(tc)+' / Monat';const cb=$('#ownerIncomeSummary');if(cb)cb.innerHTML=users.length?users.map(u=>{const amount=ownerMonthlyContribution(u),share=tc>0?amount/tc*100:0;return `<article class="dash-contribution-card-v070l"><div class="dash-contribution-avatar-v070l">${esc(ownerInitialsV045L(u.name))}</div><div class="dash-contribution-main-v070l"><div><strong>${esc(u.name)}</strong><b>${eur(amount)}</b></div><div class="dash-contribution-bar-v070l"><i style="width:${share}%"></i></div><small>${share.toLocaleString('de-DE',{maximumFractionDigits:1})} % der Einzahlungen</small></div></article>`}).join(''):'<div class="empty">Keine aktiven Benutzer</div>';
- const pr={sofort:0,hoch:1,mittel:2,niedrig:3},up=[...(state.tasks||[])].sort((a,b)=>{const ad=String(a.status||'').toLowerCase()==='erledigt'?1:0,bd=String(b.status||'').toLowerCase()==='erledigt'?1:0;if(ad!==bd)return ad-bd;const ap=pr[String(a.priority||'').toLowerCase()]??4,bp=pr[String(b.priority||'').toLowerCase()]??4;if(ap!==bp)return ap-bp;return (a.due||'9999').localeCompare(b.due||'9999')});const tb=$('#upcomingItems');if(tb)tb.innerHTML=up.length?up.slice(0,8).map(dashboardTaskCardV33).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>';
- const ac=(state.costPlans||[]).filter(c=>!costIsPaid(c)).map(c=>({...c,_monthly:costMonthly(c)})).sort((a,b)=>b._monthly-a._monthly);if($('#dashboardCostCountV070L'))$('#dashboardCostCountV070L').textContent=`${ac.length} Position${ac.length===1?'':'en'}`;const chart=$('#dashboardCostChartV070L');if(chart){const top=ac.slice(0,6),max=Math.max(1,...top.map(c=>c._monthly));chart.innerHTML=top.length?top.map(c=>`<div class="dash-cost-bar-row-v070l"><span>${esc(c.name||c.category||'Kosten')}</span><i><b style="width:${Math.max(4,c._monthly/max*100)}%"></b></i><strong>${eur(c._monthly)}</strong></div>`).join(''):'<div class="empty">Keine laufenden Kosten</div>'}const cost=$('#dashboardCostPositions');if(cost)cost.innerHTML=ac.length?ac.slice(0,5).map(c=>`<article class="dash-cost-card-v070l"><span class="dash-cost-icon-v070l">${costIconV046L(c.category,c.name)}</span><div><strong>${esc(c.name||'Kostenposition')}</strong><small>${esc(c.category||'Kosten')} · ${esc(propertyName(c.propertyId))}</small></div><b>${eur(c._monthly)}<small>/Monat</small></b></article>`).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
- renderDashboardProperties();renderDashboardVehicles();
+
+/* =========================================================
+   0.71l – Dashboard-only renderer
+   These functions read existing state but do not replace
+   shared renderers used by Konto/Objekte/Planung/Fahrzeuge/Mehr.
+   ========================================================= */
+
+function dashEnergyIndexV071L(value){
+ const c=String(value||'').trim().toUpperCase().replace('+','');
+ return ({A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7})[c]??-1;
 }
+function dashEnergyScaleV071L(value){
+ const idx=dashEnergyIndexV071L(value);
+ const letters=['A','B','C','D','E','F','G','H'];
+ return '<div class="dash-energy-scale-v071l">'+letters.map((l,i)=>'<span class="energy-'+l.toLowerCase()+(i===idx?' active':'')+'">'+l+'</span>').join('')+'</div>';
+}
+function dashConsumptionBarsV071L(rows,max,kind){
+ if(!rows.length)return '<div class="dash-no-history-v071l">Noch keine Historie</div>';
+ return '<div class="dash-spark-v071l '+kind+'">'+rows.map(r=>'<i style="height:'+Math.max(8,r.value/max*100)+'%" title="'+r.value.toLocaleString('de-DE')+'"></i>').join('')+'</div>';
+}
+function dashTaskSortV071L(a,b){
+ const doneA=String(a.status||'').toLowerCase()==='erledigt'?1:0;
+ const doneB=String(b.status||'').toLowerCase()==='erledigt'?1:0;
+ if(doneA!==doneB)return doneA-doneB;
+ const pr={sofort:0,hoch:1,mittel:2,niedrig:3};
+ const pa=pr[String(a.priority||'').toLowerCase()]??4;
+ const pb=pr[String(b.priority||'').toLowerCase()]??4;
+ if(pa!==pb)return pa-pb;
+ return String(a.due||'9999').localeCompare(String(b.due||'9999'));
+}
+function renderDashboardOnlyV071L(){
+ if(!document.querySelector('.dashboard-only-v071l'))return;
+
+ const tasks=(state.tasks||[]);
+ const loans=currentLoansV061L();
+ const props=(state.properties||[]);
+ const cars=(state.vehicles||[]);
+
+ // Status
+ $('#dashTaskCountV071L').textContent=tasks.filter(t=>String(t.status||'').toLowerCase()!=='erledigt').length;
+ $('#dashLoanCountV071L').textContent=loans.length;
+ $('#dashObjectCountV071L').textContent=props.length;
+ $('#dashCarCountV071L').textContent=cars.length;
+
+ // Demnächst wichtig
+ const important=[];
+ tasks.filter(t=>String(t.status||'').toLowerCase()!=='erledigt').forEach(t=>{
+  const d=taskDueMonthDateV34(t.due);
+  if(!d)return;
+  const days=Math.ceil((d-new Date())/86400000);
+  if(days<=45)important.push({icon:'✅',level:days<=7?'red':'orange',title:t.title,text:`${taskMonthLabelV34(t.due)} · ${propertyName(t.propertyId)}`,days});
+ });
+ (state.maintenance||[]).forEach(m=>{
+  if(m.status==='Erledigt'||!m.due)return;
+  const d=maintenanceMonthDueDateV040L(m.due);
+  if(!d)return;
+  const days=Math.ceil((d-new Date())/86400000);
+  if(days<=45)important.push({icon:'🔧',level:days<=7?'red':'orange',title:m.title,text:`${maintenanceMonthLabelV040L(m.due)} · ${propertyName(m.propertyId)}`,days});
+ });
+ cars.forEach(v=>{
+  const days=monthEndDaysV38(v.tuvDate);
+  if(days!==null&&days<=90)important.push({icon:'🚗',level:days<=30?'red':'orange',title:`HU / TÜV · ${vehicleName(v)}`,text:monthYearLabelV36(v.tuvDate),days});
+ });
+ $('#dashImportantCountV071L').textContent=`${important.length} Hinweis${important.length===1?'':'e'}`;
+ $('#dashImportantV071L').innerHTML=important.length?important.slice(0,8).map(i=>`<article class="dash-important-card-v071l ${i.level}">
+   <span class="dash-important-icon-v071l">${i.icon}</span>
+   <div><strong>${esc(i.title)}</strong><small>${esc(i.text)}</small></div>
+   <b>${i.days<0?'Überfällig':i.days===0?'Jetzt':`${i.days} T.`}</b>
+  </article>`).join(''):'<div class="dash-ok-v071l"><span>✓</span><div><strong>Alles im grünen Bereich</strong><small>Aktuell nichts Dringendes.</small></div></div>';
+
+ // Aufgaben – existing card function, dashboard only
+ const sortedTasks=[...tasks].sort(dashTaskSortV071L);
+ $('#dashTasksV071L').innerHTML=sortedTasks.length?sortedTasks.slice(0,8).map(dashboardTaskCardV33).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>';
+
+ // Kredite
+ const lt=loanTotalsV061L();
+ const pct=lt.original?Math.min(100,Math.max(0,lt.paid/lt.original*100)):0;
+ $('#dashLoanTagV071L').textContent=`${loans.length} Kredit${loans.length===1?'':'e'}`;
+ $('#dashLoanPercentV071L').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';
+ $('#dashLoanDonutV071L').style.setProperty('--p',pct);
+ $('#dashLoanOriginalV071L').textContent=eur(lt.original);
+ $('#dashLoanRemainingV071L').textContent=eur(lt.remaining);
+ $('#dashLoanPaidV071L').textContent=eur(lt.paid);
+ $('#dashLoanRateV071L').textContent=eur(lt.monthlyPayment);
+ $('#dashLoanCardsV071L').innerHTML=loans.length?loans.map((l,i)=>{
+  const p=loanProjectionForV061L(l);
+  const interest=p.remaining*(Number(l.interest)||0)/100/12;
+  const principal=Math.max(0,Math.min(p.remaining,(Number(l.monthlyPayment)||0)-interest));
+  const lp=Number(l.original)>0?Math.min(100,Math.max(0,(Number(l.original)-p.remaining)/Number(l.original)*100)):0;
+  return `<article class="dash-loan-card-v071l">
+    <div class="dash-loan-card-head-v071l"><span>🏦</span><div><strong>${esc(l.name||`Kredit ${i+1}`)}</strong><small>${esc(l.bank||'Keine Bank')}</small></div><b>${lp.toLocaleString('de-DE',{maximumFractionDigits:1})}%</b></div>
+    <div class="dash-progress-v071l"><i style="width:${lp}%"></i></div>
+    <div class="dash-loan-values-v071l"><div><span>Restschuld</span><strong>${eur(p.remaining)}</strong></div><div><span>Rate</span><strong>${eur(l.monthlyPayment)}</strong></div><div><span>Zins</span><strong>${eur(interest)}</strong></div><div><span>Tilgung</span><strong>${eur(principal)}</strong></div></div>
+  </article>`;
+ }).join(''):'<div class="empty">Noch keine Kredite eingetragen</div>';
+
+ // Verbrauch – uses meter history, but does not replace the original consumption renderer
+ $('#dashConsumptionV071L').innerHTML=props.length?props.map(p=>{
+  const e=meterConsumptionsV38(p,'electricity');
+  const w=meterConsumptionsV38(p,'water');
+  const re=e.slice(-6),rw=w.slice(-6);
+  const le=e[e.length-1],lw=w[w.length-1];
+  const me=Math.max(1,...re.map(x=>x.value)),mw=Math.max(1,...rw.map(x=>x.value));
+  return `<article class="dash-consumption-card-v071l">
+    <div class="dash-card-title-v071l"><strong>${esc(p.name)}</strong><small>${p.meterReadingDate?dateDE(p.meterReadingDate):'–'}</small></div>
+    <div class="dash-consumption-split-v071l">
+      <div><div class="dash-metric-head-v071l"><span>⚡ Strom</span><strong>${le?le.value.toLocaleString('de-DE')+' kWh':'–'}</strong></div>${dashConsumptionBarsV071L(re,me,'electricity')}</div>
+      <div><div class="dash-metric-head-v071l"><span>💧 Wasser</span><strong>${lw?lw.value.toLocaleString('de-DE')+' m³':'–'}</strong></div>${dashConsumptionBarsV071L(rw,mw,'water')}</div>
+    </div>
+  </article>`;
+ }).join(''):'<div class="empty">Noch keine Objekte</div>';
+
+ // Einzahlungen
+ const users=accountUsersV048L();
+ const totalContribution=users.reduce((s,u)=>s+ownerMonthlyContribution(u),0);
+ $('#dashContributionTotalV071L').textContent=eur(totalContribution)+' / Monat';
+ $('#dashContributionsV071L').innerHTML=users.length?users.map(u=>{
+  const amount=ownerMonthlyContribution(u);
+  const share=totalContribution?amount/totalContribution*100:0;
+  return `<article class="dash-user-card-v071l">
+    <div class="dash-user-avatar-v071l">${esc(ownerInitialsV045L(u.name))}</div>
+    <div><div class="dash-user-line-v071l"><strong>${esc(u.name)}</strong><b>${eur(amount)}</b></div><div class="dash-progress-v071l"><i style="width:${share}%"></i></div><small>${share.toLocaleString('de-DE',{maximumFractionDigits:1})} % der Einzahlungen</small></div>
+  </article>`;
+ }).join(''):'<div class="empty">Keine aktiven Benutzer</div>';
+
+ // Kostenpositionen
+ const activeCosts=(state.costPlans||[]).filter(c=>!costIsPaid(c)).map(c=>({...c,_monthly:costMonthly(c)})).sort((a,b)=>b._monthly-a._monthly);
+ $('#dashCostCountV071L').textContent=`${activeCosts.length} Position${activeCosts.length===1?'':'en'}`;
+ const top=activeCosts.slice(0,6),max=Math.max(1,...top.map(c=>c._monthly));
+ $('#dashCostBarsV071L').innerHTML=top.length?top.map(c=>`<div class="dash-cost-row-v071l"><span>${esc(c.name||c.category||'Kosten')}</span><i><b style="width:${Math.max(4,c._monthly/max*100)}%"></b></i><strong>${eur(c._monthly)}</strong></div>`).join(''):'<div class="empty">Keine laufenden Kosten</div>';
+ $('#dashCostListV071L').innerHTML=activeCosts.length?activeCosts.slice(0,5).map(c=>`<article class="dash-cost-item-v071l"><span>${costIconV046L(c.category,c.name)}</span><div><strong>${esc(c.name||'Kostenposition')}</strong><small>${esc(c.category||'Kosten')} · ${esc(propertyName(c.propertyId))}</small></div><b>${eur(c._monthly)}<small>/Monat</small></b></article>`).join(''):'';
+
+ // Objekte – dashboard-only cards
+ $('#dashObjectsV071L').innerHTML=props.length?props.map(x=>`<article class="dashboard-property-card dash-property-v071l">
+   ${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}
+   <div class="dashboard-property-body">
+    <div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m²</span></div>
+    <h3>${esc(x.name||'Ohne Namen')}</h3><p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
+    <div class="dash-property-facts-v071l"><div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div><div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms):'–'}</strong></div><div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div></div>
+    <div class="dash-energy-v071l"><div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>${dashEnergyScaleV071L(x.energyClass)}</div>
+   </div>
+  </article>`).join(''):'<div class="empty">Noch keine Objekte angelegt</div>';
+
+ // Fahrzeuge – own dashboard-only cards, original vehicle page untouched
+ $('#dashVehiclesV071L').innerHTML=cars.length?cars.map(v=>`<article class="dashboard-vehicle-card">
+   ${v.photo?`<img class="dashboard-vehicle-image" src="${v.photo}" alt="${esc(vehicleName(v))}">`:`<div class="dashboard-vehicle-placeholder">🚗</div>`}
+   <div class="dashboard-vehicle-body">
+    <div class="card-top"><span class="tag">${esc(v.plate||'Fahrzeug')}</span><span>${esc(v.year||'')}</span></div>
+    <h3>${esc(vehicleName(v))}</h3>
+    <div class="dashboard-vehicle-facts"><span>KM <b>${km(v.currentKm)}</b></span><span>HU/TÜV <b>${monthYearLabelV36(v.tuvDate)||'–'}</b></span><span>Öl <b>${v.nextOilKm?km(v.nextOilKm):'–'}</b></span></div>
+   </div>
+  </article>`).join(''):'<div class="empty">Noch keine Fahrzeuge angelegt</div>';
+}
+
+function renderDashboard(){
+ const monthlyCosts=plannedMonthly(),monthlyIncome=plannedMonthlyIncome(),monthNet=projectedMonthlyBalance();
+ $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
+ const loans=currentLoansV061L(),loanTotal=loanTotalsV061L(),
+ original=loanTotal.original,remaining=loanTotal.remaining,paid=loanTotal.paid,
+ pct=original?Math.min(100,Math.max(0,paid/original*100)):0;
+ $('#loanPercent').textContent=pct.toLocaleString('de-DE',{maximumFractionDigits:1})+' %';
+ $('#loanDonut').style.setProperty('--p',pct);
+ $('#loanOriginal').textContent=eur(original);$('#loanPaid').textContent=eur(paid);
+ $('#loanRemaining').textContent=eur(remaining);$('#loanPayment').textContent=eur(loanTotal.monthlyPayment);
+ $('#loanDetails').innerHTML=loans.length?loans.map((l,index)=>{
+  const p=loanProjectionForV061L(l),monthInterest=p.remaining*(Number(l.interest)||0)/100/12;
+  const monthPrincipal=Math.max(0,Math.min(p.remaining,Number(l.monthlyPayment)-monthInterest));
+  return `<div class="dashboard-loan-row-v061l">
+   <span><b>${esc(l.name||`Kredit ${index+1}`)}</b><small>${esc(l.bank||'Keine Bank')} · ${Number(l.interest||0).toLocaleString('de-DE')} %</small></span>
+   <span><small>Restschuld</small><strong>${eur(p.remaining)}</strong></span>
+   <span><small>Rate</small><strong>${eur(l.monthlyPayment)}</strong></span>
+   <span><small>Tilgung nächster Monat</small><strong>${eur(monthPrincipal)}</strong></span>
+  </div>`;
+ }).join(''):'<div class="empty">Noch keine Kredite eingetragen.</div>';
+ const propCosts=state.properties.map(property=>{
+  const persons=accountUsersV048L().filter(user=>(user.propertyIds||[]).map(String).includes(String(property.id)));
+  const value=(state.costPlans||[]).filter(cost=>String(cost.propertyId)===String(property.id)).reduce((sum,cost)=>sum+costMonthly(cost),0);
+  return {name:property.name,value,persons:persons.length};
+
+
+ renderDashboardProperties();
+
+ renderDashboardVehicles();
+});
+const combined=plannedCostMonthly();
+$('#dashboardObjectCosts').innerHTML=[
+ ...propCosts.map(item=>({name:item.name,value:item.value,note:`${item.persons} zugeordnete Benutzer`})),
+ {name:'Beide Objekte zusammen',value:combined,note:'Gesamte Kostenpositionen'}
+].map((item,index)=>`<div class="${index===propCosts.length?'total-row':''}"><span>${esc(item.name)}<small>${esc(item.note)}</small></span><strong>${eur(item.value)} / Monat · ${eur(item.value*12)} / Jahr</strong></div>`).join('');
+ $('#ownerIncomeSummary').innerHTML=accountUsersV048L().map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Benutzer</div>';
+ const upcoming=[...state.tasks].sort((a,b)=>{
+  const ad=a.status==='Erledigt'?1:0,bd=b.status==='Erledigt'?1:0;
+  if(ad!==bd)return ad-bd;
+  return (a.due||'9999').localeCompare(b.due||'9999');
+ });
+ $('#upcomingItems').innerHTML=upcoming.length?upcoming.map(dashboardTaskCardV33).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>'
+
+ const dashboardCostBox=$('#dashboardCostPositions');
+ if(dashboardCostBox){
+  dashboardCostBox.innerHTML=(state.costPlans||[]).length?[
+  ...state.costPlans.map(cost=>`<div class="cost-info-row ${costIsPaid(cost)?'cost-info-paid':''}"><span class="cost-category-cell"><strong>${esc(cost.category)}</strong><small>${esc(cost.name||"")}${costIsPaid(cost)?' · ✓ bezahlt':''}</small></span><span>${esc(propertyName(cost.propertyId))}</span><strong>${costIsPaid(cost)?`<s>${eur(costMonthlyOriginal(cost))}</s>`:eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${costIsPaid(cost)?`<s>${eur(costYearlyOriginal(cost))}</s>`:eur(costYearly(cost))}</strong></div>`),
+  `<div class="cost-info-row cost-info-total"><span></span><span class="total-label">Gesamt</span><strong>${eur(plannedCostMonthly())}</strong><span>Monatsdurchschnitt</span><strong>${eur(state.costPlans.reduce((sum,cost)=>sum+costYearly(cost),0))}</strong></div>`
+ ].join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
+ }
+}
+
 const wasteColors={'Restmüll':'#111111','Biotonne':'#8B5E3C','Papiertonne':'#2E8B57','Plastik':'#EAB308','Sonstige':'#7C3AED'};
 function wasteColor(type){return wasteColors[type]||'#64748b'}
 function monthTitle(d){return d.toLocaleDateString('de-DE',{month:'long',year:'numeric'})}
@@ -2597,7 +2831,17 @@ function completeItem(type,id){
 }
 function deletePlanning(type,id){if(!confirm('Eintrag wirklich löschen?'))return;const key=type==='task'?'tasks':type==='maintenance'?'maintenance':'reserves';state[key]=state[key].filter(x=>x.id!==id);save()}
 function openLoan(){openLoanV061L(null)}
-function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',tasks:'Planung',settings:'Einstellungen'};$('#pageTitle').textContent=titles[name]||'Hausverwaltung';window.scrollTo({top:0,behavior:'smooth'})}
+function switchView(name){
+ $$('.view').forEach(v=>{
+  const active=v.dataset.view===name;
+  v.classList.toggle('active',active);
+  v.setAttribute('aria-hidden',active?'false':'true');
+ });
+ $$('.bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.dataset.target===name));
+ const titles={dashboard:'Übersicht',transactions:'Hauskonto',properties:'Objekte',tasks:'Planung',vehicles:'Fahrzeuge',settings:'Einstellungen'};
+ $('#pageTitle').textContent=titles[name]||'Hausverwaltung';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
 $$('.bottom-nav .nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.target)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.go)));$$('[data-modal]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.modal;if(m==='ownerModal')openOwnerModal();else if(m==='propertyModal'){if((state.properties||[]).length>=5){alert('Es können maximal 5 Objekte angelegt werden.');return}openPropertyModal();}else if(m==='costModal')openCostModal();else if(m==='loanModal')openLoan();else document.getElementById(m).showModal()}));
 $$('[data-task-tab]').forEach(b=>b.addEventListener('click',()=>{
  activePlanningTab=b.dataset.taskTab;
