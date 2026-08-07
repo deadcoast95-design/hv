@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – V26 Mobile Nav",
+  "name": "Private Immobilienverwaltung – V35.1 Fix",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit neu aufgebauter kompakter Smartphone-Navigation",
+  "description": "V35.1 mit reparierten Auswahllisten",
   "icons": [
     {
       "src": "icon.svg",

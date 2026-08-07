@@ -1,13 +1,18 @@
-VERSION 26 – MOBILE NAVIGATION NEU AUFGEBAUT
+VERSION 35.1 – AUSWAHLLISTEN FIX
 
-- Navigation HTML komplett neu strukturiert.
-- Icon und Text sind getrennte Elemente.
-- Smartphones verwenden kurze Labels:
-  Übersicht -> Übers.
-  Fahrzeuge -> Autos
-- Alle sechs Bereiche sind exakt gleich breit.
-- Kleine Schrift speziell für Smartphones.
-- Icons kleiner und sauber zentriert.
-- iPhone Safe Area berücksichtigt.
-- Auf Tablet/Desktop erscheinen wieder die vollständigen Namen.
-- IndexedDB, JSON Import, Sprachen, Profile und alle App-Funktionen bleiben unverändert.
+Behoben:
+- In V35 wurde „Buchungen“ komplett entfernt.
+- Die Auswahllisten-Funktion griff trotzdem noch auf das entfernte Feld „transactionCategory“ zu.
+- Dadurch erschien die Warnung „Auswahllisten konnte nicht vollständig geladen werden.“
+
+V35.1:
+- Das entfernte Buchungsfeld wird nur noch angesprochen, wenn es wirklich existiert.
+- Das alte Buchungs-Render-Modul wird nicht mehr geladen.
+- Objekt-, Aufgaben-, Wartungs- und Kostenplan-Auswahllisten bleiben funktionsfähig.
+
+Alle V35-Funktionen bleiben bestehen:
+- Aufgabenfoto
+- Konto nur als Kostenplan
+- max. 5 Objekte
+- Zählerhistorie
+- Sanierungskosten pro Objekt
