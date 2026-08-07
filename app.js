@@ -1,5 +1,5 @@
-const KEY='hausverwaltung_pwa_v10';
-const OLD_KEYS=['hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
+const KEY='hausverwaltung_pwa_v13';
+const OLD_KEYS=['hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 const categories=['Einzahlung Eigentümer','Kredit','Strom','Wasser','Internet','Versicherung','Grundsteuer','Müll','Wartung','Reparatur','Rücklage','Sanierung','Sonstiges'];
 const seed={
  settings:{name:'Unsere Immobilien',startBalance:0,minimumReserve:5000,monthlyReserve:600},
@@ -27,11 +27,16 @@ function migrate(data){
  ...x,
  photo:x.photo||'',
  constructionYear:x.constructionYear||'',
+ plotArea:x.plotArea??'',
+ rooms:x.rooms??'',
+ bathrooms:x.bathrooms??'',
+ toilets:x.toilets??'',
  electricityMeter:x.electricityMeter??'',
  waterMeter:x.waterMeter??'',
  meterReadingDate:x.meterReadingDate||'',
  energyClass:x.energyClass||'',
- heatingType:x.heatingType||''
+ heatingType:x.heatingType||'',
+ notes:x.notes||''
 }));
  d.transactions=Array.isArray(data.transactions)?data.transactions:[];
  d.tasks=(data.tasks||[]).map(x=>({...x,propertyId:x.propertyId??'all'}));
@@ -132,6 +137,7 @@ function render(){
  const notice=$('#appNotice');if(notice){notice.classList.add('hidden');notice.innerHTML=''}
  runModule('Auswahllisten',populateSelects);
  runModule('Übersicht',renderDashboard);
+ runModule('Objektübersicht',renderDashboardProperties);
  runModule('Buchungen',renderTransactions);
  runModule('Kostenplan',renderCosts);
  runModule('Objekte',renderProperties);
@@ -141,6 +147,37 @@ function render(){
  runModule('Müllkalender',renderWasteCalendar);
  updateLocalStatus(lastSaveTime?'Gespeichert':'Lokal gespeichert');
 }
+
+function renderDashboardProperties(){
+ const box=$('#dashboardPropertyOverview');
+ if(!box)return;
+ const props=Array.isArray(state.properties)?state.properties:[];
+ if(!props.length){
+  box.innerHTML='<div class="empty">Noch keine Objekte angelegt</div>';
+  return;
+ }
+ box.innerHTML=props.map(x=>`<article class="dashboard-property-card">
+  ${x.photo?`<img class="dashboard-property-image" src="${x.photo}" alt="${esc(x.name||'Objekt')}">`:`<div class="dashboard-property-placeholder">🏠</div>`}
+  <div class="dashboard-property-body">
+   <div class="card-top"><span class="tag">${esc(x.usage||'Objekt')}</span><span>${Number(x.area)||0} m² Wohnfläche</span></div>
+   <h3>${esc(x.name||'Ohne Namen')}</h3>
+   <p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
+   <div class="dashboard-property-details">
+    <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div>
+    <div><span>Grundstück</span><strong>${x.plotArea!==''&&x.plotArea!=null?Number(x.plotArea).toLocaleString('de-DE')+' m²':'–'}</strong></div>
+    <div><span>Zimmer</span><strong>${x.rooms!==''&&x.rooms!=null?Number(x.rooms).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>Bäder</span><strong>${x.bathrooms!==''&&x.bathrooms!=null?Number(x.bathrooms).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>WC</span><strong>${x.toilets!==''&&x.toilets!=null?Number(x.toilets).toLocaleString('de-DE'):'–'}</strong></div>
+    <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
+    <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
+    <div><span>Stromzähler</span><strong>${x.electricityMeter!==''&&x.electricityMeter!=null?Number(x.electricityMeter).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
+    <div><span>Wasserzähler</span><strong>${x.waterMeter!==''&&x.waterMeter!=null?Number(x.waterMeter).toLocaleString('de-DE')+' m³':'–'}</strong></div>
+    <div><span>Ablesedatum</span><strong>${x.meterReadingDate?dateDE(x.meterReadingDate):'–'}</strong></div>
+   </div>
+   ${x.notes?`<p class="property-notes"><strong>Notiz:</strong> ${esc(x.notes)}</p>`:''}
+  </div>
+ </article>`).join('');
+}
 function renderDashboard(){
  const monthlyCosts=plannedMonthly(),monthlyIncome=plannedMonthlyIncome(),monthNet=projectedMonthlyBalance();
  $('#monthlyNeed').textContent=eur(monthlyCosts);$('#monthlyIncome').textContent=eur(monthlyIncome);$('#monthlyNet').textContent=eur(monthNet);
@@ -149,6 +186,9 @@ function renderDashboard(){
  const persons=state.owners.filter(owner=>owner.active!==false&&(owner.propertyIds||[]).map(String).includes(String(property.id)));
  const value=persons.reduce((sum,person)=>sum+ownerMonthlyCostShare(person),0);
  return {name:property.name,value,persons:persons.length};
+
+
+ renderDashboardProperties();
 });
 const combined=plannedCostMonthly();
 $('#dashboardObjectCosts').innerHTML=[
@@ -156,13 +196,13 @@ $('#dashboardObjectCosts').innerHTML=[
  {name:'Beide Objekte zusammen',value:combined,note:'Gesamte Kostenpositionen'}
 ].map((item,index)=>`<div class="${index===propCosts.length?'total-row':''}"><span>${esc(item.name)}<small>${esc(item.note)}</small></span><strong>${eur(item.value)} / Monat · ${eur(item.value*12)} / Jahr</strong></div>`).join('');
  $('#ownerIncomeSummary').innerHTML=state.owners.filter(x=>x.active!==false).map(x=>`<div><span>${esc(x.name)}</span><strong>${eur(ownerMonthlyContribution(x))} / Monat</strong></div>`).join('')||'<div class="empty">Keine aktiven Personen</div>';
- const tx=[...state.transactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5);$('#recentTransactions').innerHTML=tx.length?tx.map(transactionRow).join(''):'<div class="empty">Noch keine Buchungen</div>';const upcoming=[...state.tasks].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));$('#upcomingItems').innerHTML=upcoming.length?upcoming.map(x=>`<div class="list-item"><div class="list-main"><strong>${esc(x.title)}</strong><span>${dateDE(x.due)} · ${esc(propertyName(x.propertyId))}${x.owner?' · '+esc(x.owner):''}</span></div><span class="tag">${esc(x.status||'Offen')}</span></div>`).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>'
+ const tx=[...state.transactions].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5);$('#recentTransactions').innerHTML=tx.length?tx.map(transactionRow).join(''):'<div class="empty">Noch keine Buchungen</div>';const upcoming=[...state.tasks].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));$('#upcomingItems').innerHTML=upcoming.length?upcoming.map(x=>`<div class="list-item"><div class="list-main"><strong>${esc(x.title)}</strong><span>${dateDE(x.due)} · ${esc(propertyName(x.propertyId))}${x.owner?' · '+esc(x.owner):''}</span></div><span class="task-status ${x.status==='Erledigt'?'task-status-done':'task-status-open'}">${esc(x.status||'Offen')}</span></div>`).join(''):'<div class="empty">Noch keine Aufgaben erstellt</div>'
 
  const dashboardCostBox=$('#dashboardCostPositions');
  if(dashboardCostBox){
   dashboardCostBox.innerHTML=(state.costPlans||[]).length?[
-  ...state.costPlans.map(cost=>`<div class="cost-info-row"><span>${esc(cost.category)}</span><span>${esc(propertyName(cost.propertyId))}</span><strong>${eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${eur(costYearly(cost))}</strong></div>`),
-  `<div class="cost-info-row cost-info-total"><strong>Gesamt</strong><span>Alle Objekte</span><strong>${eur(plannedCostMonthly())}</strong><span>Monatsdurchschnitt</span><strong>${eur(state.costPlans.reduce((sum,cost)=>sum+costYearly(cost),0))}</strong></div>`
+  ...state.costPlans.map(cost=>`<div class="cost-info-row"><span class="cost-category-cell"><strong>${esc(cost.category)}</strong><small>${esc(cost.name||"")}</small></span><span>${esc(propertyName(cost.propertyId))}</span><strong>${eur(costMonthly(cost))}</strong><span>${intervalLabel(cost.interval)}</span><strong>${eur(costYearly(cost))}</strong></div>`),
+  `<div class="cost-info-row cost-info-total"><span></span><span class="total-label">Gesamt</span><strong>${eur(plannedCostMonthly())}</strong><span>Monatsdurchschnitt</span><strong>${eur(state.costPlans.reduce((sum,cost)=>sum+costYearly(cost),0))}</strong></div>`
  ].join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
  }
 }
@@ -222,7 +262,7 @@ function renderCosts(){
  $('#costObjectSummary').innerHTML=rows.join('');
  $('#costPlanList').innerHTML=state.costPlans.length?state.costPlans.map(x=>{
   const people=eligibleOwnersForCost(x);
-  const perPayment=people.length?` <span class="per-person-note">(${eur(Number(x.amount||0)/people.length)} je beteiligter Person)</span>`:'';
+  const perPayment=people.length?` <span class="per-person-note">(${eur(Number(x.amount||0)/people.length)} je Anteil)</span>`:'';
   const personBreakdown=people.length?`<div class="cost-person-breakdown">${people.map((person,index)=>`<span><b>P${person.personNumber||index+1}</b> ${esc(person.name)}: ${eur(costMonthly(x)/people.length)} / Monat</span>`).join('')}</div>`:'<div class="warning-text">Keine Person ausgewählt</div>';
   return `<article class="entity-card"><div class="card-top"><span class="tag">${esc(x.category)}</span><span class="tag subtle">${esc(propertyName(x.propertyId))}</span></div><h3><span class="person-id-badge">Person ${x.personNumber||''}</span> ${esc(x.name)}</h3><p>${intervalLabel(x.interval)} · ${esc(x.note||'kein Hinweis')}</p><div class="meta cost-meta"><span>${eur(x.amount)} je Zahlung${perPayment}</span><strong>${eur(costMonthly(x))} / Monat · ${eur(costYearly(x))} / Jahr</strong></div>${personBreakdown}<div class="card-actions"><button class="secondary small" onclick="editCost(${x.id})">Bearbeiten</button><button class="danger small" onclick="deleteCost(${x.id})">Löschen</button></div></article>`;
  }).join(''):'<div class="empty">Noch keine Kostenpositionen</div>';
@@ -235,13 +275,13 @@ function renderProperties(){
   <h3>${esc(x.name)}</h3>
   <p>${esc(x.address||'Adresse noch nicht eingetragen')}</p>
   <div class="property-info-grid">
-   <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div>
+   <div><span>Baujahr</span><strong>${esc(x.constructionYear||'–')}</strong></div><div><span>Grundstück</span><strong>${x.plotArea!==''?Number(x.plotArea).toLocaleString('de-DE')+' m²':'–'}</strong></div><div><span>Zimmer</span><strong>${x.rooms!==''?Number(x.rooms).toLocaleString('de-DE'):'–'}</strong></div><div><span>Bäder / WC</span><strong>${x.bathrooms!==''?Number(x.bathrooms):'–'} / ${x.toilets!==''?Number(x.toilets):'–'}</strong></div>
    <div><span>Energieklasse</span><strong>${esc(x.energyClass||'–')}</strong></div>
    <div><span>Stromzähler</span><strong>${x.electricityMeter!==''?Number(x.electricityMeter).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
    <div><span>Wasserzähler</span><strong>${x.waterMeter!==''?Number(x.waterMeter).toLocaleString('de-DE')+' m³':'–'}</strong></div>
    <div><span>Ablesedatum</span><strong>${dateDE(x.meterReadingDate)}</strong></div>
    <div><span>Heizung</span><strong>${esc(x.heatingType||'–')}</strong></div>
-  </div>
+  </div>${x.notes?`<p class="property-notes"><strong>Notiz:</strong> ${esc(x.notes)}</p>`:''}
   <div class="card-actions"><button class="secondary small" onclick="editProperty(${x.id})">Bearbeiten</button><button class="danger small" onclick="deleteProperty(${x.id})">Löschen</button></div>
  </article>`).join(''):'<div class="empty">Noch keine Objekte</div>'
 }
@@ -260,7 +300,7 @@ function renderOwnerPropertyChoices(selected=[]){
 }
 function openOwnerModal(owner=null){const f=$('#ownerForm');f.reset();$('#ownerModalTitle').textContent=owner?'Person bearbeiten':'Person hinzufügen';f.elements.id.value=owner?.id||'';f.elements.name.value=owner?.name||'';f.elements.personType.value=owner?.personType||'Eigentümer';f.elements.ownershipShare.value=owner?.ownershipShare??0;f.elements.paymentShare.value=owner?.paymentShare??0;f.elements.role.value=owner?.role||'';f.elements.active.checked=owner?.active!==false;renderOwnerPropertyChoices(owner?.propertyIds||[]);$('#ownerModal').showModal()}
 function editOwner(id){const x=state.owners.find(x=>x.id===id);if(x)openOwnerModal(x)} function toggleOwner(id){const x=state.owners.find(x=>x.id===id);if(x){x.active=x.active===false;save()}} function deleteOwner(id){const x=state.owners.find(x=>x.id===id);if(x&&confirm(`Person „${x.name}“ wirklich entfernen?`)){state.owners=state.owners.filter(y=>y.id!==id);save()}}
-function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';showPhotoPreview();$('#propertyModal').showModal()}
+function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
 function showPhotoPreview(){const p=$('#propertyPhotoPreview');p.classList.toggle('hidden',!propertyPhotoData);p.innerHTML=propertyPhotoData?`<img src="${propertyPhotoData}" alt="Vorschau">`:''}
 function editProperty(id){const x=state.properties.find(x=>x.id===id);if(x)openPropertyModal(x)}
 function deleteProperty(id){const x=state.properties.find(x=>x.id===id);if(!x||!confirm(`Objekt „${x.name}“ löschen? Zugeordnete Planungen bleiben erhalten und werden dann als unbekannt angezeigt.`))return;state.properties=state.properties.filter(y=>y.id!==id);save()}
@@ -287,7 +327,7 @@ $('#wasteDateSave').addEventListener('click',saveWasteDateSelections);
 $('#transactionForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.transactions.push({id:Date.now(),type:f.get('type'),category:f.get('category'),propertyId:f.get('propertyId'),description:f.get('description'),amount:Number(f.get('amount')),date:f.get('date')});e.target.reset();$('#transactionModal').close();save()});
 $('#costForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),personIds=f.getAll('personIds').map(Number);if(!personIds.length){alert('Bitte mindestens eine aktive Person auswählen.');return}const data={category:f.get('category'),name:f.get('name'),personIds,splitCount:personIds.length,propertyId:f.get('propertyId'),amount:Number(f.get('amount')),interval:f.get('interval'),note:f.get('note')};if(id)Object.assign(state.costPlans.find(x=>x.id===id),data);else state.costPlans.push({id:Date.now(),...data});e.target.reset();$('#costModal').close();save()});
 $('#loanForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.loan={bank:f.get('bank'),original:Number(f.get('original')),remaining:Number(f.get('remaining')),balanceDate:f.get('balanceDate'),interest:Number(f.get('interest')),monthlyPayment:Number(f.get('monthlyPayment')),startDate:f.get('startDate'),fixedUntil:f.get('fixedUntil'),extraPayment:Number(f.get('extraPayment')),autoCalculate:f.get('autoCalculate')==='on'};$('#loanModal').close();save()});
-$('#propertyForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),data={name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),constructionYear:f.get('constructionYear'),usage:f.get('usage'),energyClass:f.get('energyClass'),heatingType:f.get('heatingType'),electricityMeter:f.get('electricityMeter')===''?'':Number(f.get('electricityMeter')),waterMeter:f.get('waterMeter')===''?'':Number(f.get('waterMeter')),meterReadingDate:f.get('meterReadingDate'),photo:propertyPhotoData};if(id)Object.assign(state.properties.find(x=>x.id===id),data);else state.properties.push({id:Date.now(),...data});e.target.reset();propertyPhotoData='';$('#propertyModal').close();save()});
+$('#propertyForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id')),data={name:f.get('name'),address:f.get('address'),area:Number(f.get('area')),plotArea:f.get('plotArea')===''?'':Number(f.get('plotArea')),constructionYear:f.get('constructionYear'),rooms:f.get('rooms')===''?'':Number(f.get('rooms')),bathrooms:f.get('bathrooms')===''?'':Number(f.get('bathrooms')),toilets:f.get('toilets')===''?'':Number(f.get('toilets')),usage:f.get('usage'),energyClass:f.get('energyClass'),heatingType:f.get('heatingType'),electricityMeter:f.get('electricityMeter')===''?'':Number(f.get('electricityMeter')),waterMeter:f.get('waterMeter')===''?'':Number(f.get('waterMeter')),meterReadingDate:f.get('meterReadingDate'),notes:f.get('notes'),photo:propertyPhotoData};if(id)Object.assign(state.properties.find(x=>x.id===id),data);else state.properties.push({id:Date.now(),...data});e.target.reset();propertyPhotoData='';$('#propertyModal').close();save()});
 $('#propertyForm').elements.photo.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>2_500_000){alert('Das Foto ist zu groß. Bitte ein Foto unter etwa 2,5 MB verwenden.');e.target.value='';return}const r=new FileReader();r.onload=()=>{propertyPhotoData=r.result;showPhotoPreview()};r.readAsDataURL(file)});
 $('#ownerForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),id=Number(f.get('id'));if(!id&&state.owners.length>=5){alert('Maximal fünf Personen.');return}const data={name:f.get('name').trim(),personType:f.get('personType'),ownershipShare:Number(f.get('ownershipShare')),paymentShare:Number(f.get('paymentShare')),role:f.get('role').trim(),propertyIds:f.getAll('propertyIds').map(String),active:f.get('active')==='on'};if(id)Object.assign(state.owners.find(x=>x.id===id),data);else state.owners.push({id:Date.now(),...data});state.owners=state.owners.slice(0,5).map((owner,index)=>({...owner,personNumber:index+1}));e.target.reset();$('#ownerModal').close();save()});
 $('#taskForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);state.tasks.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),owner:f.get('owner'),priority:f.get('priority'),status:'Offen'});e.target.reset();$('#taskModal').close();save()});

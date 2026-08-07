@@ -30,7 +30,7 @@
         </div>
       </div>
       <div id="loanDetails" class="detail-grid"></div>
-    </section><section class="panel"><div class="panel-head"><h2>Kosten je Objekt</h2></div><div id="dashboardObjectCosts" class="cost-summary"></div></section><section class="panel"><div class="panel-head"><h2>Monatliche Einzahlungen der Personen</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
+    </section><section class="panel"><div class="panel-head"><h2>Kosten je Objekt</h2><span class="tag">Nur Information</span></div><div id="dashboardObjectCosts" class="cost-summary"></div><p class="helper-text">Anzeige der rechnerischen Kosten je Objekt. Bearbeitung erfolgt im Kostenplan.</p></section><section class="panel"><div class="panel-head"><h2>Monatliche Einzahlungen der Personen</h2></div><div id="ownerIncomeSummary" class="cost-summary"></div></section>
     <section class="panel"><div class="panel-head"><h2>Letzte Buchungen</h2><button class="link-btn" data-go="transactions">Alle</button></div><div id="recentTransactions" class="list"></div></section>
 
     <section class="panel waste-panel">
@@ -40,7 +40,12 @@
       <div class="waste-legend"><span><i style="background:#111111"></i>Restmüll</span><span><i style="background:#8B5E3C"></i>Bio</span><span><i style="background:#2E8B57"></i>Papier</span><span><i style="background:#EAB308"></i>Plastik</span></div>
     </section>
     <section class="panel"><div class="panel-head"><h2>Kostenpositionen</h2><span class="tag">Nur Information</span></div><div class="cost-info-table"><div class="cost-info-head"><span>Kategorie</span><span>Objekt</span><span>Monatlich</span><span>Intervall</span><span>Jahr gesamt</span></div><div id="dashboardCostPositions"></div></div></section>
-    <section class="panel"><div class="panel-head"><h2>Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="list"></div></section>
+    <section class="panel">
+  <div class="panel-head"><h2>Objektübersicht</h2><span class="tag">Nur Information</span></div>
+  <div id="dashboardPropertyOverview" class="dashboard-property-grid"></div>
+</section>
+
+<section class="panel"><div class="panel-head"><h2>Aufgabenübersicht</h2><span class="tag">Nur Information</span></div><div id="upcomingItems" class="list"></div></section>
   </section>
 
   <section class="view" data-view="transactions">
@@ -73,7 +78,7 @@
     <section class="panel"><h2>Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary">Exportieren</button><label class="secondary file-label">Importieren<input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full">Alle lokalen Daten löschen</button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2>Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>10 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>13 Lokal</strong></div></div></section>
 <section class="panel note"><strong>Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -89,7 +94,9 @@
 <fieldset class="dialog-section"><legend>Grunddaten</legend>
 <label>Bezeichnung<input name="name" required /></label>
 <label>Adresse<input name="address" /></label>
-<div class="form-two-columns"><label>Wohnfläche m²<input name="area" type="number" min="0" step="0.1" /></label><label>Baujahr<input name="constructionYear" type="number" min="1000" max="2100" step="1" /></label></div>
+<div class="form-two-columns"><label>Wohnfläche m²<input name="area" type="number" min="0" step="0.1" /></label><label>Grundstücksgröße m²<input name="plotArea" type="number" min="0" step="0.1" /></label></div>
+<div class="form-two-columns"><label>Baujahr<input name="constructionYear" type="number" min="1000" max="2100" step="1" /></label><label>Zimmer<input name="rooms" type="number" min="0" step="0.5" /></label></div>
+<div class="form-two-columns"><label>Badezimmer<input name="bathrooms" type="number" min="0" step="1" /></label><label>WC<input name="toilets" type="number" min="0" step="1" /></label></div>
 <label>Nutzung<select name="usage"><option>Eigennutzung</option><option>Mietfreie Überlassung</option><option>Vermietung</option><option>Leerstand</option></select></label>
 </fieldset>
 <fieldset class="dialog-section"><legend>Energie und Technik</legend>
@@ -99,6 +106,7 @@
 <div class="form-two-columns"><label>Stromzählerstand kWh<input name="electricityMeter" type="number" min="0" step="0.01" /></label><label>Wasserzählerstand m³<input name="waterMeter" type="number" min="0" step="0.001" /></label></div>
 <label>Datum der Ablesung<input name="meterReadingDate" type="date" /></label>
 </fieldset>
+<fieldset class="dialog-section"><legend>Notizen</legend><label>Notiz zum Objekt<textarea name="notes" rows="4" placeholder="z. B. Sanierungsstand, Besonderheiten, wichtige Hinweise"></textarea></label></fieldset>
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
 <dialog id="ownerModal"><form method="dialog" id="ownerForm"><h2 id="ownerModalTitle">Person hinzufügen</h2><input name="id" type="hidden" /><label>Name<input name="name" required /></label><label>Rolle<select name="personType"><option>Eigentümer</option><option>Bewohner</option><option>Verwalter</option><option>Sonstige Person</option></select></label><label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" required /></label><label>Zahlanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" required /></label><label>Aufgabe<input name="role" /></label><fieldset class="object-picker"><legend>Person gehört zu diesen Objekten</legend><div id="ownerPropertyChoices" class="check-grid"></div></fieldset><label class="check-row"><input name="active" type="checkbox" checked /> Person ist aktiv</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>

@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – Objektinformationen",
+  "name": "Private Immobilienverwaltung – Objektübersicht V13",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit Kosten-, Aufgaben- und Gebäudeübersicht",
+  "description": "Lokale Immobilienverwaltung mit robuster Objektübersicht auf dem Dashboard",
   "icons": [
     {
       "src": "icon.svg",
