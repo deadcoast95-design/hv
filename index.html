@@ -54,6 +54,8 @@
   <div id="dashboardPropertyOverview" class="dashboard-property-grid"></div>
 </section>
 
+<section class="panel"><div class="panel-head"><h2>Sanierungsübersicht</h2><span class="tag">Nur Information</span></div><div id="dashboardRenovationOverview" class="dashboard-renovation-overview"></div></section>
+
 <section class="panel">
   <div class="panel-head"><h2 data-i18n="vehicleOverview">Fahrzeugübersicht</h2><span class="tag">Nur Information</span></div>
   <div id="dashboardVehicleOverview" class="dashboard-vehicle-grid"></div>
@@ -97,7 +99,7 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>36 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>37 Lokal</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -198,11 +200,20 @@
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
 <dialog id="renovationModal"><form method="dialog" id="renovationForm">
-<h2>Sanierungskosten hinzufügen</h2>
-<input name="propertyId" type="hidden" />
-<label>Bezeichnung<input name="title" required placeholder="z. B. Fenster, Elektrik, Dach" /></label>
-<div class="form-two-columns"><label>Betrag €<input name="amount" type="number" min="0" step="0.01" required /></label><label>Bezahlt am<input name="date" type="date" /></label></div>
+<h2 id="renovationModalTitle">Sanierungskosten hinzufügen</h2>
+<input name="propertyId" type="hidden" /><input name="id" type="hidden" />
+<label>Bezeichnung<input name="title" required placeholder="z. B. Fenster erneuert" /></label>
+<div class="form-two-columns">
+<label>Kategorie<select name="category" required>
+<option value="Elektrik">⚡ Elektrik</option><option value="Dach">🏠 Dach</option><option value="Fenster">🪟 Fenster</option><option value="Heizung">🔥 Heizung</option><option value="Sanitär">🚿 Sanitär</option><option value="Innenausbau">🎨 Innenausbau</option><option value="Außenanlage">🌳 Außenanlage</option><option value="Sonstiges">📦 Sonstiges</option>
+</select></label>
+<label>Status<select name="status" required><option value="paid">🟢 Bereits bezahlt</option><option value="open">🟠 Noch offen</option></select></label>
+</div>
+<div class="form-two-columns"><label>Betrag €<input name="amount" type="number" min="0" step="0.01" required /></label><label>Monat / Jahr<input name="month" type="month" /></label></div>
+<label>Firma / Ausführender Betrieb<input name="company" placeholder="z. B. Elektro Müller GmbH oder Eigenleistung" /></label>
 <label>Notiz<textarea name="note" rows="3"></textarea></label>
+<label>Fotos / Dokumente<input name="attachments" type="file" accept="image/*,.pdf,application/pdf" multiple /></label>
+<div id="renovationAttachmentInfo" class="renovation-attachment-info">Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.</div>
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
 <dialog id="ownerModal"><form method="dialog" id="ownerForm"><h2 id="ownerModalTitle">Person hinzufügen</h2><input name="id" type="hidden" /><label>Name<input name="name" required /></label><label>Rolle<select name="personType"><option>Eigentümer</option><option>Bewohner</option><option>Verwalter</option><option>Sonstige Person</option></select></label><label>Eigentumsanteil %<input name="ownershipShare" type="number" min="0" max="100" step="0.01" required /></label><label>Zahlanteil %<input name="paymentShare" type="number" min="0" max="100" step="0.01" required /></label><label>Aufgabe<input name="role" /></label><fieldset class="object-picker"><legend>Person gehört zu diesen Objekten</legend><div id="ownerPropertyChoices" class="check-grid"></div></fieldset><label class="check-row"><input name="active" type="checkbox" checked /> Person ist aktiv</label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>

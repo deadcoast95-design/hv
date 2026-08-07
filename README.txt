@@ -1,21 +1,31 @@
-VERSION 36 – FAHRZEUGWARTUNG
+VERSION 37 – SANIERUNGSAKTE
 
-Weitere Wartung bei Fahrzeug hinzufügen/bearbeiten:
+Neu pro Sanierung:
+- Bezeichnung
+- Kategorie/Gewerk
+- Betrag
+- Status: Bereits bezahlt / Noch offen
+- Firma bzw. ausführender Betrieb
+- Monat/Jahr statt Tagesdatum
+- Notiz
+- Fotos und PDF-Dokumente
 
-HU / TÜV:
-- nur Monat + Jahr
+Objektkarte:
+- Bereits bezahlt, Noch offen und Gesamt
+- Status direkt umschaltbar
+- Eintrag bearbeiten/löschen
+- Firma, Monat/Jahr, Gewerk und Anhänge sichtbar
 
-Reifen:
-- Auswahl: Neu / Mäßig / Müssen ersetzt werden
+Übersicht:
+- Sanierungsübersicht über alle Objekte
+- bezahlt/offen/gesamt
+- Summen nach Gewerk
 
-Bremsen:
-- zuletzt gewechselt: Monat + Jahr
-- nächster Wechsel: Monat + Jahr
+Alte Einträge:
+- werden als bezahlt übernommen
+- alte Tagesdaten werden automatisch auf Monat/Jahr reduziert
 
-Batterie:
-- zuletzt gewechselt: Monat + Jahr
-- nächster Wechsel: Monat + Jahr
-
-Die Fahrzeugkarte zeigt sowohl die letzten als auch die nächsten Wechseltermine.
-Auf der Startseite erscheinen die nächsten Wartungen ebenfalls.
-Alte Tagesdaten werden beim Bearbeiten automatisch auf Monat/Jahr reduziert.
+Lokale Dateigrenzen:
+- max. 3 MB je Datei
+- max. 5 neue Dateien je Speichervorgang
+- max. 10 Anhänge je Sanierung

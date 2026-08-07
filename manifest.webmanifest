@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – V36 Fahrzeugwartung",
+  "name": "Private Immobilienverwaltung – V37 Sanierungsakte",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Hausverwaltung mit erweiterten Fahrzeug-Wartungsdaten",
+  "description": "Lokale Hausverwaltung mit Sanierungsstatus, Firmen, Gewerken und Dokumenten",
   "icons": [
     {
       "src": "icon.svg",
