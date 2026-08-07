@@ -76,7 +76,7 @@
     <div id="taskList" class="list card-list"></div><div id="maintenanceList" class="list card-list hidden"></div><div id="reserveList" class="list card-list hidden"></div>
   </section>
 
-  <section class="view" data-view="vehicles"><div class="toolbar"><button class="primary" data-modal="vehicleModal">+ Fahrzeug</button></div><section class="panel compact"><div class="panel-head"><h2>Fahrzeugakte</h2><span class="tag">Werkstattübersicht</span></div><p>Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
+  <section class="view" data-view="vehicles"><div class="toolbar"><button id="addVehicleBtn" class="primary" type="button">+ Fahrzeug</button></div><section class="panel compact"><div class="panel-head"><h2>Fahrzeugakte</h2><span id="vehicleCountTag" class="tag">0 / 6 Fahrzeuge</span></div><p>Ölwechsel, Kilometerstand, HU/TÜV und wichtige Wartungen im Blick behalten.</p></section><div id="vehicleList" class="vehicle-grid"></div></section>
 <section class="view" data-view="settings">
     <section class="panel"><div class="panel-head"><h2>Kreditverwaltung</h2><button class="primary" data-modal="loanModal">Kredit bearbeiten</button></div><p>Die Übersicht zeigt nur die aktuellen Werte. Bankdaten, Stichtag und automatische Fortschreibung werden hier gepflegt.</p></section>
     <section class="panel"><h2>Verwaltung</h2><p>Personen und Objekte verwalten.</p><div class="button-row"><button class="secondary" data-go="owners">👥 Personen</button><button class="secondary" data-go="properties">🏠 Objekte</button></div></section>
@@ -84,7 +84,7 @@
     <section class="panel"><h2>Datensicherung</h2><p>Exportiere alle Daten als JSON-Datei oder importiere eine zuvor gespeicherte Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary">Exportieren</button><label class="secondary file-label">Importieren<input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full">Alle lokalen Daten löschen</button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2>Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>15 Lokal</strong></div></div></section>
+<div class="detail-grid"><div><span>Speicherort</span><strong>Dieses Gerät</strong></div><div><span>Synchronisierung</span><strong>Aus</strong></div><div><span>Offline</span><strong>Verfügbar</strong></div><div><span>App-Version</span><strong>16 Lokal</strong></div></div></section>
 <section class="panel note"><strong>Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>

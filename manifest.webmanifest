@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – Fahrzeugübersicht",
+  "name": "Private Immobilienverwaltung – Max 6 Fahrzeuge",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Lokale Immobilienverwaltung mit Fahrzeugübersicht und symmetrischer Navigation",
+  "description": "Lokale Immobilienverwaltung mit bis zu sechs Fahrzeugen",
   "icons": [
     {
       "src": "icon.svg",
