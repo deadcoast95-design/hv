@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v076l';
+const KEY='hausverwaltung_pwa_v077l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -1392,6 +1392,29 @@ function dashTaskSortV071L(a,b){
  if(pa!==pb)return pa-pb;
  return String(a.due||'9999').localeCompare(String(b.due||'9999'));
 }
+
+function meterHistorySortedV077L(p){
+ return (p?.meterHistory||[]).filter(r=>r?.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+function meterLatestPeriodV077L(p,key){
+ const periods=meterConsumptionsV38(p,key);
+ return periods[periods.length-1]||null;
+}
+function meterPeriodLabelV077L(period){
+ if(!period)return 'Noch keine Verbrauchsperiode';
+ return `${dateDE(period.from)} → ${dateDE(period.to)}`;
+}
+function meterTrendRowsV077L(p,key,unit){
+ const periods=meterConsumptionsV38(p,key).slice(-5);
+ if(!periods.length)return '<div class="dash-meter-empty-v077l">Für eine Verbrauchsauswertung werden mindestens zwei Ablesungen benötigt.</div>';
+ const max=Math.max(1,...periods.map(x=>x.value));
+ return `<div class="dash-meter-trend-v077l">${periods.map(x=>`
+   <div class="dash-meter-trend-row-v077l">
+    <span>${dateDE(x.to)}</span>
+    <i><b style="width:${Math.max(5,x.value/max*100)}%"></b></i>
+    <strong>${x.value.toLocaleString('de-DE')} ${unit}</strong>
+   </div>`).join('')}</div>`;
+}
 function renderDashboardOnlyV071L(){
  if(!document.querySelector('.dashboard-only-v071l'))return;
 
@@ -1458,18 +1481,43 @@ function renderDashboardOnlyV071L(){
   </article>`;
  }).join(''):'<div class="empty">Noch keine Kredite eingetragen</div>';
 
- // Verbrauch – uses meter history, but does not replace the original consumption renderer
+ // Verbrauch – ausführliche Dashboard-Auswertung, Objektseite bleibt unabhängig
  $('#dashConsumptionV071L').innerHTML=props.length?props.map(p=>{
-  const e=meterConsumptionsV38(p,'electricity');
-  const w=meterConsumptionsV38(p,'water');
-  const re=e.slice(-6),rw=w.slice(-6);
-  const le=e[e.length-1],lw=w[w.length-1];
-  const me=Math.max(1,...re.map(x=>x.value)),mw=Math.max(1,...rw.map(x=>x.value));
-  return `<article class="dash-consumption-card-v071l">
-    <div class="dash-card-title-v071l"><strong>${esc(p.name)}</strong><small>${p.meterReadingDate?dateDE(p.meterReadingDate):'–'}</small></div>
-    <div class="dash-consumption-split-v071l">
-      <div><div class="dash-metric-head-v071l"><span>⚡ Strom</span><strong>${le?le.value.toLocaleString('de-DE')+' kWh':'–'}</strong></div>${dashConsumptionBarsV071L(re,me,'electricity')}</div>
-      <div><div class="dash-metric-head-v071l"><span>💧 Wasser</span><strong>${lw?lw.value.toLocaleString('de-DE')+' m³':'–'}</strong></div>${dashConsumptionBarsV071L(rw,mw,'water')}</div>
+  const history=meterHistorySortedV077L(p);
+  const latest=history[history.length-1]||null;
+  const prev=history[history.length-2]||null;
+  const ePeriod=meterLatestPeriodV077L(p,'electricity');
+  const wPeriod=meterLatestPeriodV077L(p,'water');
+  const eCurrent=latest&&latest.electricity!==''&&latest.electricity!=null?Number(latest.electricity):null;
+  const wCurrent=latest&&latest.water!==''&&latest.water!=null?Number(latest.water):null;
+
+  return `<article class="dash-consumption-card-v077l">
+    <div class="dash-consumption-head-v077l">
+      <div><strong>${esc(p.name)}</strong><small>${latest?`Letzte Ablesung ${dateDE(latest.date)}`:'Noch keine Ablesung'}</small></div>
+      <span>${history.length} Ablesung${history.length===1?'':'en'}</span>
+    </div>
+
+    <div class="dash-meter-current-v077l">
+      <div class="electricity"><span>⚡ Aktueller Stromstand</span><strong>${eCurrent!=null?eCurrent.toLocaleString('de-DE')+' kWh':'–'}</strong></div>
+      <div class="water"><span>💧 Aktueller Wasserstand</span><strong>${wCurrent!=null?wCurrent.toLocaleString('de-DE')+' m³':'–'}</strong></div>
+    </div>
+
+    <div class="dash-last-period-v077l">
+      <div>
+       <span>⚡ Letzter Verbrauch</span>
+       <strong>${ePeriod?ePeriod.value.toLocaleString('de-DE')+' kWh':'–'}</strong>
+       <small>${meterPeriodLabelV077L(ePeriod)}</small>
+      </div>
+      <div>
+       <span>💧 Letzter Verbrauch</span>
+       <strong>${wPeriod?wPeriod.value.toLocaleString('de-DE')+' m³':'–'}</strong>
+       <small>${meterPeriodLabelV077L(wPeriod)}</small>
+      </div>
+    </div>
+
+    <div class="dash-meter-charts-v077l">
+      <section><div><strong>⚡ Stromverlauf</strong><small>Verbrauch je Ableseperiode</small></div>${meterTrendRowsV077L(p,'electricity','kWh')}</section>
+      <section><div><strong>💧 Wasserverlauf</strong><small>Verbrauch je Ableseperiode</small></div>${meterTrendRowsV077L(p,'water','m³')}</section>
     </div>
   </article>`;
  }).join(''):'<div class="empty">Noch keine Objekte</div>';
@@ -1994,15 +2042,63 @@ function renderCosts(){
 }
 function intervalLabel(i){return {monthly:'monatlich',fiveyearly:'5× jährlich',quarterly:'vierteljährlich',semiannual:'halbjährlich',yearly:'jährlich'}[i]||i}
 
-function propertyMeterHistoryHtmlV35(x){
- const rows=(x.meterHistory||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- if(!rows.length)return '<div class="property-sub-empty">Noch keine Zählerstände historisiert</div>';
- return `<div class="meter-history-list">${rows.map(r=>`<div class="meter-history-row">
-  <span>${dateDE(r.date)}</span>
-  <strong>⚡ ${r.electricity!==''&&r.electricity!=null?Number(r.electricity).toLocaleString('de-DE')+' kWh':'–'}</strong>
-  <strong>💧 ${r.water!==''&&r.water!=null?Number(r.water).toLocaleString('de-DE')+' m³':'–'}</strong>
- </div>`).join('')}</div>`;
+function latestMeterReadingV077L(x){
+ const rows=(x?.meterHistory||[]).slice().filter(r=>r?.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ return rows[rows.length-1]||null;
 }
+function propertyMeterHistoryHtmlV35(x){
+ const rows=(x.meterHistory||[]).slice().filter(r=>r?.date).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const latest=rows[0]||null;
+ return `<div class="meter-history-v077l">
+  <div class="meter-history-head-v077l">
+   <div>
+    <strong>Aktuelle Zählerstände</strong>
+    <small>${latest?`Letzte Ablesung ${dateDE(latest.date)}`:'Noch keine Ablesung gespeichert'}</small>
+   </div>
+   <button type="button" class="primary small" onclick="openMeterReadingV077L(${x.id})">+ Zählerstand</button>
+  </div>
+  <div class="meter-current-grid-v077l">
+   <div><span>⚡ Strom aktuell</span><strong>${latest&&latest.electricity!==''&&latest.electricity!=null?Number(latest.electricity).toLocaleString('de-DE')+' kWh':'–'}</strong></div>
+   <div><span>💧 Wasser aktuell</span><strong>${latest&&latest.water!==''&&latest.water!=null?Number(latest.water).toLocaleString('de-DE')+' m³':'–'}</strong></div>
+  </div>
+  ${rows.length?`<div class="meter-history-list-v077l">${rows.map((r,index)=>{
+    const older=rows[index+1];
+    const eDiff=older&&r.electricity!==''&&r.electricity!=null&&older.electricity!==''&&older.electricity!=null
+      ?Number(r.electricity)-Number(older.electricity):null;
+    const wDiff=older&&r.water!==''&&r.water!=null&&older.water!==''&&older.water!=null
+      ?Number(r.water)-Number(older.water):null;
+    return `<article class="meter-history-row-v077l">
+      <div class="meter-history-date-v077l"><strong>${dateDE(r.date)}</strong>${index===0?'<span>Aktuell</span>':''}</div>
+      <div><span>⚡ Zählerstand</span><strong>${r.electricity!==''&&r.electricity!=null?Number(r.electricity).toLocaleString('de-DE')+' kWh':'–'}</strong>${eDiff!=null&&eDiff>=0?`<small>+ ${eDiff.toLocaleString('de-DE')} kWh</small>`:''}</div>
+      <div><span>💧 Zählerstand</span><strong>${r.water!==''&&r.water!=null?Number(r.water).toLocaleString('de-DE')+' m³':'–'}</strong>${wDiff!=null&&wDiff>=0?`<small>+ ${wDiff.toLocaleString('de-DE')} m³</small>`:''}</div>
+     </article>`;
+   }).join('')}</div>`:'<div class="property-sub-empty">Noch keine Zählerstände historisiert</div>'}
+ </div>`;
+}
+function openMeterReadingV077L(propertyId){
+ const p=(state.properties||[]).find(x=>Number(x.id)===Number(propertyId));if(!p)return;
+ const f=$('#meterReadingFormV077L');if(!f)return;
+ f.reset();f.elements.propertyId.value=propertyId;
+ f.elements.date.value=new Date().toISOString().slice(0,10);
+ const latest=latestMeterReadingV077L(p);
+ const info=$('#meterReadingPreviousV077L');
+ if(info){
+  info.innerHTML=latest?`<strong>Letzte Ablesung</strong><span>${dateDE(latest.date)} · ⚡ ${latest.electricity!==''&&latest.electricity!=null?Number(latest.electricity).toLocaleString('de-DE')+' kWh':'–'} · 💧 ${latest.water!==''&&latest.water!=null?Number(latest.water).toLocaleString('de-DE')+' m³':'–'}</span>`:'<span>Dies ist die erste Ablesung für dieses Objekt.</span>';
+ }
+ $('#meterReadingModalV077L').showModal();
+}
+function deleteMeterReadingV077L(propertyId,id){
+ const p=(state.properties||[]).find(x=>Number(x.id)===Number(propertyId));if(!p)return;
+ if(!confirm('Diesen Zählerstand wirklich löschen?'))return;
+ p.meterHistory=(p.meterHistory||[]).filter(r=>String(r.id)!==String(id));
+ const latest=latestMeterReadingV077L(p);
+ p.electricityMeter=latest?.electricity??'';
+ p.waterMeter=latest?.water??'';
+ p.meterReadingDate=latest?.date||'';
+ save();
+}
+window.openMeterReadingV077L=openMeterReadingV077L;
+window.deleteMeterReadingV077L=deleteMeterReadingV077L;
 function monthValueV37(value){const raw=String(value||'');const m=raw.match(/^(\d{4})-(\d{2})/);return m?`${m[1]}-${m[2]}`:''}
 function renovationMonthLabelV37(value){const m=monthValueV37(value);if(!m)return 'ohne Monat/Jahr';const [y,mo]=m.split('-');return `${mo}/${y}`}
 function renovationCategoryIconV37(c){return ({Elektrik:'⚡',Dach:'🏠',Fenster:'🪟',Heizung:'🔥',Sanitär:'🚿',Innenausbau:'🎨',Außenanlage:'🌳',Sonstiges:'📦'})[c]||'📦'}
@@ -2888,7 +2984,7 @@ function populateSelects(){
   transactionCategory.innerHTML=categories.map(x=>`<option>${esc(x)}</option>`).join('');
  }
 }
-function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';if(f.elements.estimatedValue)f.elements.estimatedValue.value=x?.estimatedValue??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.electricityMeter.value=x?.electricityMeter??'';f.elements.waterMeter.value=x?.waterMeter??'';f.elements.meterReadingDate.value=x?.meterReadingDate||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
+function openPropertyModal(x=null){const f=$('#propertyForm');f.reset();propertyPhotoData=x?.photo||'';$('#propertyModalTitle').textContent=x?'Objekt bearbeiten':'Objekt hinzufügen';f.elements.id.value=x?.id||'';f.elements.name.value=x?.name||'';f.elements.address.value=x?.address||'';f.elements.area.value=x?.area??'';if(f.elements.estimatedValue)f.elements.estimatedValue.value=x?.estimatedValue??'';f.elements.plotArea.value=x?.plotArea??'';f.elements.constructionYear.value=x?.constructionYear??'';f.elements.rooms.value=x?.rooms??'';f.elements.bathrooms.value=x?.bathrooms??'';f.elements.toilets.value=x?.toilets??'';f.elements.usage.value=x?.usage||'Eigennutzung';f.elements.energyClass.value=x?.energyClass||'';f.elements.heatingType.value=x?.heatingType||'';f.elements.notes.value=x?.notes||'';showPhotoPreview();$('#propertyModal').showModal()}
 function showPhotoPreview(){const p=$('#propertyPhotoPreview');p.classList.toggle('hidden',!propertyPhotoData);p.innerHTML=propertyPhotoData?`<img src="${propertyPhotoData}" alt="Vorschau">`:''}
 function editProperty(id){const x=state.properties.find(x=>x.id===id);if(x)openPropertyModal(x)}
 function deleteProperty(id){const x=state.properties.find(x=>x.id===id);if(!x||!confirm(`Objekt „${x.name}“ löschen? Zugeordnete Planungen bleiben erhalten und werden dann als unbekannt angezeigt.`))return;state.properties=state.properties.filter(y=>y.id!==id);save()}
@@ -3270,21 +3366,44 @@ $('#propertyForm').addEventListener('submit',e=>{
   rooms:f.get('rooms')===''?'':Number(f.get('rooms')),bathrooms:f.get('bathrooms')===''?'':Number(f.get('bathrooms')),
   toilets:f.get('toilets')===''?'':Number(f.get('toilets')),usage:f.get('usage'),
   energyClass:f.get('energyClass'),heatingType:f.get('heatingType'),
-  electricityMeter:f.get('electricityMeter')===''?'':Number(f.get('electricityMeter')),
-  waterMeter:f.get('waterMeter')===''?'':Number(f.get('waterMeter')),
-  meterReadingDate:f.get('meterReadingDate'),notes:f.get('notes'),photo:propertyPhotoData
+  notes:f.get('notes'),photo:propertyPhotoData,
+  meterHistory:Array.isArray(existing?.meterHistory)?existing.meterHistory:[],
+  electricityMeter:existing?.electricityMeter??'',
+  waterMeter:existing?.waterMeter??'',
+  meterReadingDate:existing?.meterReadingDate||'',
+  renovationCosts:Array.isArray(existing?.renovationCosts)?existing.renovationCosts:[]
  };
- const history=Array.isArray(existing?.meterHistory)?[...existing.meterHistory]:[];
- if(data.meterReadingDate&&(data.electricityMeter!==''||data.waterMeter!=='')){
-  const same=history.find(r=>r.date===data.meterReadingDate);
-  if(same){same.electricity=data.electricityMeter;same.water=data.waterMeter}
-  else history.push({id:Date.now()+Math.random(),date:data.meterReadingDate,electricity:data.electricityMeter,water:data.waterMeter});
-  history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- }
- data.meterHistory=history;
- data.renovationCosts=Array.isArray(existing?.renovationCosts)?existing.renovationCosts:[];
  if(id)Object.assign(existing,data);else state.properties.push({id:Date.now(),...data});
  form.reset();propertyPhotoData='';$('#propertyModal').close();save();
+});
+
+$('#meterReadingFormV077L')?.addEventListener('submit',e=>{
+ e.preventDefault();
+ const f=new FormData(e.target),propertyId=Number(f.get('propertyId'));
+ const p=(state.properties||[]).find(x=>Number(x.id)===propertyId);if(!p)return;
+ const date=String(f.get('date')||'');
+ const electricity=f.get('electricity')===''?'':Number(f.get('electricity'));
+ const water=f.get('water')===''?'':Number(f.get('water'));
+ if(!date){alert('Bitte ein Ablesedatum auswählen.');return}
+ if(electricity===''&&water===''){alert('Bitte mindestens einen Zählerstand eingeben.');return}
+
+ const history=Array.isArray(p.meterHistory)?p.meterHistory:[];
+ const same=history.find(r=>r.date===date);
+ if(same){
+  if(!confirm('Für dieses Datum gibt es bereits einen Eintrag. Werte ersetzen?'))return;
+  same.electricity=electricity;same.water=water;same.updatedAt=new Date().toISOString();
+ }else{
+  history.push({id:Date.now()+Math.floor(Math.random()*1000),date,electricity,water,createdAt:new Date().toISOString()});
+ }
+ history.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ p.meterHistory=history;
+
+ const latest=latestMeterReadingV077L(p);
+ p.electricityMeter=latest?.electricity??'';
+ p.waterMeter=latest?.water??'';
+ p.meterReadingDate=latest?.date||'';
+
+ e.target.reset();$('#meterReadingModalV077L').close();save();
 });
 $('#propertyForm').elements.photo.addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>2_500_000){alert('Das Foto ist zu groß. Bitte ein Foto unter etwa 2,5 MB verwenden.');e.target.value='';return}const r=new FileReader();r.onload=()=>{propertyPhotoData=r.result;showPhotoPreview()};r.readAsDataURL(file)});
 $('#taskForm')?.elements.photoFile?.addEventListener('change',async e=>{

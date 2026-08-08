@@ -471,7 +471,7 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere eine Vollsicherung mit App-Daten, Konto und Benutzern oder importiere eine vorhandene Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.76l</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.77l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -792,13 +792,28 @@
 <fieldset class="dialog-section"><legend>Energie und Technik</legend>
 <div class="form-two-columns"><label>Energieeffizienzklasse<select name="energyClass"><option value="">Nicht eingetragen</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></label><label>Heizungsart<input name="heatingType" placeholder="z. B. Wärmepumpe" /></label></div>
 </fieldset>
-<fieldset class="dialog-section"><legend>Zählerstände</legend>
-<div class="form-two-columns"><label>Stromzählerstand kWh<input name="electricityMeter" type="number" min="0" step="0.01" /></label><label>Wasserzählerstand m³<input name="waterMeter" type="number" min="0" step="0.001" /></label></div>
-<label>Datum der Ablesung<input name="meterReadingDate" type="date" /></label>
-</fieldset>
+
 <fieldset class="dialog-section"><legend>Notizen</legend><label>Notiz zum Objekt<textarea name="notes" rows="4" placeholder="z. B. Sanierungsstand, Besonderheiten, wichtige Hinweise"></textarea></label></fieldset>
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
+<dialog id="meterReadingModalV077L">
+ <form method="dialog" id="meterReadingFormV077L">
+  <h2>Zählerstand hinzufügen</h2>
+  <p class="helper-text">Neue Ablesung für das ausgewählte Objekt speichern.</p>
+  <input name="propertyId" type="hidden">
+  <label>Datum der Ablesung<input name="date" type="date" required></label>
+  <div class="form-two-columns">
+   <label>⚡ Stromzählerstand kWh<input name="electricity" type="number" min="0" step="0.01" placeholder="z. B. 19822"></label>
+   <label>💧 Wasserzählerstand m³<input name="water" type="number" min="0" step="0.001" placeholder="z. B. 410"></label>
+  </div>
+  <div id="meterReadingPreviousV077L" class="meter-previous-v077l"></div>
+  <div class="dialog-actions">
+   <button value="cancel" class="secondary">Abbrechen</button>
+   <button value="default" class="primary">Zählerstand speichern</button>
+  </div>
+ </form>
+</dialog>
+
 <dialog id="renovationModal"><form method="dialog" id="renovationForm">
 <h2 id="renovationModalTitle">Sanierungskosten hinzufügen</h2>
 <input name="propertyId" type="hidden" /><input name="id" type="hidden" />

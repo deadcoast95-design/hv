@@ -1760,3 +1760,51 @@ button.tiny{padding:4px 6px!important;min-height:0!important}
  .renovation-calc-preview-v075l{grid-template-columns:1fr}
  .renovation-row-price-v075l{min-width:0}
 }
+
+/* =========================================================
+   0.77l – Zählerstände separat + bessere Verbrauchsanalyse
+   ========================================================= */
+.meter-history-v077l{display:grid;gap:10px;padding-top:8px}
+.meter-history-head-v077l{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.meter-history-head-v077l>div{display:flex;flex-direction:column;gap:2px}
+.meter-history-head-v077l strong{font-size:9px}.meter-history-head-v077l small{font-size:7px;color:#64748b}
+.meter-current-grid-v077l{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meter-current-grid-v077l>div{padding:10px;border:1px solid #dbe5f0;border-radius:11px;background:#f8fafc;display:flex;flex-direction:column;gap:3px}
+.meter-current-grid-v077l span{font-size:7px;color:#64748b}.meter-current-grid-v077l strong{font-size:11px}
+.meter-history-list-v077l{display:grid;gap:7px}
+.meter-history-row-v077l{display:grid;grid-template-columns:110px 1fr 1fr;gap:8px;align-items:center;padding:9px;border:1px solid #e2e8f0;border-radius:11px;background:#fff}
+.meter-history-date-v077l{display:flex;flex-direction:column;gap:3px}.meter-history-date-v077l>span{width:max-content;padding:2px 5px;border-radius:999px;background:#dbeafe;color:#2563eb;font-size:6px;font-weight:900}
+.meter-history-row-v077l>div:not(.meter-history-date-v077l){display:flex;flex-direction:column}.meter-history-row-v077l span,.meter-history-row-v077l small{font-size:6px;color:#64748b}.meter-history-row-v077l strong{font-size:8px}
+.meter-previous-v077l{margin-top:8px;padding:9px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:3px}.meter-previous-v077l strong{font-size:8px}.meter-previous-v077l span{font-size:7px;color:#64748b}
+
+/* Dashboard Verbrauch */
+.dashboard-only-v071l .dash-consumption-card-v077l{border:1px solid #e2e8f0;border-radius:15px;background:#fff;padding:12px;display:grid;gap:10px}
+.dashboard-only-v071l .dash-consumption-head-v077l{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dashboard-only-v071l .dash-consumption-head-v077l>div{display:flex;flex-direction:column;gap:2px}
+.dashboard-only-v071l .dash-consumption-head-v077l strong{font-size:10px}.dashboard-only-v071l .dash-consumption-head-v077l small{font-size:7px;color:#64748b}
+.dashboard-only-v071l .dash-consumption-head-v077l>span{padding:4px 7px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:7px;font-weight:900}
+.dashboard-only-v071l .dash-meter-current-v077l,.dashboard-only-v071l .dash-last-period-v077l{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dashboard-only-v071l .dash-meter-current-v077l>div{padding:9px 10px;border-radius:11px;border:1px solid #e2e8f0;background:#f8fafc;display:flex;flex-direction:column}
+.dashboard-only-v071l .dash-meter-current-v077l span,.dashboard-only-v071l .dash-last-period-v077l span{font-size:6px;color:#64748b}
+.dashboard-only-v071l .dash-meter-current-v077l strong{font-size:10px;margin-top:2px}
+.dashboard-only-v071l .dash-last-period-v077l>div{padding:9px 10px;border-radius:11px;background:#f8fbff;border-left:4px solid #2563eb;display:flex;flex-direction:column}
+.dashboard-only-v071l .dash-last-period-v077l>div:nth-child(2){border-left-color:#06b6d4}
+.dashboard-only-v071l .dash-last-period-v077l strong{font-size:12px;margin:2px 0}.dashboard-only-v071l .dash-last-period-v077l small{font-size:6px;color:#64748b}
+.dashboard-only-v071l .dash-meter-charts-v077l{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dashboard-only-v071l .dash-meter-charts-v077l>section{padding:10px;border-radius:11px;background:#f8fafc;border:1px solid #edf2f7}
+.dashboard-only-v071l .dash-meter-charts-v077l>section>div:first-child{display:flex;flex-direction:column;margin-bottom:8px}.dashboard-only-v071l .dash-meter-charts-v077l>section>div:first-child strong{font-size:8px}.dashboard-only-v071l .dash-meter-charts-v077l>section>div:first-child small{font-size:6px;color:#64748b}
+.dashboard-only-v071l .dash-meter-trend-v077l{display:grid;gap:6px}
+.dashboard-only-v071l .dash-meter-trend-row-v077l{display:grid;grid-template-columns:66px 1fr 78px;gap:6px;align-items:center}
+.dashboard-only-v071l .dash-meter-trend-row-v077l>span{font-size:6px;color:#64748b}.dashboard-only-v071l .dash-meter-trend-row-v077l>i{height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden}.dashboard-only-v071l .dash-meter-trend-row-v077l>i>b{display:block;height:100%;border-radius:999px;background:#2563eb}.dashboard-only-v071l .dash-meter-charts-v077l>section:nth-child(2) .dash-meter-trend-row-v077l>i>b{background:#06b6d4}.dashboard-only-v071l .dash-meter-trend-row-v077l>strong{text-align:right;font-size:7px}
+.dashboard-only-v071l .dash-meter-empty-v077l{min-height:54px;display:grid;place-items:center;text-align:center;font-size:7px;line-height:1.4;color:#94a3b8}
+
+.dark-mode .meter-current-grid-v077l>div,.dark-mode .meter-history-row-v077l,.dark-mode .meter-previous-v077l{background:#1e293b!important;border-color:#334155!important}
+.dark-mode .dashboard-only-v071l .dash-consumption-card-v077l{background:#111827!important;border-color:#334155!important}
+.dark-mode .dashboard-only-v071l .dash-meter-current-v077l>div,.dark-mode .dashboard-only-v071l .dash-last-period-v077l>div,.dark-mode .dashboard-only-v071l .dash-meter-charts-v077l>section{background:#1e293b!important;border-color:#334155!important}
+@media(max-width:700px){
+ .meter-history-row-v077l{grid-template-columns:1fr 1fr}.meter-history-date-v077l{grid-column:1/-1}
+ .dashboard-only-v071l .dash-meter-charts-v077l{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+ .meter-current-grid-v077l,.dashboard-only-v071l .dash-meter-current-v077l,.dashboard-only-v071l .dash-last-period-v077l{grid-template-columns:1fr}
+}

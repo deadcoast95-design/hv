@@ -1,32 +1,49 @@
-APP-VERSION 0.76l – LOGIN / LAUFZEITFEHLER REPARIERT
+APP-VERSION 0.77l – ZÄHLERSTÄNDE UND VERBRAUCHSANALYSE
 
-FEHLER GEFUNDEN
-In Version 0.75l blieb nach dem Umbau der Sanierungskosten noch folgende
-alte JavaScript-Zeile bestehen:
+OBJEKT ERSTELLEN / BEARBEITEN
+Die Felder für:
+- Stromzählerstand
+- Wasserzählerstand
+- Datum der Ablesung
 
-window.toggleRenovationStatusV37 = toggleRenovationStatusV37
+wurden vollständig aus der Objektmaske entfernt.
 
-Die Funktion toggleRenovationStatusV37 existierte aber nicht mehr.
+ZÄHLERSTÄNDE & HISTORIE
+Zählerstände werden jetzt nur noch direkt beim jeweiligen Objekt gepflegt.
 
-Folge:
-Der Browser brach die Ausführung der kompletten app.js an dieser Stelle ab.
-Die Login-Eventlistener stehen weiter unten in der Datei und wurden deshalb
-nie registriert. Beim Klick auf „Anmelden“ passierte folglich gar nichts.
+Im aufgeklappten Bereich gibt es:
+„+ Zählerstand“
 
-BEHOBEN
-- alten ungültigen Funktionsverweis entfernt
-- Login-Fehlerausgabe zusätzlich abgesichert
-- JavaScript-Syntax vollständig geprüft
-- globale window-Funktionsverweise auf fehlende Funktionen geprüft
-- App anschließend in Chromium gestartet
-- Login-Formular technisch getestet
-- Seitenstart und Dashboard nach Login kontrolliert
+Neue Eingabe:
+- Datum der Ablesung
+- Stromzählerstand
+- Wasserzählerstand
 
-Alle Funktionen aus 0.75l bleiben erhalten:
-- Sanierungskosten Geplant / Offen / Bezahlt
-- einklappbare Sanierungskostenliste
-- Aufgaben-Notiz und Bearbeiten
-- Admin-Einzellöschung im Verlauf
-- Dashboard-Fahrzeugkarten
-- getrennte Seitenansichten
-- Kredit-/Sondertilgungslogik
+Mindestens Strom oder Wasser muss ausgefüllt sein.
+
+Beim Speichern:
+- Eintrag landet in der Historie
+- letzter Eintrag wird automatisch zum aktuellen Zählerstand
+- aktuelles Ablesedatum wird automatisch aktualisiert
+- bestehende alte Historie bleibt erhalten
+- gleicher Tag kann nach Rückfrage aktualisiert werden
+
+Die Historie zeigt zusätzlich die Differenz zur vorherigen Ablesung.
+
+ÜBERSICHT → VERBRAUCHSANALYSE
+Die Darstellung wurde deutlich erweitert.
+
+Je Objekt sieht man:
+- Anzahl der Ablesungen
+- Datum der letzten Ablesung
+- aktuellen Stromzählerstand
+- aktuellen Wasserzählerstand
+- Verbrauch der letzten Ableseperiode
+- genauen Zeitraum dieser Periode
+- Stromverlauf der letzten bis zu 5 Ableseperioden
+- Wasserverlauf der letzten bis zu 5 Ableseperioden
+
+Die Diagramme zeigen Verbrauchsdifferenzen zwischen zwei Zählerständen,
+nicht den absoluten Zählerstand.
+
+Alle übrigen App-Bereiche bleiben unverändert.

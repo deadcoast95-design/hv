@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – 0.76l",
+  "name": "Private Immobilienverwaltung – 0.77l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Login-Laufzeitfehler behoben und App vollständig geprüft",
+  "description": "Zählerstände direkt in der Historie erfassen und verbesserte Verbrauchsanalyse",
   "icons": [
     {
       "src": "icon.svg",
