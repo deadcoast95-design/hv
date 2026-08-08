@@ -471,7 +471,7 @@
     <section class="panel"><h2 data-i18n="backup">Datensicherung</h2><p>Exportiere eine Vollsicherung mit App-Daten, Konto und Benutzern oder importiere eine vorhandene Sicherung.</p><div class="button-row"><button id="exportBtn" class="secondary"><span data-i18n="export">Exportieren</span></button><label class="secondary file-label"><span data-i18n="import">Importieren</span><input id="importInput" type="file" accept="application/json" /></label></div><button id="resetBtn" class="danger full"><span data-i18n="deleteData">Alle lokalen Daten löschen</span></button></section>
     <section class="panel local-mode-panel"><div class="panel-head"><h2 data-i18n="localMode">Lokaler App-Modus</h2><span class="tag">Aktiv</span></div>
 <p>Alle Eingaben bleiben ausschließlich auf diesem Gerät und funktionieren auch ohne Internet. Ein Server oder NAS wird noch nicht benötigt.</p>
-<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.73l</strong></div></div></section>
+<div class="detail-grid"><div><span data-i18n="storage">Speicherort</span><strong>Dieses Gerät · IndexedDB</strong></div><div><span data-i18n="sync">Synchronisierung</span><strong>Aus</strong></div><div><span data-i18n="offline">Offline</span><strong>Verfügbar</strong></div><div><span data-i18n="appVersion">App-Version</span><strong>0.75l</strong></div></div></section>
 <section class="panel note"><strong data-i18n="privacy">Datenschutz</strong><p>Diese Version speichert alle Angaben nur in diesem Browser. Exportiere regelmäßig eine Sicherung. NAS-Synchronisierung wird später als optionales Backend angebunden.</p></section>
   </section>
 </main>
@@ -803,16 +803,18 @@
 <h2 id="renovationModalTitle">Sanierungskosten hinzufügen</h2>
 <input name="propertyId" type="hidden" /><input name="id" type="hidden" />
 <label>Bezeichnung<input name="title" required placeholder="z. B. Fenster erneuert" /></label>
-<div class="form-two-columns">
 <label>Kategorie<select name="category" required>
 <option value="Elektrik">⚡ Elektrik</option><option value="Dach">🏠 Dach</option><option value="Fenster">🪟 Fenster</option><option value="Heizung">🔥 Heizung</option><option value="Sanitär">🚿 Sanitär</option><option value="Innenausbau">🎨 Innenausbau</option><option value="Außenanlage">🌳 Außenanlage</option><option value="Sonstiges">📦 Sonstiges</option>
 </select></label>
-<label>Status<select name="status" required><option value="paid">🟢 Bereits bezahlt</option><option value="open">🟠 Noch offen</option></select></label>
-</div>
 <div class="form-two-columns">
-<label>Geplante Kosten €<input name="plannedAmount" type="number" min="0" step="0.01" placeholder="z. B. 10000" /></label>
-<label>Tatsächlicher / aktueller Betrag €<input name="amount" type="number" min="0" step="0.01" required /></label>
+<label>Geplanter Betrag €<input name="plannedAmount" type="number" min="0" step="0.01" required placeholder="z. B. 20000" /></label>
+<label>Fehlender / offener Betrag €<input name="openAmount" type="number" min="0" step="0.01" required placeholder="z. B. 2000" /></label>
 </div>
+<div class="renovation-calc-preview-v075l">
+ <div><span>Bereits bezahlt</span><strong id="renovationPaidPreviewV075L">0,00 €</strong></div>
+ <div><span>Fortschritt</span><strong id="renovationProgressPreviewV075L">0,0 %</strong></div>
+</div>
+<p class="renovation-form-help-v075l">Beispiel: 20.000 € geplant − 2.000 € offen = 18.000 € bezahlt = 90 %.</p>
 <label>Monat / Jahr<input name="month" type="month" /></label>
 <div class="form-two-columns">
 <label>Ausführung<select name="workType"><option value="Fachfirma">Fachfirma</option><option value="Eigenleistung">Eigenleistung</option></select></label>
@@ -833,9 +835,10 @@
 <div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div>
 </form></dialog>
 
-<dialog id="taskModal"><form method="dialog" id="taskForm"><h2>Aufgabe hinzufügen</h2><label>Aufgabe<input name="title" required /></label>
+<dialog id="taskModal"><form method="dialog" id="taskForm"><h2 id="taskModalTitleV074L">Aufgabe hinzufügen</h2><input name="id" type="hidden"><label>Aufgabe<input name="title" required /></label>
 <label>Foto zur Aufgabe<input name="photoFile" type="file" accept="image/*" /></label>
-<div id="taskPhotoPreviewWrap" class="task-photo-preview-wrap hidden"><img id="taskPhotoPreview" alt="Aufgabenfoto Vorschau"><button id="removeTaskPhotoBtn" type="button" class="danger small">Foto entfernen</button></div><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Fällig (Monat / Jahr)<input name="due" type="month" /></label><label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
+<div id="taskPhotoPreviewWrap" class="task-photo-preview-wrap hidden"><img id="taskPhotoPreview" alt="Aufgabenfoto Vorschau"><button id="removeTaskPhotoBtn" type="button" class="danger small">Foto entfernen</button></div><label>Objekt<select name="propertyId" class="property-select"></select></label><label>Fällig (Monat / Jahr)<input name="due" type="month" /></label><label>Priorität<select name="priority"><option>Niedrig</option><option selected>Mittel</option><option>Hoch</option><option>Sofort</option></select></label>
+<label>Notiz<textarea name="note" rows="4" placeholder="Zusätzliche Informationen zur Aufgabe …"></textarea></label><div class="dialog-actions"><button value="cancel" class="secondary">Abbrechen</button><button value="default" class="primary">Speichern</button></div></form></dialog>
 <dialog id="maintenanceModal" class="planning-dialog-v40"><form method="dialog" id="maintenanceForm">
 <div class="dialog-title-row-v40"><div><span class="dialog-icon-v40">🔧</span><div><h2>Wartung hinzufügen</h2><p>Regelmäßige Wartung für ein Objekt anlegen.</p></div></div></div>
 

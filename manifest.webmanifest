@@ -1,11 +1,11 @@
 {
-  "name": "Private Immobilienverwaltung – 0.73l",
+  "name": "Private Immobilienverwaltung – 0.75l",
   "short_name": "Hausverwaltung",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
-  "description": "Dashboard-Fahrzeugübersicht kompakt und symmetrisch gestaltet",
+  "description": "Sanierungskosten mit Geplant-Offen-Bezahlt-Logik und einklappbarer Kostenliste",
   "icons": [
     {
       "src": "icon.svg",

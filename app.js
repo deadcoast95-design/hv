@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v073l';
+const KEY='hausverwaltung_pwa_v075l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -199,6 +199,9 @@ function migrate(data){
  ...r,category:r.category||'Sonstiges',status:r.status||'paid',
  month:r.month||monthValueV37(r.date||''),company:r.company||'',
  plannedAmount:Number(r.plannedAmount ?? r.amount ?? 0)||0,
+   openAmount:r.openAmount!=null
+    ?Math.max(0,Number(r.openAmount)||0)
+    :(String(r.status||'paid')==='open'?Math.max(0,Number(r.amount)||0):0),
    workType:r.workType||'Fachfirma',
    companyRating:r.companyRating||'',
    attachments:Array.isArray(r.attachments)?r.attachments:[]
@@ -2003,12 +2006,32 @@ function propertyMeterHistoryHtmlV35(x){
 function monthValueV37(value){const raw=String(value||'');const m=raw.match(/^(\d{4})-(\d{2})/);return m?`${m[1]}-${m[2]}`:''}
 function renovationMonthLabelV37(value){const m=monthValueV37(value);if(!m)return 'ohne Monat/Jahr';const [y,mo]=m.split('-');return `${mo}/${y}`}
 function renovationCategoryIconV37(c){return ({Elektrik:'⚡',Dach:'🏠',Fenster:'🪟',Heizung:'🔥',Sanitär:'🚿',Innenausbau:'🎨',Außenanlage:'🌳',Sonstiges:'📦'})[c]||'📦'}
-function renovationPaidV37(r){return String(r?.status||'paid')==='paid'}
-function renovationPaidTotalV37(x){return (x.renovationCosts||[]).filter(renovationPaidV37).reduce((s,r)=>s+Number(r.amount||0),0)}
-function renovationOpenTotalV37(x){return (x.renovationCosts||[]).filter(r=>!renovationPaidV37(r)).reduce((s,r)=>s+Number(r.amount||0),0)}
-function renovationPlannedTotalV39(x){return (x.renovationCosts||[]).reduce((s,r)=>s+Number(r.plannedAmount ?? r.amount ?? 0),0)}
-function renovationTotalV35(x){return (x.renovationCosts||[]).reduce((s,r)=>s+Number(r.amount||0),0)}
-function renovationProgressV39(x){const planned=renovationPlannedTotalV39(x),paid=renovationPaidTotalV37(x);return planned>0?Math.min(100,Math.max(0,(paid/planned)*100)):0}
+function renovationPlannedAmountV075L(r){
+ return Math.max(0,Number(r?.plannedAmount ?? r?.amount ?? 0)||0);
+}
+function renovationOpenAmountV075L(r){
+ const planned=renovationPlannedAmountV075L(r);
+ const raw=r?.openAmount!=null
+  ?Math.max(0,Number(r.openAmount)||0)
+  :(String(r?.status||'paid')==='open'?Math.max(0,Number(r?.amount)||0):0);
+ return Math.min(planned,raw);
+}
+function renovationPaidAmountV075L(r){
+ return Math.max(0,renovationPlannedAmountV075L(r)-renovationOpenAmountV075L(r));
+}
+function renovationEntryProgressV075L(r){
+ const planned=renovationPlannedAmountV075L(r);
+ return planned>0?Math.min(100,Math.max(0,renovationPaidAmountV075L(r)/planned*100)):0;
+}
+function renovationPaidV37(r){return renovationOpenAmountV075L(r)<=0}
+function renovationPaidTotalV37(x){return (x.renovationCosts||[]).reduce((s,r)=>s+renovationPaidAmountV075L(r),0)}
+function renovationOpenTotalV37(x){return (x.renovationCosts||[]).reduce((s,r)=>s+renovationOpenAmountV075L(r),0)}
+function renovationPlannedTotalV39(x){return (x.renovationCosts||[]).reduce((s,r)=>s+renovationPlannedAmountV075L(r),0)}
+function renovationTotalV35(x){return renovationPaidTotalV37(x)}
+function renovationProgressV39(x){
+ const planned=renovationPlannedTotalV39(x),paid=renovationPaidTotalV37(x);
+ return planned>0?Math.min(100,Math.max(0,(paid/planned)*100)):0;
+}
 function renovationAttachmentHtmlV37(a){if(!a?.data)return '';const isImage=String(a.type||'').startsWith('image/');return isImage?`<a class="renovation-file renovation-file-image" href="${a.data}" target="_blank"><img src="${a.data}" alt="${esc(a.name||'Foto')}"><span>📷 ${esc(a.name||'Foto')}</span></a>`:`<a class="renovation-file" href="${a.data}" download="${esc(a.name||'Dokument.pdf')}">📄 ${esc(a.name||'Dokument')}</a>`}
 function propertyRenovationHtmlV35(x){
  const rows=(x.renovationCosts||[]).slice().sort((a,b)=>String(b.month||b.date||'').localeCompare(String(a.month||a.date||'')));
@@ -2018,25 +2041,101 @@ function propertyRenovationHtmlV35(x){
    <div class="ren-sum ren-paid"><span>Bereits bezahlt</span><strong>${eur(paid)}</strong></div>
    <div class="ren-sum ren-open"><span>Noch offen</span><strong>${eur(open)}</strong></div>
   </div>
-  <div class="renovation-progress-v39"><div><span>Sanierungsfortschritt</span><strong>${progress.toFixed(1).replace('.',',')} %</strong></div><i><b style="width:${progress}%"></b></i><small>${eur(paid)} von ${eur(planned)} bezahlt</small></div>
-  <div class="renovation-list renovation-timeline-v39">${rows.length?rows.map(r=>`<article class="renovation-row-v37 ${renovationPaidV37(r)?'is-paid':'is-open'}">
-    <div class="renovation-timeline-dot"></div>
-    <div class="renovation-row-main">
-      <div class="renovation-row-title"><span class="ren-category">${renovationCategoryIconV37(r.category)} ${esc(r.category||'Sonstiges')}</span><strong>${esc(r.title||'Sanierung')}</strong></div>
-      <div class="renovation-row-meta"><span>📅 ${renovationMonthLabelV37(r.month||r.date)}</span><span>👷 ${esc(r.workType||'Fachfirma')}</span>${r.company?`<span>🏢 ${esc(r.company)}</span>`:''}${r.companyRating?`<span>⭐ ${'★'.repeat(Number(r.companyRating))}</span>`:''}${r.note?`<span>📝 ${esc(r.note)}</span>`:''}</div>
-      ${(r.attachments||[]).length?`<div class="renovation-files">${r.attachments.map(renovationAttachmentHtmlV37).join('')}</div>`:''}
-    </div>
-    <div class="renovation-row-price"><strong>${eur(r.amount)}</strong><small>geplant ${eur(r.plannedAmount ?? r.amount ?? 0)}</small><span class="ren-status ${renovationPaidV37(r)?'paid':'open'}">${renovationPaidV37(r)?'● Bezahlt':'● Offen'}</span></div>
-    <div class="renovation-row-actions"><button class="secondary tiny" onclick="editRenovationV37(${x.id},${r.id})">Bearbeiten</button><button class="${renovationPaidV37(r)?'secondary':'success'} tiny" onclick="toggleRenovationStatusV37(${x.id},${r.id})">${renovationPaidV37(r)?'Auf offen setzen':'Als bezahlt markieren'}</button><button class="danger tiny" onclick="deleteRenovationV35(${x.id},${r.id})">Löschen</button></div>
-  </article>`).join(''):'<div class="property-sub-empty">Noch keine Sanierungskosten eingetragen</div>'}</div>`;
+  <div class="renovation-progress-v39">
+   <div><span>Sanierungsfortschritt</span><strong>${progress.toFixed(1).replace('.',',')} %</strong></div>
+   <i><b style="width:${progress}%"></b></i>
+   <small>${eur(paid)} von ${eur(planned)} bezahlt · ${eur(open)} offen</small>
+  </div>
+
+  <details class="renovation-cost-list-v075l">
+   <summary>
+    <span><strong>Kostenliste</strong><small>${rows.length} Eintrag${rows.length===1?'':'e'} · sortiert nach Monat/Jahr</small></span>
+    <b class="renovation-list-arrow-v075l">⌄</b>
+   </summary>
+   <div class="renovation-list renovation-timeline-v39">
+    ${rows.length?rows.map(r=>{
+      const rp=renovationPlannedAmountV075L(r),ro=renovationOpenAmountV075L(r),rd=renovationPaidAmountV075L(r),pct=renovationEntryProgressV075L(r);
+      return `<article class="renovation-row-v37 ${ro<=0?'is-paid':'is-open'}">
+       <div class="renovation-timeline-dot"></div>
+       <div class="renovation-row-main">
+        <div class="renovation-row-title"><span class="ren-category">${renovationCategoryIconV37(r.category)} ${esc(r.category||'Sonstiges')}</span><strong>${esc(r.title||'Sanierung')}</strong></div>
+        <div class="renovation-row-meta">
+         <span>📅 ${renovationMonthLabelV37(r.month||r.date)}</span>
+         <span>👷 ${esc(r.workType||'Fachfirma')}</span>
+         ${r.company?`<span>🏢 ${esc(r.company)}</span>`:''}
+         ${r.companyRating?`<span>⭐ ${'★'.repeat(Number(r.companyRating))}</span>`:''}
+         ${r.note?`<span>📝 ${esc(r.note)}</span>`:''}
+        </div>
+        <div class="renovation-entry-progress-v075l">
+         <i><b style="width:${pct}%"></b></i><span>${pct.toFixed(1).replace('.',',')} %</span>
+        </div>
+        ${(r.attachments||[]).length?`<div class="renovation-files">${r.attachments.map(renovationAttachmentHtmlV37).join('')}</div>`:''}
+       </div>
+       <div class="renovation-row-price renovation-row-price-v075l">
+        <div><span>Geplant</span><strong>${eur(rp)}</strong></div>
+        <div class="paid"><span>Bezahlt</span><strong>${eur(rd)}</strong></div>
+        <div class="open"><span>Offen</span><strong>${eur(ro)}</strong></div>
+       </div>
+       <div class="renovation-row-actions">
+        <button class="secondary tiny" onclick="editRenovationV37(${x.id},${r.id})">Bearbeiten</button>
+        ${ro>0?`<button class="success tiny" onclick="markRenovationPaidV075L(${x.id},${r.id})">Komplett bezahlt</button>`:''}
+        <button class="danger tiny" onclick="deleteRenovationV35(${x.id},${r.id})">Löschen</button>
+       </div>
+      </article>`;
+    }).join(''):'<div class="property-sub-empty">Noch keine Sanierungskosten eingetragen</div>'}
+   </div>
+  </details>`;
 }
-function openRenovationModalV35(propertyId){const f=$('#renovationForm');f.reset();f.dataset.mode='new';f.elements.propertyId.value=propertyId;f.elements.id.value='';f.elements.status.value='paid';f.elements.category.value='Sonstiges';if(f.elements.workType)f.elements.workType.value='Fachfirma';if(f.elements.companyRating)f.elements.companyRating.value='';f.elements.month.value=new Date().toISOString().slice(0,7);$('#renovationModalTitle').textContent='Sanierungskosten hinzufügen';$('#renovationAttachmentInfo').textContent='Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.';$('#renovationModal').showModal()}
-function editRenovationV37(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;const f=$('#renovationForm');f.reset();f.dataset.mode='edit';f.elements.propertyId.value=propertyId;f.elements.id.value=id;f.elements.title.value=r.title||'';f.elements.category.value=r.category||'Sonstiges';f.elements.status.value=renovationPaidV37(r)?'paid':'open';if(f.elements.plannedAmount)f.elements.plannedAmount.value=Number(r.plannedAmount ?? r.amount ?? 0);
- f.elements.amount.value=Number(r.amount||0);
+function updateRenovationCalcPreviewV075L(){
+ const f=$('#renovationForm');if(!f)return;
+ const planned=Math.max(0,Number(f.elements.plannedAmount?.value)||0);
+ let open=Math.max(0,Number(f.elements.openAmount?.value)||0);
+ if(open>planned){
+  open=planned;
+  if(document.activeElement!==f.elements.openAmount)f.elements.openAmount.value=String(planned);
+ }
+ const paid=Math.max(0,planned-open);
+ const pct=planned>0?paid/planned*100:0;
+ if($('#renovationPaidPreviewV075L'))$('#renovationPaidPreviewV075L').textContent=eur(paid);
+ if($('#renovationProgressPreviewV075L'))$('#renovationProgressPreviewV075L').textContent=pct.toFixed(1).replace('.',',')+' %';
+}
+function openRenovationModalV35(propertyId){
+ const f=$('#renovationForm');f.reset();f.dataset.mode='new';
+ f.elements.propertyId.value=propertyId;f.elements.id.value='';
+ f.elements.category.value='Sonstiges';
+ if(f.elements.workType)f.elements.workType.value='Fachfirma';
+ if(f.elements.companyRating)f.elements.companyRating.value='';
+ f.elements.plannedAmount.value='';
+ f.elements.openAmount.value='';
+ f.elements.month.value=new Date().toISOString().slice(0,7);
+ $('#renovationModalTitle').textContent='Sanierungskosten hinzufügen';
+ $('#renovationAttachmentInfo').textContent='Optional: Fotos oder PDF-Rechnungen/Angebote hinzufügen.';
+ updateRenovationCalcPreviewV075L();
+ $('#renovationModal').showModal();
+}
+function editRenovationV37(propertyId,id){
+ const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;
+ const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;
+ const f=$('#renovationForm');f.reset();f.dataset.mode='edit';
+ f.elements.propertyId.value=propertyId;f.elements.id.value=id;
+ f.elements.title.value=r.title||'';f.elements.category.value=r.category||'Sonstiges';
+ f.elements.plannedAmount.value=renovationPlannedAmountV075L(r);
+ f.elements.openAmount.value=renovationOpenAmountV075L(r);
  f.elements.month.value=monthValueV37(r.month||r.date);
  if(f.elements.workType)f.elements.workType.value=r.workType||'Fachfirma';
- if(f.elements.companyRating)f.elements.companyRating.value=r.companyRating||'';f.elements.company.value=r.company||'';f.elements.note.value=r.note||'';$('#renovationModalTitle').textContent='Sanierungskosten bearbeiten';$('#renovationAttachmentInfo').textContent=(r.attachments||[]).length?`${r.attachments.length} Datei(en) vorhanden. Neue Dateien werden zusätzlich angehängt.`:'Noch keine Dateien vorhanden.';$('#renovationModal').showModal()}
-function toggleRenovationStatusV37(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;r.status=renovationPaidV37(r)?'open':'paid';r.updatedAt=new Date().toISOString();save()}
+ if(f.elements.companyRating)f.elements.companyRating.value=r.companyRating||'';
+ f.elements.company.value=r.company||'';f.elements.note.value=r.note||'';
+ $('#renovationModalTitle').textContent='Sanierungskosten bearbeiten';
+ $('#renovationAttachmentInfo').textContent=(r.attachments||[]).length?`${r.attachments.length} Datei(en) vorhanden. Neue Dateien werden zusätzlich angehängt.`:'Noch keine Dateien vorhanden.';
+ updateRenovationCalcPreviewV075L();
+ $('#renovationModal').showModal();
+}
+function markRenovationPaidV075L(propertyId,id){
+ const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;
+ const r=(p.renovationCosts||[]).find(x=>Number(x.id)===Number(id));if(!r)return;
+ r.openAmount=0;r.status='paid';r.amount=renovationPlannedAmountV075L(r);r.updatedAt=new Date().toISOString();save();
+}
+window.markRenovationPaidV075L=markRenovationPaidV075L;
 function deleteRenovationV35(propertyId,id){const p=state.properties.find(x=>Number(x.id)===Number(propertyId));if(!p)return;if(!confirm('Diesen Sanierungskosten-Eintrag wirklich löschen?'))return;p.renovationCosts=(p.renovationCosts||[]).filter(r=>Number(r.id)!==Number(id));save()}
 async function fileToDataUrlV37(file){return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(reader.error||new Error('Datei konnte nicht gelesen werden'));reader.readAsDataURL(file)})}
 async function renovationFilesV37(fileList){const files=[...(fileList||[])].slice(0,5),result=[];for(const file of files){if(file.size>3000000)throw new Error(`${file.name} ist größer als 3 MB.`);const data=String(file.type||'').startsWith('image/')?await imageFileToDataUrlV31(file,1400,1000,.80):await fileToDataUrlV37(file);result.push({name:file.name,type:file.type||'application/octet-stream',data,size:file.size})}return result}
@@ -2045,9 +2144,9 @@ function renderDashboardRenovationsV37(){
  const properties=state.properties||[];
  const all=properties.flatMap(p=>(p.renovationCosts||[]).map(r=>({...r,propertyName:p.name})));
  if(!all.length){box.innerHTML='<div class="empty">Noch keine Sanierungskosten eingetragen</div>';return}
- const planned=all.reduce((s,r)=>s+Number(r.plannedAmount ?? r.amount ?? 0),0);
- const paid=all.filter(renovationPaidV37).reduce((s,r)=>s+Number(r.amount||0),0);
- const open=all.filter(r=>!renovationPaidV37(r)).reduce((s,r)=>s+Number(r.amount||0),0);
+ const planned=all.reduce((s,r)=>s+renovationPlannedAmountV075L(r),0);
+ const paid=all.reduce((s,r)=>s+renovationPaidAmountV075L(r),0);
+ const open=all.reduce((s,r)=>s+renovationOpenAmountV075L(r),0);
  const progress=planned>0?Math.min(100,(paid/planned)*100):0;
  const perObject=properties.map(p=>({name:p.name,planned:renovationPlannedTotalV39(p),paid:renovationPaidTotalV37(p),open:renovationOpenTotalV37(p),progress:renovationProgressV39(p)})).filter(x=>x.planned||x.paid||x.open);
  box.innerHTML=`<div class="dashboard-ren-totals"><div><span>Geplant</span><strong>${eur(planned)}</strong></div><div><span>Bereits investiert</span><strong>${eur(paid)}</strong></div><div><span>Noch offen</span><strong>${eur(open)}</strong></div></div>
@@ -2318,6 +2417,39 @@ function planningGroupHtmlV043L(items,type){
  return parts.join('');
 }
 
+
+function openTaskModalV074L(task=null){
+ const f=$('#taskForm');if(!f)return;
+ f.reset();
+ f.elements.id.value=task?.id||'';
+ f.elements.title.value=task?.title||'';
+ f.elements.propertyId.value=task?.propertyId??'all';
+ f.elements.due.value=task?.due||'';
+ f.elements.priority.value=task?.priority||'Mittel';
+ f.elements.note.value=task?.note||'';
+ f.dataset.currentPhoto=task?.photo||'';
+ if(f.elements.photoFile)f.elements.photoFile.value='';
+ updateTaskPhotoPreviewV35(task?.photo||'');
+ const title=$('#taskModalTitleV074L');
+ if(title)title.textContent=task?'Aufgabe bearbeiten':'Aufgabe hinzufügen';
+ $('#taskModal').showModal();
+}
+function editTaskV074L(id){
+ const task=(state.tasks||[]).find(x=>Number(x.id)===Number(id));
+ if(task)openTaskModalV074L(task);
+}
+function deletePlanningHistoryV074L(id){
+ if(typeof currentRoleV27==='function' && currentRoleV27()!=='admin'){
+  alert('Nur der Administrator darf Verlaufseinträge löschen.');
+  return;
+ }
+ if(!confirm('Diesen Eintrag wirklich aus dem Verlauf löschen?'))return;
+ state.planningHistory=(state.planningHistory||[]).filter(x=>Number(x.id)!==Number(id));
+ save();
+}
+window.editTaskV074L=editTaskV074L;
+window.deletePlanningHistoryV074L=deletePlanningHistoryV074L;
+
 function renderPlanningHistoryV044L(){
  const box=$('#planningHistoryList');if(!box)return;
  const rows=[...(state.planningHistory||[])].sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||'')));
@@ -2343,6 +2475,9 @@ function renderPlanningHistoryV044L(){
      ${r.cost?`<span>💶 ${eur(r.cost)}</span>`:''}
     </div>
     ${r.note?`<div class="history-note-v044l">${esc(r.note)}</div>`:''}
+    ${typeof currentRoleV27==='function'&&currentRoleV27()==='admin'
+      ?`<div class="history-admin-actions-v074l"><button type="button" class="danger small" onclick="deletePlanningHistoryV074L(${r.id})">Eintrag löschen</button></div>`
+      :''}
    </div>
   </article>`;
  }).join('');
@@ -2369,7 +2504,7 @@ function planningCard(x,type){
  const visual=isTask&&x.photo
   ?`<img class="planning-card-photo-v40" src="${x.photo}" alt="${esc(x.title)}">`
   :`<div class="planning-card-icon-v40 ${isTask?'task':'maintenance'}">${isTask?'☑':maintenanceIconV40(x.title)}</div>`;
- const note=!isTask&&x.note?`<span class="planning-note-v40">${esc(x.note)}</span>`:'';
+ const note=x.note?`<span class="planning-note-v40 planning-task-note-v074l">📝 ${esc(x.note)}</span>`:'';
  return `<article class="planning-card-v40 ${done?'is-done':planned?'is-planned':''}">
   <div class="planning-card-check-v40">${done?'✓':planned?'◷':'○'}</div>
   ${visual}
@@ -2394,6 +2529,7 @@ function planningCard(x,type){
  :planned
   ?`<span class="planning-planned-badge-v042l">Geplant bis ${esc(maintenanceMonthLabelV040L(x.due))}</span>`
   :`<button class="primary small" onclick="completeItem('${type}',${x.id})">Erledigen</button>`}
+     ${isTask&&!done?`<button class="secondary small" onclick="editTaskV074L(${x.id})">Bearbeiten</button>`:''}
      <button class="danger small" onclick="deletePlanning('${type}',${x.id})">Löschen</button>
     </div>
    </div>
@@ -2890,7 +3026,8 @@ document.addEventListener('click',e=>{
 
 $('#planningAddBtn').addEventListener('click',()=>{
  if(activePlanningTab==='history')return;
- const modal=document.getElementById(activePlanningTab==='tasks'?'taskModal':'maintenanceModal');
+ if(activePlanningTab==='tasks'){openTaskModalV074L(null);return}
+ const modal=document.getElementById('maintenanceModal');
  if(modal)modal.showModal();
 });
 $('#wastePrev').addEventListener('click',()=>changeWasteMonth(-1));
@@ -3082,29 +3219,45 @@ $('#vehicleServiceForm').addEventListener('submit',async e=>{
 
 window.editRenovationV37=editRenovationV37;
 window.toggleRenovationStatusV37=toggleRenovationStatusV37;
+$('#renovationForm [name="plannedAmount"]')?.addEventListener('input',updateRenovationCalcPreviewV075L);
+$('#renovationForm [name="openAmount"]')?.addEventListener('input',updateRenovationCalcPreviewV075L);
 $('#renovationForm')?.addEventListener('submit',async e=>{
  e.preventDefault();
  const form=e.target,f=new FormData(form),propertyId=Number(f.get('propertyId')),id=Number(f.get('id'));
  const p=state.properties.find(x=>Number(x.id)===propertyId);if(!p)return;
  p.renovationCosts=Array.isArray(p.renovationCosts)?p.renovationCosts:[];
  const existing=id?p.renovationCosts.find(x=>Number(x.id)===id):null;
+
+ const plannedAmount=Math.max(0,Number(f.get('plannedAmount'))||0);
+ const openAmount=Math.max(0,Number(f.get('openAmount'))||0);
+ if(plannedAmount<=0){alert('Bitte einen geplanten Betrag größer 0 € eintragen.');return}
+ if(openAmount>plannedAmount){alert('Der offene Betrag kann nicht höher als der geplante Betrag sein.');return}
+
  let attachments=Array.isArray(existing?.attachments)?[...existing.attachments]:[];
- try{const added=await renovationFilesV37(f.getAll('attachments').filter(x=>x&&x.size));attachments=[...attachments,...added].slice(0,10)}catch(err){alert(err.message||'Eine Datei konnte nicht gespeichert werden.');return}
+ try{
+  const added=await renovationFilesV37(f.getAll('attachments').filter(x=>x&&x.size));
+  attachments=[...attachments,...added].slice(0,10)
+ }catch(err){alert(err.message||'Eine Datei konnte nicht gespeichert werden.');return}
+
+ const paidAmount=Math.max(0,plannedAmount-openAmount);
  const data={
- title:String(f.get('title')||'').trim(),
- category:String(f.get('category')||'Sonstiges'),
- plannedAmount:Number(f.get('plannedAmount'))||Number(f.get('amount'))||0,
- amount:Number(f.get('amount'))||0,
- status:String(f.get('status')||'paid'),
- month:f.get('month')||'',
- workType:String(f.get('workType')||'Fachfirma'),
- company:String(f.get('company')||'').trim(),
- companyRating:String(f.get('companyRating')||''),
- note:String(f.get('note')||'').trim(),
- attachments,
- updatedAt:new Date().toISOString()
-};
- if(existing)Object.assign(existing,data);else p.renovationCosts.push({id:Date.now(),createdAt:new Date().toISOString(),...data});
+  title:String(f.get('title')||'').trim(),
+  category:String(f.get('category')||'Sonstiges'),
+  plannedAmount,
+  openAmount,
+  // Legacy fields bleiben für ältere Sicherungen/Ansichten kompatibel:
+  amount:paidAmount,
+  status:openAmount<=0?'paid':'open',
+  month:f.get('month')||'',
+  workType:String(f.get('workType')||'Fachfirma'),
+  company:String(f.get('company')||'').trim(),
+  companyRating:String(f.get('companyRating')||''),
+  note:String(f.get('note')||'').trim(),
+  attachments,
+  updatedAt:new Date().toISOString()
+ };
+ if(existing)Object.assign(existing,data);
+ else p.renovationCosts.push({id:Date.now(),createdAt:new Date().toISOString(),...data});
  form.reset();$('#renovationModal').close();save();
 });
 $('#propertyForm').addEventListener('submit',e=>{
@@ -3140,21 +3293,43 @@ $('#taskForm')?.elements.photoFile?.addEventListener('change',async e=>{
  try{updateTaskPhotoPreviewV35(await imageFileToDataUrlV31(file,850,650,.76))}catch{}
 });
 $('#removeTaskPhotoBtn')?.addEventListener('click',()=>{
- const f=$('#taskForm');if(f?.elements.photoFile)f.elements.photoFile.value='';
+ const f=$('#taskForm');
+ if(f?.elements.photoFile)f.elements.photoFile.value='';
+ if(f)f.dataset.currentPhoto='';
  updateTaskPhotoPreviewV35('');
 });
 
 $('#taskForm').addEventListener('submit',async e=>{
  e.preventDefault();
- const form=e.target,f=new FormData(form);
- let photo='';
+ const form=e.target,f=new FormData(form),id=Number(f.get('id'))||0;
+ let photo=form.dataset.currentPhoto||'';
  const file=f.get('photoFile');
  if(file&&file.size){
   try{photo=await imageFileToDataUrlV31(file,1100,800,.80)}
   catch{alert('Das Aufgabenfoto konnte nicht verarbeitet werden.');return}
  }
- state.tasks.push({id:Date.now(),title:f.get('title'),propertyId:f.get('propertyId'),due:f.get('due'),priority:f.get('priority'),status:'Offen',completedAt:'',completedByUserId:'',completedByName:'',photo});
- form.reset();updateTaskPhotoPreviewV35('');$('#taskModal').close();save();
+ const data={
+  title:String(f.get('title')||'').trim(),
+  propertyId:f.get('propertyId'),
+  due:f.get('due'),
+  priority:f.get('priority'),
+  note:String(f.get('note')||'').trim(),
+  photo
+ };
+ if(id){
+  const task=(state.tasks||[]).find(x=>Number(x.id)===id);
+  if(task)Object.assign(task,data);
+ }else{
+  state.tasks.push({
+   id:Date.now(),...data,status:'Offen',completedAt:'',
+   completedByUserId:'',completedByName:''
+  });
+ }
+ form.reset();
+ form.dataset.currentPhoto='';
+ updateTaskPhotoPreviewV35('');
+ $('#taskModal').close();
+ save();
 });
 $('#maintenanceTypeSelect')?.addEventListener('change',e=>{
  const custom=e.target.value==='__custom__';

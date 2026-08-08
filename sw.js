@@ -1,4 +1,4 @@
-const CACHE='hausverwaltung-v073l';
+const CACHE='hausverwaltung-v075l';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icon.svg'
   './languages.json',
   './lang/de.json',

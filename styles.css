@@ -1604,3 +1604,159 @@ button.tiny{padding:4px 6px!important;min-height:0!important}
   height:170px;
  }
 }
+
+/* 0.74l – Aufgaben-Notizen + Verlauf Admin-Löschen */
+#taskForm textarea[name="note"]{
+ width:100%;
+ min-height:82px;
+ resize:vertical;
+}
+.planning-task-note-v074l{
+ display:block!important;
+ margin-top:6px;
+ padding:7px 9px;
+ border:1px solid #dbeafe;
+ border-radius:9px;
+ background:#f8fbff;
+ line-height:1.4;
+ white-space:pre-wrap;
+}
+.history-admin-actions-v074l{
+ margin-top:8px;
+ padding-top:7px;
+ border-top:1px solid #e2e8f0;
+ display:flex;
+ justify-content:flex-end;
+}
+.dark-mode .planning-task-note-v074l{
+ background:#172033!important;
+ border-color:#334155!important;
+}
+.dark-mode .history-admin-actions-v074l{
+ border-color:#334155!important;
+}
+
+/* =========================================================
+   0.75l – Sanierungskosten: Geplant / Offen / Bezahlt
+   ========================================================= */
+.renovation-calc-preview-v075l{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px;
+ margin:9px 0 4px;
+}
+.renovation-calc-preview-v075l>div{
+ padding:9px 10px;
+ border:1px solid #dbeafe;
+ border-radius:10px;
+ background:#f8fbff;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+.renovation-calc-preview-v075l span{font-size:7px;color:#64748b}
+.renovation-calc-preview-v075l strong{font-size:10px}
+.renovation-form-help-v075l{
+ margin:4px 0 10px;
+ font-size:7px;
+ line-height:1.45;
+ color:#64748b;
+}
+
+.renovation-cost-list-v075l{
+ margin-top:10px;
+ border:1px solid #e2e8f0;
+ border-radius:12px;
+ overflow:hidden;
+ background:#fff;
+}
+.renovation-cost-list-v075l>summary{
+ list-style:none;
+ cursor:pointer;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:10px;
+ padding:11px 12px;
+ background:#f8fafc;
+ user-select:none;
+}
+.renovation-cost-list-v075l>summary::-webkit-details-marker{display:none}
+.renovation-cost-list-v075l>summary>span{
+ display:flex;
+ flex-direction:column;
+ gap:2px;
+}
+.renovation-cost-list-v075l>summary strong{font-size:9px}
+.renovation-cost-list-v075l>summary small{font-size:7px;color:#64748b}
+.renovation-list-arrow-v075l{
+ width:27px;
+ height:27px;
+ border-radius:8px;
+ background:#eaf2ff;
+ color:#2563eb;
+ display:grid;
+ place-items:center;
+ font-size:15px;
+ transition:transform .18s ease;
+}
+.renovation-cost-list-v075l[open] .renovation-list-arrow-v075l{transform:rotate(180deg)}
+.renovation-cost-list-v075l .renovation-list{padding:9px}
+
+.renovation-row-price-v075l{
+ display:grid!important;
+ grid-template-columns:1fr;
+ gap:4px!important;
+ min-width:125px;
+}
+.renovation-row-price-v075l>div{
+ display:flex;
+ justify-content:space-between;
+ gap:9px;
+ align-items:center;
+ padding:5px 7px;
+ border-radius:7px;
+ background:#f8fafc;
+}
+.renovation-row-price-v075l span{font-size:6px;color:#64748b}
+.renovation-row-price-v075l strong{font-size:8px}
+.renovation-row-price-v075l .paid strong{color:#15803d}
+.renovation-row-price-v075l .open strong{color:#d97706}
+
+.renovation-entry-progress-v075l{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ margin-top:7px;
+ max-width:280px;
+}
+.renovation-entry-progress-v075l>i{
+ flex:1;
+ height:5px;
+ border-radius:999px;
+ overflow:hidden;
+ background:#e2e8f0;
+}
+.renovation-entry-progress-v075l>i>b{
+ display:block;
+ height:100%;
+ border-radius:999px;
+ background:linear-gradient(90deg,#2563eb,#22c55e);
+}
+.renovation-entry-progress-v075l>span{
+ font-size:7px;
+ font-weight:800;
+ color:#475569;
+}
+
+.dark-mode .renovation-calc-preview-v075l>div,
+.dark-mode .renovation-cost-list-v075l,
+.dark-mode .renovation-cost-list-v075l>summary,
+.dark-mode .renovation-row-price-v075l>div{
+ background:#1e293b!important;
+ border-color:#334155!important;
+}
+@media(max-width:650px){
+ .renovation-calc-preview-v075l{grid-template-columns:1fr}
+ .renovation-row-price-v075l{min-width:0}
+}
