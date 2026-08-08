@@ -1,4 +1,4 @@
-const KEY='hausverwaltung_pwa_v075l';
+const KEY='hausverwaltung_pwa_v076l';
 const OLD_KEYS=['hausverwaltung_pwa_v29','hausverwaltung_pwa_v28','hausverwaltung_pwa_v27','hausverwaltung_pwa_v26','hausverwaltung_pwa_v25','hausverwaltung_pwa_v24','hausverwaltung_pwa_v23','hausverwaltung_pwa_v22','hausverwaltung_pwa_v21','hausverwaltung_pwa_v20','hausverwaltung_pwa_v19','hausverwaltung_pwa_v18','hausverwaltung_pwa_v17','hausverwaltung_pwa_v16','hausverwaltung_pwa_v15','hausverwaltung_pwa_v14','hausverwaltung_pwa_v13','hausverwaltung_pwa_v12','hausverwaltung_pwa_v11','hausverwaltung_pwa_v10','hausverwaltung_pwa_v9','hausverwaltung_pwa_v8','hausverwaltung_pwa_v7','hausverwaltung_pwa_v6','hausverwaltung_pwa_v5','hausverwaltung_pwa_v4','hausverwaltung_pwa_v3','hausverwaltung_pwa_v2','hausverwaltung_pwa'];
 
 const LANG_KEY='hausverwaltung_ui_language_v1';
@@ -459,7 +459,7 @@ async function saveRegistryV27(){
 }
 function showAuthV27(mode){document.body.classList.add('auth-locked');$('#authGate').classList.remove('hidden');$('#loginCard').classList.toggle('hidden',mode!=='login');$('#setupCard').classList.toggle('hidden',mode!=='setup')}
 function hideAuthV27(){$('#authGate').classList.add('hidden');document.body.classList.remove('auth-locked')}
-function authErrV27(id,msg){const e=$('#'+id);e.textContent=msg||'';e.classList.toggle('hidden',!msg)}
+function authErrV27(id,msg){const e=$('#'+id);if(!e)return;e.textContent=msg||'';e.classList.toggle('hidden',!msg)}
 async function loadTenantStateV27(){
  const tid=currentTenantIdV27();if(!tid)return;
  const fallbackKey='tenant_state_fallback:'+tid;
@@ -3218,7 +3218,6 @@ $('#vehicleServiceForm').addEventListener('submit',async e=>{
 });
 
 window.editRenovationV37=editRenovationV37;
-window.toggleRenovationStatusV37=toggleRenovationStatusV37;
 $('#renovationForm [name="plannedAmount"]')?.addEventListener('input',updateRenovationCalcPreviewV075L);
 $('#renovationForm [name="openAmount"]')?.addEventListener('input',updateRenovationCalcPreviewV075L);
 $('#renovationForm')?.addEventListener('submit',async e=>{

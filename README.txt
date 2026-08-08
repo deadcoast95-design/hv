@@ -1,62 +1,32 @@
-APP-VERSION 0.75l – SANIERUNGSKOSTEN NEU BERECHNET
+APP-VERSION 0.76l – LOGIN / LAUFZEITFEHLER REPARIERT
 
-OBJEKTE → SANIERUNGSKOSTEN
+FEHLER GEFUNDEN
+In Version 0.75l blieb nach dem Umbau der Sanierungskosten noch folgende
+alte JavaScript-Zeile bestehen:
 
-KOSTENLISTE
-Die einzelnen Sanierungskosten bleiben nach Monat/Jahr sortiert.
-Die Liste ist jetzt standardmäßig eingeklappt.
+window.toggleRenovationStatusV37 = toggleRenovationStatusV37
 
-Unter der Zusammenfassung gibt es:
-„Kostenliste“
-mit Anzahl der Einträge und einem Pfeil nach unten.
+Die Funktion toggleRenovationStatusV37 existierte aber nicht mehr.
 
-Erst beim Aufklappen werden die einzelnen Kostenpositionen angezeigt.
+Folge:
+Der Browser brach die Ausführung der kompletten app.js an dieser Stelle ab.
+Die Login-Eventlistener stehen weiter unten in der Datei und wurden deshalb
+nie registriert. Beim Klick auf „Anmelden“ passierte folglich gar nichts.
 
-NEUE BETRAGSLOGIK
-Das alte Feld
-„Tatsächlicher / aktueller Betrag“
-wurde entfernt.
+BEHOBEN
+- alten ungültigen Funktionsverweis entfernt
+- Login-Fehlerausgabe zusätzlich abgesichert
+- JavaScript-Syntax vollständig geprüft
+- globale window-Funktionsverweise auf fehlende Funktionen geprüft
+- App anschließend in Chromium gestartet
+- Login-Formular technisch getestet
+- Seitenstart und Dashboard nach Login kontrolliert
 
-Stattdessen gibt es:
-- Geplanter Betrag
-- Fehlender / offener Betrag
-
-Die App berechnet automatisch:
-Bezahlt = Geplant − Offen
-
-Beispiel:
-Geplant: 20.000 €
-Offen:    2.000 €
-Bezahlt: 18.000 €
-Fortschritt: 90 %
-
-MEHRERE SANIERUNGEN
-Die Gesamtübersicht berechnet jetzt mathematisch:
-
-Gesamt geplant = Summe aller geplanten Beträge
-Gesamt offen   = Summe aller offenen Restbeträge
-Gesamt bezahlt = Gesamt geplant − Gesamt offen
-
-Fortschritt =
-Gesamt bezahlt / Gesamt geplant × 100
-
-Dadurch wird die Prozentanzeige auch bei mehreren Sanierungskosten korrekt.
-
-EINZELPOSITIONEN
-Jede Position zeigt:
-- Geplant
-- Bezahlt
-- Offen
-- eigenen Fortschrittsbalken
-
-Bei offenen Positionen gibt es weiterhin:
-„Komplett bezahlt“
-
-Dieser setzt den offenen Betrag auf 0 €.
-
-DATENKOMPATIBILITÄT
-Alte Einträge werden automatisch übernommen:
-- alter Status „bezahlt“ → offener Betrag 0 €
-- alter Status „offen“ → bisheriger Betrag wird als offener Restbetrag übernommen
-
-Alle Daten bleiben lokal gespeichert und JSON-kompatibel.
+Alle Funktionen aus 0.75l bleiben erhalten:
+- Sanierungskosten Geplant / Offen / Bezahlt
+- einklappbare Sanierungskostenliste
+- Aufgaben-Notiz und Bearbeiten
+- Admin-Einzellöschung im Verlauf
+- Dashboard-Fahrzeugkarten
+- getrennte Seitenansichten
+- Kredit-/Sondertilgungslogik
